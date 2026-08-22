@@ -35,3 +35,6 @@ Parâmetros configuráveis:
 - cortes no início/fim;
 - duração média capturada;
 - falhas/overflows de dispositivo.
+
+## Taxa nativa do hardware
+O pipeline interno utiliza 16 kHz mono PCM16, mas a interface física pode operar em 44,1 ou 48 kHz. A partir da v0.2.1, a aplicação consulta automaticamente a taxa nativa anunciada pelo PortAudio/ALSA, captura nessa taxa e reamostra para 16 kHz. Na reprodução, faz o caminho inverso quando necessário. Isso evita `PaErrorCode -9997 (Invalid sample rate)` em dispositivos `hw:*`.

@@ -5,6 +5,8 @@ from typing import Protocol
 
 from orelhao.config import AudioConfig
 from orelhao.interfaces.voice.audio import PCM16Audio
+from orelhao.interfaces.voice.devices import native_sample_rate
+from orelhao.interfaces.voice.resample import resample_pcm16
 
 
 class AudioPlayback(Protocol):
@@ -31,10 +33,12 @@ class SoundDeviceAudioPlayback:
                 "Suporte de áudio não instalado. Execute: pip install -e '.[audio]'"
             ) from exc
 
+        hardware_rate = native_sample_rate(sd, self.config.output_device, "output")
+        playback_audio = resample_pcm16(audio, hardware_rate)
         with sd.RawOutputStream(
-            samplerate=audio.sample_rate,
+            samplerate=hardware_rate,
             device=self.config.output_device,
-            channels=audio.channels,
+            channels=playback_audio.channels,
             dtype="int16",
         ) as stream:
-            stream.write(audio.data)
+            stream.write(playback_audio.data)

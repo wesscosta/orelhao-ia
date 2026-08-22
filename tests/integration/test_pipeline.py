@@ -6,7 +6,7 @@ from orelhao.services.stt.service import MockSTTService
 
 def test_mock_pipeline_returns_grounded_answer() -> None:
     audio = MockAudioCapture().capture()
-    query = MockSTTService().transcribe(audio)
+    query = MockSTTService().transcribe(audio).text
     context = MockRetriever().search(query)
     answer = MockLLMService().generate(query, context)
     assert "base-senac-mock" in answer

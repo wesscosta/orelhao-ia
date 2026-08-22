@@ -1,21 +1,24 @@
 from __future__ import annotations
 
+from array import array
 from dataclasses import dataclass
 from math import sqrt
-from array import array
+from statistics import median
+from typing import Iterable
 
 
 @dataclass(slots=True)
 class EnergyVAD:
-    """VAD simples por energia para validar o pipeline de áudio da v0.1.
+    """VAD por energia com threshold fixo.
 
-    Não é a decisão final de VAD. Ele é deliberadamente leve, offline e sem modelo,
-    adequado para benchmarking inicial do microfone/monofone.
+    Mantido como primitiva simples e útil em testes. Em produção a captura usa
+    ``AdaptiveEnergyVAD`` para calibrar o ruído do ambiente antes de ouvir a fala.
     """
 
     rms_threshold: float = 0.015
 
-    def rms(self, pcm16: bytes) -> float:
+    @staticmethod
+    def rms(pcm16: bytes) -> float:
         if not pcm16:
             return 0.0
         samples = array("h")
@@ -28,3 +31,29 @@ class EnergyVAD:
 
     def is_speech(self, pcm16: bytes) -> bool:
         return self.rms(pcm16) >= self.rms_threshold
+
+
+@dataclass(slots=True)
+class AdaptiveEnergyVAD:
+    """VAD offline com calibração de noise floor.
+
+    O threshold é derivado da mediana do RMS dos blocos de calibração. A mediana
+    reduz o impacto de picos esporádicos e evita calibrar o terminal para um único
+    computador/microfone.
+    """
+
+    threshold_multiplier: float = 3.0
+    min_threshold: float = 0.006
+    max_threshold: float = 0.08
+    noise_floor: float = 0.0
+    threshold: float = 0.006
+
+    def calibrate(self, blocks: Iterable[bytes]) -> float:
+        levels = [EnergyVAD.rms(block) for block in blocks if block]
+        self.noise_floor = median(levels) if levels else 0.0
+        candidate = self.noise_floor * self.threshold_multiplier
+        self.threshold = min(self.max_threshold, max(self.min_threshold, candidate))
+        return self.threshold
+
+    def is_speech(self, pcm16: bytes) -> bool:
+        return EnergyVAD.rms(pcm16) >= self.threshold

@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 
 from orelhao.config import load_config
 from orelhao.core.conversation.session import Session
 from orelhao.core.conversation.state_machine import ConversationStateMachine, State
 from orelhao.infrastructure.telemetry.metrics import Metrics
+from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.interfaces.voice.capture import MockAudioCapture, SoundDeviceAudioCapture
+from orelhao.interfaces.voice.devices import inspect_device
 from orelhao.interfaces.voice.playback import MockAudioPlayback, SoundDeviceAudioPlayback
 from orelhao.services.llm.service import MockLLMService
 from orelhao.services.rag.retriever import MockRetriever
-from orelhao.services.stt.service import MockSTTService
+from orelhao.services.stt.service import FasterWhisperSTTService, MockSTTService
 from orelhao.services.tts.service import MockTTSService
 
 
@@ -39,7 +42,8 @@ def run_mock_pipeline() -> None:
     audio = capture.capture()
 
     machine.transition(State.TRANSCRIBING)
-    query = stt.transcribe(audio)
+    transcription = stt.transcribe(audio)
+    query = transcription.text
     print(f"Usuário: {query}")
 
     machine.transition(State.RETRIEVING)
@@ -60,13 +64,94 @@ def audio_loopback() -> None:
     config = _config()
     capture = SoundDeviceAudioCapture(config.audio)
     playback = SoundDeviceAudioPlayback(config.audio)
-    print("Fale após esta mensagem. A captura termina após o silêncio configurado...")
+    print("Aguarde uma breve calibração em silêncio; depois fale normalmente...")
     audio = capture.capture()
+    _print_capture_diagnostics(capture)
     if not audio.data:
         print("Nenhuma fala detectada.")
         return
     print(f"Capturado: {audio.duration_seconds:.2f}s. Reproduzindo...")
     playback.play(audio)
+
+
+def stt_test() -> None:
+    config = _config()
+    capture = SoundDeviceAudioCapture(config.audio)
+    stt = FasterWhisperSTTService(config.stt)
+
+    print(
+        f"STT local: model={config.stt.model} device={config.stt.device} "
+        f"compute={config.stt.compute_type}"
+    )
+    print("Aguarde uma breve calibração em silêncio; depois fale uma frase...")
+    audio = capture.capture()
+    _print_capture_diagnostics(capture)
+    if not audio.data:
+        print("Nenhuma fala detectada.")
+        return
+
+    print(f"Áudio capturado: {audio.duration_seconds:.2f}s")
+    print("Transcrevendo...")
+    result = stt.transcribe(audio)
+    print(f"Texto: {result.text or '[vazio]'}")
+    print(
+        "Métricas: "
+        f"STT={result.elapsed_seconds:.3f}s | "
+        f"áudio={result.audio_seconds:.3f}s | "
+        f"RTF={result.real_time_factor:.3f} | "
+        f"idioma={result.language} | "
+        f"confiança={_fmt_probability(result.language_probability)} | "
+        f"segmentos={result.segments} | "
+        f"cpu_fallback={stt.used_cpu_fallback}"
+    )
+
+
+def stt_file(path: str) -> None:
+    config = _config()
+    payload = Path(path).read_bytes()
+    audio = PCM16Audio.from_wav_bytes(payload)
+    stt = FasterWhisperSTTService(config.stt)
+    result = stt.transcribe(audio)
+    print(result.text)
+    print(
+        f"[STT {result.elapsed_seconds:.3f}s | áudio {result.audio_seconds:.3f}s | "
+        f"RTF {result.real_time_factor:.3f}]"
+    )
+
+
+def _fmt_probability(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.3f}"
+
+
+
+def _print_capture_diagnostics(capture: SoundDeviceAudioCapture) -> None:
+    diag = capture.last_diagnostics
+    if diag is None:
+        return
+    print(
+        "Áudio: "
+        f"hardware={diag.hardware_rate}Hz → pipeline={diag.pipeline_rate}Hz | "
+        f"noise={diag.noise_floor:.5f} | threshold={diag.speech_threshold:.5f} | "
+        f"fim={diag.stop_reason} | overflows={diag.overflow_count}"
+    )
+
+
+def audio_diagnose() -> None:
+    config = _config()
+    try:
+        import sounddevice as sd
+    except ImportError as exc:
+        raise SystemExit("Instale o suporte de áudio: pip install -e '.[audio]'") from exc
+
+    for kind, device in (("input", config.audio.input_device), ("output", config.audio.output_device)):
+        status = inspect_device(sd, device, kind, config.audio.channels)
+        if status.available:
+            print(
+                f"{kind.upper()}: OK | device={device!r} | {status.name} | "
+                f"native={status.native_sample_rate}Hz | channels={status.channels}"
+            )
+        else:
+            print(f"{kind.upper()}: ERRO | device={device!r} | {status.error}")
 
 
 def list_audio_devices() -> None:
@@ -81,12 +166,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Orelhão IA")
     parser.add_argument("--audio-loopback", action="store_true", help="testa captura + VAD + playback")
     parser.add_argument("--list-audio-devices", action="store_true", help="lista interfaces de áudio")
+    parser.add_argument("--audio-diagnose", action="store_true", help="valida input/output configurados")
+    parser.add_argument("--stt-test", action="store_true", help="captura fala e transcreve localmente")
+    parser.add_argument("--stt-file", metavar="WAV", help="transcreve um WAV PCM16 mono 16 kHz")
     args = parser.parse_args()
 
     if args.list_audio_devices:
         list_audio_devices()
+    elif args.audio_diagnose:
+        audio_diagnose()
     elif args.audio_loopback:
         audio_loopback()
+    elif args.stt_test:
+        stt_test()
+    elif args.stt_file:
+        stt_file(args.stt_file)
     else:
         run_mock_pipeline()
 

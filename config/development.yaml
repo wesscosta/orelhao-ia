@@ -8,7 +8,24 @@ audio:
   block_ms: 30
   pre_roll_ms: 300
   silence_ms: 900
-  max_record_seconds: 15
+  max_record_seconds: 30
+  adaptive_vad: true
+  vad_calibration_ms: 700
+  speech_start_timeout_seconds: 8
+  vad_threshold_multiplier: 3.0
+  vad_min_threshold: 0.006
+  vad_max_threshold: 0.08
   rms_threshold: 0.015
-  input_device: null
-  output_device: null
+  input_device: 0
+  output_device: 0
+stt:
+  backend: faster-whisper
+  model: small
+  language: pt
+  device: cpu
+  compute_type: int8
+  beam_size: 1
+  cpu_threads: 0
+  num_workers: 1
+  fallback_to_cpu: true
+  cpu_fallback_compute_type: int8

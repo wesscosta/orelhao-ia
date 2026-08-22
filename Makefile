@@ -1,13 +1,13 @@
-.PHONY: install install-audio test lint run audio devices
+.PHONY: install install-stt test lint run audio-devices audio-loopback stt-test
 
 install:
-	python -m pip install -e '.[dev]'
+	pip install -e '.[dev,audio]'
 
-install-audio:
-	python -m pip install -e '.[dev,audio]'
+install-stt:
+	pip install -e '.[dev,audio,stt]'
 
 test:
-	pytest
+	pytest -q
 
 lint:
 	ruff check src tests
@@ -15,8 +15,11 @@ lint:
 run:
 	orelhao
 
-audio:
+audio-devices:
+	orelhao --list-audio-devices
+
+audio-loopback:
 	orelhao --audio-loopback
 
-devices:
-	orelhao --list-audio-devices
+stt-test:
+	orelhao --stt-test
