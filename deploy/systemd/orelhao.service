@@ -1,0 +1,14 @@
+[Unit]
+Description=Orelhao IA
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/orelhao-ia
+ExecStart=/opt/orelhao-ia/.venv/bin/orelhao
+Restart=always
+RestartSec=3
+Environment=ORELHAO_CONFIG=/opt/orelhao-ia/config/production.yaml
+
+[Install]
+WantedBy=multi-user.target

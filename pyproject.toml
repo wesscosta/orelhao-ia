@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orelhao-ia"
+version = "0.1.0"
+description = "Terminal conversacional offline-first do projeto Orelhão IA Senac"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.8,<3",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+audio = [
+  "numpy>=2,<3",
+  "sounddevice>=0.5,<1",
+]
+dev = [
+  "pytest>=8,<9",
+  "ruff>=0.6,<1",
+  "mypy>=1.11,<2",
+  "numpy>=2,<3",
+]
+
+[project.scripts]
+orelhao = "orelhao.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

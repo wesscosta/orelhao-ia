@@ -1,0 +1,14 @@
+name: Orelhão IA
+environment: development
+session_timeout_seconds: 120
+simulate_hardware: true
+audio:
+  sample_rate: 16000
+  channels: 1
+  block_ms: 30
+  pre_roll_ms: 300
+  silence_ms: 900
+  max_record_seconds: 15
+  rms_threshold: 0.015
+  input_device: null
+  output_device: null
