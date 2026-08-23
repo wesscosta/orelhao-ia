@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -13,10 +15,12 @@ class Retriever(Protocol):
 
 
 class MockRetriever:
+    """Compatibilidade temporária do pipeline mock até o orquestrador v0.4."""
+
     def search(self, query: str) -> list[RetrievedContext]:
         return [
             RetrievedContext(
-                text=f"Contexto institucional simulado para: {query}",
-                source="base-senac-mock",
+                text=f"Contexto controlado simulado para: {query}",
+                source="knowledge-base-mock",
             )
         ]

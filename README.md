@@ -4,9 +4,11 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.3.10
+## Estado atual — v0.4.0-alpha.1
 
-A etapa atual valida o subsistema de voz local em bancada:
+A baseline de voz v0.3.10 permanece estável. A v0.4.0-alpha.1 inicia a camada de conhecimento/RAG com contratos independentes de domínio e uma implementação lexical determinística para testes.
+
+Pipeline de voz já validado:
 
 `microfone → captura/VAD → STT local → texto → TTS local → reprodução`
 
@@ -25,7 +27,7 @@ Estado validado:
 - pipeline de voz `STT → TTS` funcional;
 - 40 testes automatizados passando na v0.3.10.
 
-RAG e LLM permanecem desacoplados do subsistema de voz e constituem a próxima etapa principal de integração.
+A alpha.1 adiciona `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`. Ainda não há embeddings, vector database ou LLM real nesta etapa; essas dependências entram somente após o contrato e os testes de recuperação estarem estáveis.
 
 ## Arquitetura alvo
 
@@ -153,7 +155,7 @@ Essa separação é intencional: **Orelhão IA é a plataforma conversacional; a
 
 ## Próxima etapa
 
-Com o subsistema de voz estabilizado na v0.3.10, a próxima etapa arquitetural é integrar a camada de conhecimento:
+A próxima etapa da série v0.4 é substituir a recuperação lexical de baseline por embeddings e índice vetorial local, preservando os mesmos contratos:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 
@@ -173,3 +175,12 @@ Após RAG e LLM, permanecem previstas etapas como:
 - homologação e piloto.
 
 Interface touch é uma extensão possível, mas não é dependência do fluxo de voz.
+
+
+## Smoke test do RAG — v0.4.0-alpha.1
+
+```bash
+orelhao --rag-test "como funciona a base de conhecimento?"
+```
+
+Esse comando usa uma base em memória deliberadamente pequena e determinística. O objetivo é validar ingestão, chunking, ranking e construção de contexto sem baixar modelos adicionais.

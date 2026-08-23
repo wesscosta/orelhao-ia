@@ -17,6 +17,7 @@ from orelhao.interfaces.voice.capture import (
 from orelhao.interfaces.voice.devices import inspect_device
 from orelhao.interfaces.voice.playback import MockAudioPlayback, SoundDeviceAudioPlayback
 from orelhao.services.llm.service import MockLLMService
+from orelhao.services.knowledge import Document, KnowledgeService
 from orelhao.services.rag.retriever import MockRetriever
 from orelhao.services.stt.service import FasterWhisperSTTService, MockSTTService
 from orelhao.services.tts.provision import provision_piper_voice
@@ -162,6 +163,43 @@ def voice_test() -> None:
     )
     playback.play(result.audio)
 
+
+def rag_test(query: str) -> None:
+    """Smoke test determinístico da fundação RAG sem embeddings/LLM real."""
+    knowledge = KnowledgeService()
+    knowledge.ingest(
+        [
+            Document(
+                id="getting-started",
+                title="Atendimento",
+                source="demo/atendimento.md",
+                text=(
+                    "O terminal pode operar offline quando modelos e base de conhecimento "
+                    "estão provisionados localmente. A rede é auxiliar para atualizações, "
+                    "telemetria e manutenção autorizada."
+                ),
+            ),
+            Document(
+                id="architecture",
+                title="Arquitetura",
+                source="demo/arquitetura.md",
+                text=(
+                    "A base de conhecimento é configurável por implantação. O core não deve "
+                    "depender do domínio, do modelo de embeddings ou do vector store escolhido."
+                ),
+            ),
+        ],
+        chunk_size=320,
+        overlap=40,
+    )
+    context = knowledge.retrieve(query, limit=3)
+    print(f"Consulta: {query}")
+    if not context.has_evidence:
+        print("Nenhuma evidência encontrada na base de demonstração.")
+        return
+    print(context.text)
+
+
 def _fmt_probability(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.3f}"
 
@@ -237,6 +275,7 @@ def main() -> None:
     parser.add_argument("--tts-test", metavar="TEXT", help="sintetiza texto localmente e reproduz")
     parser.add_argument("--tts-provision", action="store_true", help="baixa/provisiona a voz PT-BR configurada")
     parser.add_argument("--voice-test", action="store_true", help="captura → STT → TTS → playback")
+    parser.add_argument("--rag-test", metavar="QUERY", help="testa ingestão + recuperação local determinística")
     args = parser.parse_args()
 
     if args.list_audio_devices:
@@ -255,6 +294,8 @@ def main() -> None:
         tts_test(args.tts_test)
     elif args.voice_test:
         voice_test()
+    elif args.rag_test:
+        rag_test(args.rag_test)
     else:
         run_mock_pipeline()
 

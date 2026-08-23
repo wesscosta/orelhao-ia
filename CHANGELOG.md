@@ -4,6 +4,19 @@
 
 
 
+
+## 0.4.0-alpha.1
+
+- inicia a camada Knowledge/RAG desacoplada do domínio;
+- adiciona contratos Document, Chunk, SearchResult e KnowledgeContext;
+- adiciona KnowledgeRepository e implementação em memória;
+- adiciona retriever lexical determinístico como baseline;
+- adiciona ContextBuilder com orçamento de contexto e preservação de fontes;
+- adiciona KnowledgeService como facade substituível;
+- adiciona `orelhao --rag-test`;
+- remove acoplamento Senac dos mocks/prompts de RAG/LLM;
+- sem embeddings, vector DB ou LLM real nesta alpha.
+
 ## 0.3.10
 
 - aumenta a janela de encerramento WebRTC VAD de 600 ms para 1500 ms, tolerando pausas naturais;

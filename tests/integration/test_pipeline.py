@@ -9,4 +9,4 @@ def test_mock_pipeline_returns_grounded_answer() -> None:
     query = MockSTTService().transcribe(audio).text
     context = MockRetriever().search(query)
     answer = MockLLMService().generate(query, context)
-    assert "base-senac-mock" in answer
+    assert "knowledge-base-mock" in answer

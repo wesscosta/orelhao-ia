@@ -1,7 +1,36 @@
-# RAG
+# RAG / Knowledge — v0.4.0-alpha.1
 
-A LLM não é a fonte de verdade.
+A camada de conhecimento é independente do domínio da implantação.
 
-Pipeline futuro:
+## Objetivo da alpha.1
 
-`fontes Senac -> ingestão -> limpeza -> chunking -> embeddings -> índice local -> retrieval -> LLM`
+Validar os contratos do RAG antes de introduzir embeddings, banco vetorial ou LLM real.
+
+Fluxo atual:
+
+`Document → chunking → KnowledgeRepository → LexicalRetriever → ContextBuilder → KnowledgeContext`
+
+## Contratos
+
+- `Document`: fonte lógica fornecida pela implantação;
+- `Chunk`: unidade recuperável;
+- `SearchResult`: chunk + score normalizado;
+- `KnowledgeRepository`: persistência/consulta dos chunks;
+- `Retriever`: estratégia substituível de recuperação;
+- `ContextBuilder`: aplica orçamento de contexto e preserva fonte;
+- `KnowledgeService`: facade utilizada pelas camadas superiores.
+
+## Implementação atual
+
+A alpha.1 usa `InMemoryKnowledgeRepository` e `LexicalRetriever`. O ranking é lexical e determinístico, propositalmente sem dependências externas.
+
+Essa implementação **não é o retriever final**. Ela serve como baseline de comportamento e testes para que embeddings e vector stores possam ser avaliados sem alterar o core.
+
+## Próxima etapa
+
+- escolher modelo de embeddings local;
+- criar índice vetorial persistente;
+- implementar ingestão de arquivos da base configurada;
+- adicionar avaliação de recuperação (Recall@K/MRR);
+- conectar o contexto ao LLM local;
+- adicionar política de resposta sem evidência.
