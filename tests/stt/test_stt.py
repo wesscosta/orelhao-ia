@@ -36,3 +36,12 @@ def test_stt_cpu_fallback_defaults_enabled() -> None:
     config = STTConfig()
     assert config.fallback_to_cpu is True
     assert config.cpu_fallback_compute_type == "int8"
+
+
+def test_stt_defaults_bias_portuguese_brazilian_without_changing_language_code():
+    from orelhao.config import STTConfig
+    cfg = STTConfig()
+    assert cfg.language == "pt"
+    assert cfg.beam_size == 5
+    assert cfg.initial_prompt is not None
+    assert "português brasileiro" in cfg.initial_prompt.lower()

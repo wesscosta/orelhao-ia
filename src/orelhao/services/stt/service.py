@@ -116,6 +116,7 @@ class FasterWhisperSTTService:
                 vad_filter=False,  # O Audio Engine já executa VAD antes do STT.
                 condition_on_previous_text=False,
                 temperature=0.0,
+                initial_prompt=self.config.initial_prompt,
             )
             segments = list(segments_iter)
         except RuntimeError as exc:
@@ -138,6 +139,7 @@ class FasterWhisperSTTService:
                 vad_filter=False,
                 condition_on_previous_text=False,
                 temperature=0.0,
+                initial_prompt=self.config.initial_prompt,
             )
             segments = list(segments_iter)
         elapsed = perf_counter() - started

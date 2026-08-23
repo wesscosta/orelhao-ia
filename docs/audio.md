@@ -38,3 +38,15 @@ Parâmetros configuráveis:
 
 ## Taxa nativa do hardware
 O pipeline interno utiliza 16 kHz mono PCM16, mas a interface física pode operar em 44,1 ou 48 kHz. A partir da v0.2.1, a aplicação consulta automaticamente a taxa nativa anunciada pelo PortAudio/ALSA, captura nessa taxa e reamostra para 16 kHz. Na reprodução, faz o caminho inverso quando necessário. Isso evita `PaErrorCode -9997 (Invalid sample rate)` em dispositivos `hw:*`.
+
+
+## Backend de captura PipeWire (v0.3.4)
+
+Em produção/desenvolvimento Linux, `audio.capture_backend: pipewire` usa `pw-record` em modo raw PCM16. Isso remove PortAudio do caminho crítico de captura e evita que erros nativos de ALSA/JACK corrompam o processo Python.
+
+Por padrão o PipeWire escolhe a fonte de entrada ativa. Para fixar uma fonte específica, configure `audio.pipewire_target` com o `node.name` ou `object.serial` aceito por `pw-record --target`.
+
+
+### PipeWire capture implementation
+
+Production capture uses `pw-record` to a temporary RAW PCM16 file. The application tails that file in blocks while the recorder is active, preserving real-time VAD without routing native audio through Python stdout/PortAudio.

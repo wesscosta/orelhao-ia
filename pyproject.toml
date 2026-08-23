@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orelhao-ia"
-version = "0.2.2"
+version = "0.3.10"
 description = "Terminal conversacional offline-first do projeto Orelhão IA Senac"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -14,6 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+vad = ["webrtcvad-wheels>=2.0.14,<3"]
 audio = [
   "numpy>=2,<3",
   "sounddevice>=0.5,<1",
@@ -21,6 +22,10 @@ audio = [
 stt = [
   "faster-whisper>=1.1,<2",
   "numpy>=2,<3",
+]
+tts = [
+  "piper-tts==1.6.0",
+  "huggingface-hub>=0.21",
 ]
 dev = [
   "pytest>=8,<9",

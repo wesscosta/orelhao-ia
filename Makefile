@@ -23,3 +23,10 @@ audio-loopback:
 
 stt-test:
 	orelhao --stt-test
+
+
+tts-test:
+	orelhao --tts-test "Olá, eu sou o assistente virtual do Senac."
+
+voice-test:
+	orelhao --voice-test

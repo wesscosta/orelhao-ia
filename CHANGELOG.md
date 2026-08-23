@@ -1,4 +1,87 @@
+## 0.3.5
+
+
+
+
+
+## 0.3.10
+
+- aumenta a janela de encerramento WebRTC VAD de 600 ms para 1500 ms, tolerando pausas naturais;
+- mantém início de fala rápido e `max_record_seconds` apenas como failsafe;
+- mantém o idioma do Whisper como `pt`, código suportado para português;
+- adiciona contexto explícito de português brasileiro via `initial_prompt`;
+- aumenta `beam_size` de 1 para 5 para priorizar precisão sobre uma pequena parcela de latência;
+- mantém a voz Piper `pt_BR-cadu-medium`; nenhuma troca de timbre nesta revisão.
+
+## 0.3.9
+
+- substitui o RMS como decisão primária por WebRTC VAD (speech-aware);
+- mantém RMS apenas para noise floor, peak e diagnóstico;
+- usa janelas independentes para início e fim da fala com histerese;
+- tolera pausas naturais e exige baixa atividade sustentada para endpoint;
+- adiciona post-roll de 300 ms para preservar finais de palavras;
+- mantém PipeWire, Whisper e Piper inalterados.
+
+## 0.3.7
+
+- adiciona telemetria `peak_rms` ao diagnóstico de captura;
+- reduz o multiplicador padrão do VAD adaptativo de 3.0 para 1.8;
+- limita o threshold adaptativo padrão a 0.05 para microfones com menor amplitude útil;
+- mantém gate temporal de 180 ms para evitar falso início após o aumento de sensibilidade;
+- nenhuma alteração no backend PipeWire, sample rate, STT ou TTS.
+
+## 0.3.6
+
+- trata encerramento intencional do `pw-record` como fluxo normal;
+- usa `SIGINT` para finalizar a captura, equivalente ao `Ctrl+C` validado manualmente;
+- diferencia término inesperado do recorder de timeout/ausência de fala;
+- evita falso `RuntimeError` após uma sessão sem fala detectada.
+
+- PipeWire capture now uses a temporary RAW file instead of stdout.
+- The RAW file is consumed incrementally so adaptive VAD remains real-time.
+- Matches the capture path validated manually with `pw-record`.
+
 # Changelog
+
+## 0.3.4
+
+- captura principal migrada de PortAudio/sounddevice para `pw-record` (PipeWire);
+- PCM16 mono é entregue diretamente ao VAD/Whisper sem biblioteca nativa de áudio dentro do processo Python;
+- `sounddevice` e o processo isolado anterior permanecem como backends de fallback/diagnóstico;
+- novo `audio.pipewire_target` permite fixar um `node.name`/serial do PipeWire quando necessário;
+- `pw-record` é encerrado de forma controlada ao fim da fala ou timeout.
+
+## 0.3.3
+- captura de áudio isolada em processo filho para conter crashes nativos de PortAudio/ALSA;
+- máquina de estados temporal WAITING/SPEAKING/COMPLETE no VAD;
+- debounce de início de fala e rejeição de falsos inícios;
+- pausa natural aumentada para 1,8 s antes de encerrar a pergunta;
+- calibração robusta pela metade mais silenciosa das amostras;
+- CLI só avisa "Pode falar agora" após finalizar a calibração;
+- timeouts de início e duração total continuam separados.
+
+## v0.3.2
+
+- playback preferencial isolado via `pw-play`/`aplay`, evitando crashes nativos do PortAudio no processo principal;
+- preservação da taxa original do WAV do TTS durante playback pelo sistema;
+- caminhos de configuração/modelos resolvidos a partir da raiz da aplicação, independentes do diretório atual;
+- `ORELHAO_ROOT` disponível para instalações/appliances;
+- fallback `sounddevice` mantido como backend explícito.
+
+## 0.3.1
+- seleção de áudio por nome/capacidade, evitando índices PortAudio instáveis;
+- provisionamento da voz Piper `pt_BR-cadu-medium`;
+- dependência TTS explícita e mensagens de erro orientativas;
+- novos testes de resolução de dispositivos e provisionamento.
+
+# Changelog
+
+## 0.3.0
+- Adiciona TTS local desacoplado via Piper CLI.
+- Adiciona `--tts-test` e `--voice-test`.
+- Mede latência e RTF da síntese.
+- Aumenta silêncio pós-fala para 1600 ms para tolerar pausas naturais.
+- Mantém RAG/LLM fora do caminho real nesta etapa.
 
 ## 0.2.2
 - Substitui o encerramento por threshold fixo por VAD adaptativo com calibração de noise floor.

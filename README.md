@@ -46,3 +46,6 @@ pytest -q
 ## Arquitetura
 
 A aplicação permanece um monólito modular com contratos entre Core, Serviços, Interfaces, Hardware e Infraestrutura. Touch é apenas uma extensão futura e não faz parte do MVP.
+
+
+A captura de voz padrão usa `pw-record`/PipeWire; `sounddevice` permanece apenas como fallback e diagnóstico.

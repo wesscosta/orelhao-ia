@@ -7,25 +7,55 @@ audio:
   channels: 1
   block_ms: 30
   pre_roll_ms: 300
-  silence_ms: 900
+  silence_ms: 1800
   max_record_seconds: 30
   adaptive_vad: true
   vad_calibration_ms: 700
-  speech_start_timeout_seconds: 8
-  vad_threshold_multiplier: 3.0
+  speech_start_timeout_seconds: 12
+  speech_start_min_ms: 180
+  min_speech_ms: 360
+  false_start_silence_ms: 450
+  capture_backend: pipewire
+  pipewire_executable: pw-record
+  pipewire_target: null
+  vad_threshold_multiplier: 1.8
   vad_min_threshold: 0.006
-  vad_max_threshold: 0.08
+  vad_max_threshold: 0.05
+  vad_backend: webrtc
+  vad_aggressiveness: 2
+  vad_start_window_ms: 300
+  vad_start_ratio: 0.55
+  vad_end_window_ms: 1500
+  vad_end_ratio: 0.10
+  vad_post_roll_ms: 300
   rms_threshold: 0.015
-  input_device: 0
-  output_device: 0
+  input_device: null
+  output_device: null
+  playback_backend: system
+  system_player: auto
 stt:
   backend: faster-whisper
   model: small
   language: pt
   device: auto
   compute_type: default
-  beam_size: 1
+  beam_size: 5
   cpu_threads: 0
   num_workers: 1
   fallback_to_cpu: true
   cpu_fallback_compute_type: int8
+  initial_prompt: "Transcrição em português brasileiro (pt-BR), com ortografia do Brasil. Preserve nomes próprios e termos do Senac quando estiverem presentes."
+
+tts:
+  backend: piper
+  executable: piper
+  model: models/tts/pt_BR-cadu-medium.onnx
+  config: models/tts/pt_BR-cadu-medium.onnx.json
+  voice_repo: rhasspy/piper-voices
+  voice_model_file: pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx
+  voice_config_file: pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx.json
+  voice_model_card_file: pt/pt_BR/cadu/medium/MODEL_CARD
+  speaker: null
+  length_scale: 1.0
+  noise_scale: 0.667
+  noise_w: 0.8
