@@ -18,6 +18,7 @@ from orelhao.interfaces.voice.devices import inspect_device
 from orelhao.interfaces.voice.playback import MockAudioPlayback, SoundDeviceAudioPlayback
 from orelhao.services.llm.service import MockLLMService
 from orelhao.services.knowledge import Document, KnowledgeService
+from orelhao.services.knowledge.cli import add_knowledge_parser
 from orelhao.services.rag.retriever import MockRetriever
 from orelhao.services.stt.service import FasterWhisperSTTService, MockSTTService
 from orelhao.services.tts.provision import provision_piper_voice
@@ -267,6 +268,8 @@ def list_audio_devices() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Orelhão IA")
+    subparsers = parser.add_subparsers(dest="command")
+    add_knowledge_parser(subparsers)
     parser.add_argument("--audio-loopback", action="store_true", help="testa captura + VAD + playback")
     parser.add_argument("--list-audio-devices", action="store_true", help="lista interfaces de áudio")
     parser.add_argument("--audio-diagnose", action="store_true", help="valida input/output configurados")
@@ -278,7 +281,9 @@ def main() -> None:
     parser.add_argument("--rag-test", metavar="QUERY", help="testa ingestão + recuperação local determinística")
     args = parser.parse_args()
 
-    if args.list_audio_devices:
+    if hasattr(args, "handler"):
+        args.handler(args)
+    elif args.list_audio_devices:
         list_audio_devices()
     elif args.audio_diagnose:
         audio_diagnose()

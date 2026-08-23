@@ -124,3 +124,11 @@
 - PCM16 mono 16 kHz.
 - VAD local por energia com pre-roll e encerramento por silêncio.
 - Listagem de dispositivos e loopback de áudio.
+## 0.4.0-alpha.2
+
+- adiciona `knowledge/sources/` como fonte da verdade e `knowledge/index/` como artefato reconstruível;
+- adiciona ingestão local de Markdown e TXT;
+- adiciona índice vetorial persistente com NumPy;
+- adiciona `orelhao knowledge index` e `orelhao knowledge search`;
+- adiciona threshold explícito para abstenção quando não há evidência suficiente;
+- mantém embeddings semânticos de modelo para a próxima evolução.

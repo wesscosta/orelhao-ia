@@ -34,3 +34,10 @@ Essa implementação **não é o retriever final**. Ela serve como baseline de c
 - adicionar avaliação de recuperação (Recall@K/MRR);
 - conectar o contexto ao LLM local;
 - adicionar política de resposta sem evidência.
+
+## Alpha.2 — base em disco
+
+A fonte autoritativa passa a ser `knowledge/sources/`; `knowledge/index/` contém apenas artefatos reconstruíveis.
+Os comandos operacionais são `orelhao knowledge index` e `orelhao knowledge search <consulta>`.
+
+A alpha.2 usa um vetor determinístico de hashing (palavras + trigramas) para validar persistência, CLI, threshold de abstenção e desempenho sem baixar outro modelo. Ele **não substitui embeddings semânticos de modelo**, previstos para a evolução seguinte.

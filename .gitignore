@@ -12,7 +12,9 @@ build/
 models/*
 !models/README.md
 
-knowledge/processed/*
-!knowledge/processed/.gitkeep
+knowledge/index/*
+!knowledge/index/.gitkeep
 
 logs/
+
+*.patch

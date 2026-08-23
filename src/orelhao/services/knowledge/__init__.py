@@ -4,6 +4,7 @@ from .models import Chunk, Document, KnowledgeContext, SearchResult
 from .repository import InMemoryKnowledgeRepository, KnowledgeRepository
 from .retriever import LexicalRetriever, Retriever
 from .service import KnowledgeService
+from .vector_retriever import PersistentVectorRetriever
 
 __all__ = [
     "Chunk",
@@ -15,4 +16,5 @@ __all__ = [
     "Retriever",
     "LexicalRetriever",
     "KnowledgeService",
+    "PersistentVectorRetriever",
 ]
