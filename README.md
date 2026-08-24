@@ -184,3 +184,17 @@ orelhao --rag-test "como funciona a base de conhecimento?"
 ```
 
 Esse comando usa uma base em memória deliberadamente pequena e determinística. O objetivo é validar ingestão, chunking, ranking e construção de contexto sem baixar modelos adicionais.
+
+
+## Administração da base
+
+A partir da v0.4.0-alpha.3, a base pode ser administrada por uma interface web local:
+
+```bash
+pip install -e '.[admin]'
+orelhao admin
+```
+
+A interface abre por padrão em `http://127.0.0.1:8765` e manipula apenas
+`knowledge/sources/`. O índice é derivado e pode ser reconstruído pela própria
+interface ou com `orelhao knowledge index`.

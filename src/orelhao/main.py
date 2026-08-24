@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 from orelhao.config import load_config
+from orelhao.admin.cli import add_admin_parser
 from orelhao.core.conversation.session import Session
 from orelhao.core.conversation.state_machine import ConversationStateMachine, State
 from orelhao.infrastructure.telemetry.metrics import Metrics
@@ -270,6 +271,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Orelhão IA")
     subparsers = parser.add_subparsers(dest="command")
     add_knowledge_parser(subparsers)
+    add_admin_parser(subparsers)
     parser.add_argument("--audio-loopback", action="store_true", help="testa captura + VAD + playback")
     parser.add_argument("--list-audio-devices", action="store_true", help="lista interfaces de áudio")
     parser.add_argument("--audio-diagnose", action="store_true", help="valida input/output configurados")

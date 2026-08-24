@@ -5,6 +5,15 @@
 
 
 
+
+## 0.4.0-alpha.3
+
+- adiciona interface web administrativa local para `knowledge/sources/`;
+- permite upload de Markdown/TXT, normalização de TXT para Markdown e edição;
+- adiciona reindexação pelo mesmo pipeline persistente da CLI;
+- grava fontes de forma atômica e rejeita path traversal/uploads acima de 2 MiB;
+- mantém bind em `127.0.0.1` por padrão e documenta ausência de autenticação nesta alpha.
+
 ## 0.4.0-alpha.1
 
 - inicia a camada Knowledge/RAG desacoplada do domínio;
