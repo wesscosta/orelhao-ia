@@ -47,3 +47,23 @@ def test_atomic_write_and_list(tmp_path: Path):
 def test_rejects_unsupported_suffix():
     with pytest.raises(ValueError):
         normalize_source_name("manual.pdf")
+
+
+def test_create_and_delete_markdown_source(tmp_path: Path):
+    from orelhao.admin.source_manager import create_markdown_source, delete_source
+
+    path = create_markdown_source(
+        tmp_path, filename="novo documento", title="Novo Documento", tags="teste, base"
+    )
+    assert path.name == "novo-documento.md"
+    assert "# Novo Documento" in path.read_text(encoding="utf-8")
+    delete_source(tmp_path, path.name)
+    assert not path.exists()
+
+
+def test_create_rejects_duplicate(tmp_path: Path):
+    from orelhao.admin.source_manager import create_markdown_source
+
+    create_markdown_source(tmp_path, filename="faq.md", title="FAQ")
+    with pytest.raises(ValueError):
+        create_markdown_source(tmp_path, filename="faq.md", title="FAQ")

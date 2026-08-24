@@ -1,7 +1,7 @@
 import pytest
 
-from orelhao.services.knowledge.models import Document, SearchResult
 from orelhao.services.knowledge.chunking import chunk_document
+from orelhao.services.knowledge.models import Document, SearchResult
 
 
 def test_document_requires_identity_text_and_source() -> None:

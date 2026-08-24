@@ -9,7 +9,9 @@ from .paths import default_knowledge_paths
 from .vector_retriever import PersistentVectorRetriever
 
 
-def add_knowledge_parser(subparsers: argparse._SubParsersAction) -> None:
+def add_knowledge_parser(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
     knowledge = subparsers.add_parser("knowledge", help="gerencia a base de conhecimento local")
     actions = knowledge.add_subparsers(dest="knowledge_command", required=True)
 

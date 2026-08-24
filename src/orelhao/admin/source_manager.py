@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import tempfile
@@ -15,6 +16,7 @@ class SourceFile:
     name: str
     relative_path: str
     size_bytes: int
+    sha256: str
 
 
 def _safe_component(value: str) -> str:
@@ -51,10 +53,47 @@ def list_sources(directory: Path) -> list[SourceFile]:
                 name=path.name,
                 relative_path=path.relative_to(directory).as_posix(),
                 size_bytes=path.stat().st_size,
+                sha256=_file_sha256(path),
             )
         )
     return items
 
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def create_markdown_source(
+    directory: Path,
+    *,
+    filename: str,
+    title: str,
+    tags: str = "",
+) -> Path:
+    raw_name = filename.strip() or title.strip() or "documento"
+    if not raw_name.casefold().endswith(".md"):
+        raw_name += ".md"
+    target_name = normalize_source_name(raw_name)
+    path = resolve_source(directory, target_name)
+    if path.exists():
+        raise ValueError("Já existe uma fonte com esse nome")
+    resolved_title = title.strip() or Path(target_name).stem.replace("-", " ")
+    content = f"{_frontmatter(resolved_title, tags)}# {resolved_title}\n\n"
+    return atomic_write_source(directory, target_name, content)
+
+
+def delete_source(directory: Path, relative_path: str) -> None:
+    path = resolve_source(directory, relative_path)
+    if not path.exists() or not path.is_file():
+        raise FileNotFoundError(relative_path)
+    if path.suffix.casefold() not in ALLOWED_SUFFIXES:
+        raise ValueError("Formato de fonte inválido")
+    path.unlink()
 
 def resolve_source(directory: Path, relative_path: str) -> Path:
     root = directory.resolve()

@@ -21,7 +21,6 @@ mypy==1.20.2
 mypy_extensions==1.1.0
 numpy==2.5.2
 onnxruntime==1.29.0
--e git+ssh://git@github.com/wesscosta/orelhao-ia.git@73b2943bbc6fb540130563edf77aa2851cd88b3a#egg=orelhao_ia
 packaging==26.3
 pathspec==1.1.1
 pathvalidate==3.3.1

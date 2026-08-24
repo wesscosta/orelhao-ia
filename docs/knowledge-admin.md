@@ -25,3 +25,13 @@ ou pelo comando `orelhao knowledge index`.
 A interface não possui autenticação nesta alpha e fica vinculada a `127.0.0.1`.
 Não exponha a porta diretamente em redes não confiáveis. A publicação em rede deve
 ser feita apenas com controle de acesso/reverse proxy ou política equivalente.
+
+
+## v0.4.0-alpha.4
+
+- criação manual de documentos Markdown;
+- exclusão com confirmação;
+- status por fonte: `novo`, `alterado`, `indexado` ou `ignorado`;
+- indicador global `ATUALIZADO`/`DESATUALIZADO`, calculado apenas sobre fontes indexáveis;
+- documentos de controle e fontes `category: evaluation` podem ser exibidos no Admin como `ignorado`, sem tornar o índice desatualizado;
+- o índice continua sendo reconstruído explicitamente.

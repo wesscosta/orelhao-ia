@@ -3,9 +3,11 @@ from __future__ import annotations
 import html
 import json
 from pathlib import Path
+from typing import Annotated
 from urllib.parse import quote
 
 from orelhao.services.knowledge.index import build_index
+from orelhao.services.knowledge.loader import load_documents
 from orelhao.services.knowledge.paths import KnowledgePaths, default_knowledge_paths
 
 try:
@@ -18,6 +20,8 @@ except ImportError:  # pacote base continua utilizável sem o extra [admin]
 from .source_manager import (
     MAX_SOURCE_BYTES,
     atomic_write_source,
+    create_markdown_source,
+    delete_source,
     list_sources,
     normalize_uploaded_text,
     read_source,
@@ -72,6 +76,41 @@ def _manifest(index_dir: Path) -> dict[str, object]:
         return {}
 
 
+def _indexed_sources(manifest: dict[str, object]) -> dict[str, str]:
+    sources = manifest.get("sources", {})
+    if not isinstance(sources, dict):
+        return {}
+    return {str(key): str(value) for key, value in sources.items()}
+
+
+def _current_indexable_sources(sources_dir: Path) -> dict[str, str]:
+    """Return exactly the source set represented by the knowledge index."""
+    return {
+        document.source: str(document.metadata.get("sha256", ""))
+        for document in load_documents(sources_dir)
+    }
+
+
+def _source_status(
+    relative_path: str,
+    sha256: str,
+    indexed: dict[str, str],
+    current_indexable: dict[str, str],
+) -> str:
+    if relative_path not in current_indexable:
+        return "ignorado"
+    indexed_hash = indexed.get(relative_path)
+    if indexed_hash is None:
+        return "novo"
+    if indexed_hash != sha256:
+        return "alterado"
+    return "indexado"
+
+
+def _index_is_stale(current_indexable: dict[str, str], manifest: dict[str, object]) -> bool:
+    return current_indexable != _indexed_sources(manifest)
+
+
 def create_admin_app(paths: KnowledgePaths | None = None):
     _require_web()
     resolved = paths or default_knowledge_paths()
@@ -81,27 +120,42 @@ def create_admin_app(paths: KnowledgePaths | None = None):
     async def home():
         files = list_sources(resolved.sources)
         manifest = _manifest(resolved.index)
+        indexed = _indexed_sources(manifest)
+        current_indexable = _current_indexable_sources(resolved.sources)
         rows = "".join(
             f"<tr><td><a href='/edit/{quote(item.relative_path)}'>{html.escape(item.relative_path)}</a></td>"
-            f"<td>{item.size_bytes:,} B</td></tr>"
+            f"<td>{item.size_bytes:,} B</td>"
+            f"<td>{html.escape(_source_status(item.relative_path, item.sha256, indexed, current_indexable))}</td></tr>"
             for item in files
-        ) or "<tr><td colspan='2' class='muted'>Nenhuma fonte cadastrada.</td></tr>"
+        ) or "<tr><td colspan='3' class='muted'>Nenhuma fonte cadastrada.</td></tr>"
+        stale = _index_is_stale(current_indexable, manifest)
         status = (
             f"{manifest.get('documents', 0)} documentos / {manifest.get('chunks', 0)} chunks"
             if manifest
             else "Índice ainda não gerado"
         )
+        freshness = "DESATUALIZADO" if stale else "ATUALIZADO"
+        freshness_class = "warn" if stale else "ok"
         body = f"""
 <div class="grid">
 <section class="card">
 <h2>Status</h2>
 <p><strong>Fontes:</strong> {len(files)}</p>
 <p><strong>Índice:</strong> {html.escape(status)}</p>
+<p><strong>Estado:</strong> <span class="{freshness_class}">{freshness}</span></p>
 <p class="muted">A interface altera apenas <code>knowledge/sources/</code>.</p>
 <form method="post" action="/reindex"><button type="submit">Reindexar base</button></form>
 </section>
 <section class="card">
-<h2>Adicionar documento</h2>
+<h2>Criar documento</h2>
+<form method="post" action="/create">
+<label>Nome do arquivo</label><input name="filename" placeholder="faq.md">
+<label>Título</label><input name="title" placeholder="FAQ geral" required>
+<label>Tags opcionais, separadas por vírgula</label><input name="tags" placeholder="faq, atendimento">
+<button type="submit">Criar Markdown</button>
+</form>
+<hr>
+<h2>Enviar arquivo</h2>
 <form method="post" action="/upload" enctype="multipart/form-data">
 <label>Arquivo Markdown ou TXT</label><input type="file" name="file" accept=".md,.txt" required>
 <label>Título opcional</label><input name="title" placeholder="Título do documento">
@@ -111,16 +165,34 @@ def create_admin_app(paths: KnowledgePaths | None = None):
 <p class="muted">TXT é normalizado para Markdown. Limite: {MAX_SOURCE_BYTES // 1024 // 1024} MiB.</p>
 </section>
 </div>
-<section class="card"><h2>Fontes</h2><table><thead><tr><th>Arquivo</th><th>Tamanho</th></tr></thead>
+<section class="card"><h2>Fontes</h2><table><thead><tr><th>Arquivo</th><th>Tamanho</th><th>Status</th></tr></thead>
 <tbody>{rows}</tbody></table></section>
 """
         return HTMLResponse(_layout("Base de conhecimento", body))
 
+    @app.post("/create")
+    async def create(
+        filename: str = Form(""),
+        title: str = Form(...),
+        tags: str = Form(""),
+    ):
+        try:
+            path = create_markdown_source(
+                resolved.sources,
+                filename=filename,
+                title=title,
+                tags=tags,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        relative = path.relative_to(resolved.sources).as_posix()
+        return RedirectResponse(url=f"/edit/{quote(relative)}", status_code=303)
+
     @app.post("/upload")
     async def upload(
-        file: UploadFile = File(...),
-        title: str = Form(""),
-        tags: str = Form(""),
+        file: Annotated[UploadFile, File()],
+        title: Annotated[str, Form()] = "",
+        tags: Annotated[str, Form()] = "",
     ):
         raw = await file.read(MAX_SOURCE_BYTES + 1)
         if len(raw) > MAX_SOURCE_BYTES:
@@ -156,6 +228,9 @@ def create_admin_app(paths: KnowledgePaths | None = None):
 <button type="submit">Salvar</button>
 </form>
 <p class="muted">Salvar não reindexa automaticamente. Isso permite revisar várias fontes antes de reconstruir o índice.</p>
+<form method="get" action="/delete/{quote(relative_path)}">
+<button type="submit">Excluir documento</button>
+</form>
 </section>
 """
         return HTMLResponse(_layout("Editar fonte", body))
@@ -167,6 +242,34 @@ def create_admin_app(paths: KnowledgePaths | None = None):
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         return RedirectResponse(url=f"/edit/{quote(relative_path)}", status_code=303)
+
+    @app.get("/delete/{relative_path:path}", response_class=HTMLResponse)
+    async def confirm_delete(relative_path: str):
+        try:
+            read_source(resolved.sources, relative_path)
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(status_code=404, detail="Fonte não encontrada") from exc
+        body = f"""
+<section class="card">
+<h2 class="warn">Confirmar exclusão</h2>
+<p>Deseja realmente excluir <strong>{html.escape(relative_path)}</strong>?</p>
+<p class="muted">O índice ficará desatualizado até a próxima reindexação.</p>
+<form method="post" action="/delete">
+<input type="hidden" name="relative_path" value="{html.escape(relative_path, quote=True)}">
+<button type="submit">Confirmar exclusão</button>
+</form>
+<p><a href="/edit/{quote(relative_path)}">Cancelar</a></p>
+</section>
+"""
+        return HTMLResponse(_layout("Excluir fonte", body))
+
+    @app.post("/delete")
+    async def remove(relative_path: str = Form(...)):
+        try:
+            delete_source(resolved.sources, relative_path)
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(status_code=404, detail="Fonte não encontrada") from exc
+        return RedirectResponse(url="/", status_code=303)
 
     @app.post("/reindex", response_class=HTMLResponse)
     async def reindex():

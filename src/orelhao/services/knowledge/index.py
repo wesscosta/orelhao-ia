@@ -64,4 +64,5 @@ def load_vectors(index_dir: Path) -> np.ndarray:
     path = index_dir / "vectors.npy"
     if not path.exists():
         raise RuntimeError("Índice inexistente. Execute: orelhao knowledge index")
-    return np.load(path, allow_pickle=False)
+    vectors: np.ndarray = np.load(path, allow_pickle=False)
+    return vectors

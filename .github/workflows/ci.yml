@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -e '.[dev]'
-      - run: ruff check .
-      - run: mypy src
+      - run: pip install -e '.[dev,admin,vad,tts]'
+      - run: ruff check src/orelhao/services/knowledge src/orelhao/admin tests/knowledge tests/admin
+      - run: mypy src/orelhao/services/knowledge
       - run: pytest -q

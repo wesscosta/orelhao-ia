@@ -1,10 +1,14 @@
-## 0.3.5
+## 0.4.0-alpha.4
 
-
-
-
-
-
+- normaliza Markdown com frontmatter YAML, preservando metadados fora do texto recuperável;
+- ignora documentos de controle (`00-README.md`) e fontes `category: evaluation` durante indexação;
+- consolida recuperação híbrida lexical + hashing vetorial local com abstenção explícita;
+- adiciona testes de regressão para ingestão, persistência e ranking do retriever;
+- adiciona criação manual de fontes Markdown pelo Admin;
+- adiciona exclusão de fontes com confirmação;
+- calcula SHA-256 das fontes para indicar `novo`, `alterado`, `indexado` ou `ignorado`;
+- exibe estado global `ATUALIZADO`/`DESATUALIZADO` comparando apenas fontes indexáveis com o manifest;
+- mantém reindexação explícita para permitir edição em lote.
 
 ## 0.4.0-alpha.3
 
@@ -13,6 +17,15 @@
 - adiciona reindexação pelo mesmo pipeline persistente da CLI;
 - grava fontes de forma atômica e rejeita path traversal/uploads acima de 2 MiB;
 - mantém bind em `127.0.0.1` por padrão e documenta ausência de autenticação nesta alpha.
+
+## 0.4.0-alpha.2
+
+- adiciona `knowledge/sources/` como fonte da verdade e `knowledge/index/` como artefato reconstruível;
+- adiciona ingestão local de Markdown e TXT;
+- adiciona índice vetorial persistente com NumPy;
+- adiciona `orelhao knowledge index` e `orelhao knowledge search`;
+- adiciona threshold explícito para abstenção quando não há evidência suficiente;
+- mantém embeddings semânticos de modelo para a próxima evolução.
 
 ## 0.4.0-alpha.1
 
@@ -63,7 +76,6 @@
 - The RAW file is consumed incrementally so adaptive VAD remains real-time.
 - Matches the capture path validated manually with `pw-record`.
 
-# Changelog
 
 ## 0.3.4
 
@@ -96,7 +108,6 @@
 - dependência TTS explícita e mensagens de erro orientativas;
 - novos testes de resolução de dispositivos e provisionamento.
 
-# Changelog
 
 ## 0.3.0
 - Adiciona TTS local desacoplado via Piper CLI.
@@ -133,11 +144,3 @@
 - PCM16 mono 16 kHz.
 - VAD local por energia com pre-roll e encerramento por silêncio.
 - Listagem de dispositivos e loopback de áudio.
-## 0.4.0-alpha.2
-
-- adiciona `knowledge/sources/` como fonte da verdade e `knowledge/index/` como artefato reconstruível;
-- adiciona ingestão local de Markdown e TXT;
-- adiciona índice vetorial persistente com NumPy;
-- adiciona `orelhao knowledge index` e `orelhao knowledge search`;
-- adiciona threshold explícito para abstenção quando não há evidência suficiente;
-- mantém embeddings semânticos de modelo para a próxima evolução.

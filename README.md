@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.4.0-alpha.1
+## Estado atual — v0.4.0-alpha.4
 
-A baseline de voz v0.3.10 permanece estável. A v0.4.0-alpha.1 inicia a camada de conhecimento/RAG com contratos independentes de domínio e uma implementação lexical determinística para testes.
+A baseline de voz v0.3.10 permanece estável. A v0.4.0-alpha.4 consolida a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local.
 
 Pipeline de voz já validado:
 
@@ -27,7 +27,7 @@ Estado validado:
 - pipeline de voz `STT → TTS` funcional;
 - 40 testes automatizados passando na v0.3.10.
 
-A alpha.1 adiciona `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`. Ainda não há embeddings, vector database ou LLM real nesta etapa; essas dependências entram somente após o contrato e os testes de recuperação estarem estáveis.
+A alpha.4 mantém os contratos `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`, acrescentando persistência local, recuperação híbrida lexical + hashing vetorial local, gestão do corpus e administração web. A integração com uma LLM real permanece uma etapa posterior.
 
 ## Arquitetura alvo
 
@@ -177,7 +177,7 @@ Após RAG e LLM, permanecem previstas etapas como:
 Interface touch é uma extensão possível, mas não é dependência do fluxo de voz.
 
 
-## Smoke test do RAG — v0.4.0-alpha.1
+## Smoke test do RAG — v0.4.0-alpha.4
 
 ```bash
 orelhao --rag-test "como funciona a base de conhecimento?"

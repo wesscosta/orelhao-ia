@@ -9,12 +9,12 @@ from .vector_retriever import PersistentVectorRetriever
 __all__ = [
     "Chunk",
     "Document",
-    "KnowledgeContext",
-    "SearchResult",
-    "KnowledgeRepository",
     "InMemoryKnowledgeRepository",
-    "Retriever",
-    "LexicalRetriever",
+    "KnowledgeContext",
+    "KnowledgeRepository",
     "KnowledgeService",
+    "LexicalRetriever",
     "PersistentVectorRetriever",
+    "Retriever",
+    "SearchResult",
 ]
