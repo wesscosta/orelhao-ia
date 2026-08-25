@@ -1,10 +1,15 @@
-## 0.5.0-alpha.1
+## 0.5.0
 
 - adiciona benchmark reproduzível para qualidade do retrieval;
-- adiciona dataset versionado com casos positivos e de abstenção;
+- consolida dataset versionado em português brasileiro com 40 casos, sendo 30 positivos e 10 de abstenção;
+- cobre intenções institucionais, cursos, atendimento, PSG, aprendizagem, empregabilidade, biblioteca, empresas e contrato do aluno;
+- inclui consultas fora do domínio e perguntas do domínio cuja resposta não está disponível no corpus;
 - mede Hit@1, Hit@k, MRR, acurácia de abstenção e latência média;
-- adiciona `orelhao knowledge evaluate` com saída humana ou JSON;
-- estabelece baseline mensurável antes da introdução de embeddings semânticos.
+- adiciona `orelhao knowledge evaluate` com dataset padrão e saída humana ou JSON;
+- amplia testes de validação do dataset, ranking, fontes alternativas, abstenção e parâmetros inválidos;
+- congela a baseline final do retriever híbrido lexical/hash antes da introdução de embeddings semânticos.
+
+Baseline final no corpus versionado de 14 documentos e 23 chunks: Hit@1 `0.633`, Hit@4 `0.800`, MRR `0.703`, acurácia de abstenção `0.600` e latência média observada de aproximadamente `2.04 ms` no ambiente de validação.
 
 ## 0.4.0-alpha.4
 

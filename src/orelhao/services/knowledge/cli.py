@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import argparse
 import time
+from pathlib import Path
+
+from orelhao.runtime_paths import resolve_project_path
 
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, load_evaluation_cases
@@ -26,7 +29,13 @@ def add_knowledge_parser(
     search.set_defaults(handler=_search)
 
     evaluate = actions.add_parser("evaluate", help="mede a qualidade do retriever local")
-    evaluate.add_argument("dataset", help="arquivo JSON com casos de avaliação")
+    evaluate.add_argument(
+        "dataset",
+        nargs="?",
+        type=Path,
+        default=resolve_project_path("knowledge/evaluation/retrieval-v1.json"),
+        help="arquivo JSON com casos de avaliação (padrão: retrieval-v1.json)",
+    )
     evaluate.add_argument("--limit", type=int, default=4)
     evaluate.add_argument("--min-score", type=float, default=0.40)
     evaluate.add_argument("--json", action="store_true", dest="as_json")
@@ -66,10 +75,9 @@ def _search(args: argparse.Namespace) -> None:
 
 def _evaluate(args: argparse.Namespace) -> None:
     import json
-    from pathlib import Path
 
     paths = default_knowledge_paths()
-    cases = load_evaluation_cases(Path(args.dataset))
+    cases = load_evaluation_cases(args.dataset)
     retriever = PersistentVectorRetriever(paths.index, min_score=args.min_score)
     metrics = evaluate_retriever(retriever, cases, limit=args.limit)
     payload = metrics.as_dict()

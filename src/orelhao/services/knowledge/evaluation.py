@@ -64,6 +64,11 @@ def evaluate_retriever(
     *,
     limit: int = 4,
 ) -> EvaluationMetrics:
+    if not cases:
+        raise ValueError("a avaliação exige pelo menos um caso")
+    if limit <= 0:
+        raise ValueError("limit deve ser maior que zero")
+
     hits_1 = hits_k = 0
     reciprocal_ranks: list[float] = []
     abstention_checks: list[float] = []

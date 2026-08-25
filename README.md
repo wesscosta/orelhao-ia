@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.4.0-alpha.4
+## Estado atual — v0.5.0
 
-A baseline de voz v0.3.10 permanece estável. A v0.4.0-alpha.4 consolida a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerra a instrumentação objetiva do retrieval com dataset versionado em português brasileiro e benchmark reproduzível.
 
 Pipeline de voz já validado:
 
@@ -27,7 +27,7 @@ Estado validado:
 - pipeline de voz `STT → TTS` funcional;
 - 40 testes automatizados passando na v0.3.10.
 
-A alpha.4 mantém os contratos `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`, acrescentando persistência local, recuperação híbrida lexical + hashing vetorial local, gestão do corpus e administração web. A integração com uma LLM real permanece uma etapa posterior.
+A camada Knowledge mantém os contratos `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`, acrescentando persistência local, recuperação híbrida lexical + hashing vetorial local, gestão do corpus, administração web e Evaluation Harness. A integração com uma LLM real permanece uma etapa posterior.
 
 ## Arquitetura alvo
 
@@ -117,10 +117,10 @@ O encerramento normal de uma fala deve ocorrer por `fim=silence`. `max_duration`
 pytest
 ```
 
-Baseline validada da v0.3.10:
+Baseline validada da v0.5.0:
 
 ```text
-40 passed
+81 passed, 1 skipped
 ```
 
 ## Princípios de implantação
@@ -153,13 +153,30 @@ Exemplos possíveis:
 
 Essa separação é intencional: **Orelhão IA é a plataforma conversacional; a base define o domínio da aplicação.**
 
+## Avaliação do retrieval
+
+Reconstrua o índice e execute o dataset padrão:
+
+```bash
+orelhao knowledge index
+orelhao knowledge evaluate
+```
+
+Baseline final no dataset de 40 casos em pt-BR:
+
+- Hit@1: `0.633`;
+- Hit@4: `0.800`;
+- MRR: `0.703`;
+- acurácia de abstenção: `0.600`;
+- latência média observada nesta execução: aproximadamente `2.04 ms`.
+
 ## Próxima etapa
 
-A próxima etapa da série v0.4 é substituir a recuperação lexical de baseline por embeddings e índice vetorial local, preservando os mesmos contratos:
+A v0.6 deve implementar retrieval semântico local em modo `semantic-only`, preservando os contratos e comparando-o com a baseline v0.5 no mesmo dataset:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 
-A implementação deve preservar o funcionamento offline-first e manter RAG e LLM substituíveis por meio de contratos internos.
+A implementação deve preservar o funcionamento offline-first. Fusão, thresholds e confidence gate serão avaliados separadamente após a comparação inicial.
 
 ## Escopo futuro
 

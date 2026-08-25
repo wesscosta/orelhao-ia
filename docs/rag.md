@@ -1,43 +1,69 @@
-# RAG / Knowledge — v0.4.0-alpha.1
+# RAG / Knowledge — baseline v0.5.0
 
-A camada de conhecimento é independente do domínio da implantação.
+A camada de conhecimento é independente do domínio da implantação e opera localmente no caminho crítico.
 
-## Objetivo da alpha.1
+## Implementação consolidada
 
-Validar os contratos do RAG antes de introduzir embeddings, banco vetorial ou LLM real.
+O fluxo atual é:
 
-Fluxo atual:
+`fontes Markdown/TXT → ingestão e chunking → índice persistente → retrieval híbrido lexical/hash → threshold → contexto ou abstenção`
 
-`Document → chunking → KnowledgeRepository → LexicalRetriever → ContextBuilder → KnowledgeContext`
+A fonte autoritativa fica em `knowledge/sources/`. O diretório `knowledge/index/` contém somente artefatos derivados e reconstruíveis.
 
-## Contratos
+O corpo do documento é a evidência principal. Título, categoria, caminho e metadados atuam somente como sinais auxiliares. O mecanismo não contém regras específicas de uma instituição ou implantação.
 
-- `Document`: fonte lógica fornecida pela implantação;
-- `Chunk`: unidade recuperável;
-- `SearchResult`: chunk + score normalizado;
-- `KnowledgeRepository`: persistência/consulta dos chunks;
-- `Retriever`: estratégia substituível de recuperação;
-- `ContextBuilder`: aplica orçamento de contexto e preserva fonte;
-- `KnowledgeService`: facade utilizada pelas camadas superiores.
+## Evaluation Harness
 
-## Implementação atual
+A v0.5.0 congela a primeira baseline reproduzível do retrieval. O comando padrão é:
 
-A alpha.1 usa `InMemoryKnowledgeRepository` e `LexicalRetriever`. O ranking é lexical e determinístico, propositalmente sem dependências externas.
+```bash
+orelhao knowledge index
+orelhao knowledge evaluate
+```
 
-Essa implementação **não é o retriever final**. Ela serve como baseline de comportamento e testes para que embeddings e vector stores possam ser avaliados sem alterar o core.
+Para automação ou comparação A/B:
 
-## Próxima etapa
+```bash
+orelhao knowledge evaluate --json
+```
 
-- escolher modelo de embeddings local;
-- criar índice vetorial persistente;
-- implementar ingestão de arquivos da base configurada;
-- adicionar avaliação de recuperação (Recall@K/MRR);
-- conectar o contexto ao LLM local;
-- adicionar política de resposta sem evidência.
+Também é possível informar outro dataset JSON como argumento posicional.
 
-## Alpha.2 — base em disco
+O dataset `knowledge/evaluation/retrieval-v1.json` utiliza português brasileiro e contém 40 casos:
 
-A fonte autoritativa passa a ser `knowledge/sources/`; `knowledge/index/` contém apenas artefatos reconstruíveis.
-Os comandos operacionais são `orelhao knowledge index` e `orelhao knowledge search <consulta>`.
+- 30 consultas positivas;
+- 10 consultas que exigem abstenção;
+- intenções institucionais, cursos, atendimento, PSG, aprendizagem, empregabilidade, biblioteca, empresas e contrato do aluno;
+- perguntas fora do domínio;
+- perguntas relacionadas ao domínio cuja resposta não está presente ou atualizada no corpus.
 
-A alpha.2 usa um vetor determinístico de hashing (palavras + trigramas) para validar persistência, CLI, threshold de abstenção e desempenho sem baixar outro modelo. Ele **não substitui embeddings semânticos de modelo**, previstos para a evolução seguinte.
+As fontes esperadas ou aceitáveis são declaradas explicitamente por caso. O dataset de avaliação não faz parte do índice de produção.
+
+## Baseline final da v0.5.0
+
+Corpus avaliado: 14 documentos e 23 chunks. Configuração: `limit=4` e `min_score=0.40`.
+
+| Métrica | Resultado |
+| --- | ---: |
+| Hit@1 | 0.633 |
+| Hit@4 | 0.800 |
+| MRR | 0.703 |
+| Acurácia de abstenção | 0.600 |
+| Latência média observada | 2.04 ms |
+
+A latência depende do hardware e deve ser comparada no mesmo ambiente. As métricas de qualidade são determinísticas para o mesmo corpus, índice, dataset e configuração.
+
+## Limitações registradas
+
+- há fontes relevantes recuperadas abaixo da primeira posição;
+- algumas paráfrases coloquiais não atingem o threshold;
+- perguntas sobre informações atuais ou ausentes ainda podem recuperar documentos apenas relacionados ao assunto;
+- a abstenção é o principal ponto de atenção da próxima evolução.
+
+Essas limitações formam a baseline; não devem ser corrigidas com exceções específicas para perguntas do benchmark.
+
+## Próxima versão
+
+A v0.6 deve introduzir um retriever semântico local em implementação isolada e medir `semantic-only` exatamente no mesmo dataset. O baseline atual permanece disponível para comparação.
+
+Fusão lexical + semântica, novos thresholds e confidence gate pertencem a incrementos posteriores e só devem ser promovidos mediante ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.
