@@ -4,6 +4,7 @@ import argparse
 import time
 
 from .context import ContextBuilder
+from .evaluation import evaluate_retriever, load_evaluation_cases
 from .index import build_index
 from .paths import default_knowledge_paths
 from .vector_retriever import PersistentVectorRetriever
@@ -23,6 +24,13 @@ def add_knowledge_parser(
     search.add_argument("--limit", type=int, default=4)
     search.add_argument("--min-score", type=float, default=0.40)
     search.set_defaults(handler=_search)
+
+    evaluate = actions.add_parser("evaluate", help="mede a qualidade do retriever local")
+    evaluate.add_argument("dataset", help="arquivo JSON com casos de avaliação")
+    evaluate.add_argument("--limit", type=int, default=4)
+    evaluate.add_argument("--min-score", type=float, default=0.40)
+    evaluate.add_argument("--json", action="store_true", dest="as_json")
+    evaluate.set_defaults(handler=_evaluate)
 
 
 def _index(args: argparse.Namespace) -> None:
@@ -54,3 +62,23 @@ def _search(args: argparse.Namespace) -> None:
     print(context.text)
     print("\nScores: " + ", ".join(f"{item.score:.3f}" for item in results))
     print(f"tempo={elapsed * 1000:.1f}ms")
+
+
+def _evaluate(args: argparse.Namespace) -> None:
+    import json
+    from pathlib import Path
+
+    paths = default_knowledge_paths()
+    cases = load_evaluation_cases(Path(args.dataset))
+    retriever = PersistentVectorRetriever(paths.index, min_score=args.min_score)
+    metrics = evaluate_retriever(retriever, cases, limit=args.limit)
+    payload = metrics.as_dict()
+    if args.as_json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    print(f"Casos: {metrics.cases}")
+    print(f"Hit@1: {metrics.hit_at_1:.3f}")
+    print(f"Hit@{args.limit}: {metrics.hit_at_k:.3f}")
+    print(f"MRR: {metrics.mrr:.3f}")
+    print(f"Abstenção: {metrics.abstention_accuracy:.3f}")
+    print(f"Latência média: {metrics.mean_latency_ms:.2f}ms")

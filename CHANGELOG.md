@@ -1,3 +1,11 @@
+## 0.5.0-alpha.1
+
+- adiciona benchmark reproduzível para qualidade do retrieval;
+- adiciona dataset versionado com casos positivos e de abstenção;
+- mede Hit@1, Hit@k, MRR, acurácia de abstenção e latência média;
+- adiciona `orelhao knowledge evaluate` com saída humana ou JSON;
+- estabelece baseline mensurável antes da introdução de embeddings semânticos.
+
 ## 0.4.0-alpha.4
 
 - normaliza Markdown com frontmatter YAML, preservando metadados fora do texto recuperável;

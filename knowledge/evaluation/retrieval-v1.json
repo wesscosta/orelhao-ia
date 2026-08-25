@@ -1,0 +1,6 @@
+[
+  {"query":"qual o endereço do senac PI?","expected_sources":["atendimento/canais-institucionais.md"]},
+  {"query":"onde fica uma unidade em Teresina?","expected_sources":["cursos/agenda-e-unidades.md","atendimento/canais-institucionais.md"]},
+  {"query":"como faço para me inscrever no programa de gratuidade?","expected_sources":["psg/como-se-inscrever.md"]},
+  {"query":"qual é a temperatura de Marte?","abstain":true}
+]
