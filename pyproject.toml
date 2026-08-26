@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orelhao-ia"
-version = "0.5.0"
+version = "0.6.0a1"
 description = "Plataforma conversacional offline-first com IA local e base de conhecimento configurável"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -31,6 +31,12 @@ stt = [
 tts = [
   "piper-tts==1.6.0",
   "huggingface-hub>=0.21",
+]
+semantic = [
+  "huggingface-hub>=0.34,<2",
+  "numpy>=2,<3",
+  "onnxruntime>=1.22,<2",
+  "tokenizers>=0.21,<1",
 ]
 dev = [
   "pytest>=8,<9",

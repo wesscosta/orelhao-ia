@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.5.0
+## Estado atual — v0.6.0-alpha.1 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerra a instrumentação objetiva do retrieval com dataset versionado em português brasileiro e benchmark reproduzível.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval com dataset versionado em português brasileiro e benchmark reproduzível. A v0.6.0-alpha.1 inicia, sem promover o mecanismo, o experimento `semantic-only` local.
 
 Pipeline de voz já validado:
 
@@ -44,7 +44,7 @@ A aplicação permanece um **monólito modular**, com contratos entre Core, Serv
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e '.[dev,audio,stt,tts,vad]'
+pip install -e '.[dev,audio,stt,tts,vad,semantic]'
 ```
 
 ## Diagnóstico de áudio
@@ -117,10 +117,10 @@ O encerramento normal de uma fala deve ocorrer por `fim=silence`. `max_duration`
 pytest
 ```
 
-Baseline validada da v0.5.0:
+Estado validado da v0.6.0-alpha.1 sem o modelo opcional:
 
 ```text
-81 passed, 1 skipped
+86 passed, 1 skipped
 ```
 
 ## Princípios de implantação
@@ -170,9 +170,19 @@ Baseline final no dataset de 40 casos em pt-BR:
 - acurácia de abstenção: `0.600`;
 - latência média observada nesta execução: aproximadamente `2.04 ms`.
 
-## Próxima etapa
+## Experimento semântico da v0.6
 
-A v0.6 deve implementar retrieval semântico local em modo `semantic-only`, preservando os contratos e comparando-o com a baseline v0.5 no mesmo dataset:
+A implementação experimental utiliza `intfloat/multilingual-e5-small` em ONNX, com revisão fixada, e mantém pesos e índices somente no ambiente local. Provisione uma vez com rede; a indexação e a avaliação seguintes funcionam offline:
+
+```bash
+orelhao knowledge semantic-provision
+orelhao knowledge semantic-index
+orelhao knowledge evaluate --retriever semantic --json
+```
+
+O threshold semântico padrão desta primeira medição é `0.0`: ele mede ranking sem calibrar abstenção. O resultado ainda não é uma promoção do retriever e deve ser comparado com a baseline v0.5 no mesmo dataset e hardware.
+
+Fluxo futuro preservado:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 

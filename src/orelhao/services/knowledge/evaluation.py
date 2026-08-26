@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 
-from .vector_retriever import PersistentVectorRetriever
+from .retriever import Retriever
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,7 +59,7 @@ def load_evaluation_cases(path: Path) -> list[EvaluationCase]:
 
 
 def evaluate_retriever(
-    retriever: PersistentVectorRetriever,
+    retriever: Retriever,
     cases: list[EvaluationCase],
     *,
     limit: int = 4,

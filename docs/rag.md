@@ -1,4 +1,4 @@
-# RAG / Knowledge — baseline v0.5.0
+# RAG / Knowledge — baseline v0.5.0 e experimento v0.6
 
 A camada de conhecimento é independente do domínio da implantação e opera localmente no caminho crítico.
 
@@ -62,8 +62,19 @@ A latência depende do hardware e deve ser comparada no mesmo ambiente. As métr
 
 Essas limitações formam a baseline; não devem ser corrigidas com exceções específicas para perguntas do benchmark.
 
-## Próxima versão
+## Experimento semantic-only da v0.6
 
-A v0.6 deve introduzir um retriever semântico local em implementação isolada e medir `semantic-only` exatamente no mesmo dataset. O baseline atual permanece disponível para comparação.
+A v0.6.0-alpha.1 introduz um retriever semântico local isolado e mantém o baseline disponível para comparação. O modelo `intfloat/multilingual-e5-small`, na revisão ONNX fixada pelo código, é provisionado uma única vez:
+
+```bash
+pip install -e '.[semantic]'
+orelhao knowledge semantic-provision
+orelhao knowledge semantic-index
+orelhao knowledge evaluate --retriever semantic --json
+```
+
+O runtime de indexação e busca carrega somente arquivos locais. `semantic-vectors.npy` e `semantic-manifest.json` são reconstruíveis e vinculados ao hash dos mesmos chunks usados pela baseline.
+
+Nesta primeira medição, `min_score=0.0` é intencional. Assim, o benchmark mede ranking semantic-only sem introduzir simultaneamente calibração de threshold; a abstenção esperada será medida e registrada, não ocultada. Ainda não há resultado A/B validado nem promoção do mecanismo.
 
 Fusão lexical + semântica, novos thresholds e confidence gate pertencem a incrementos posteriores e só devem ser promovidos mediante ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.

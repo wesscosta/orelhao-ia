@@ -1,3 +1,15 @@
+## 0.6.0-alpha.1 — em desenvolvimento
+
+- adiciona `SemanticVectorizer` como contrato independente do retriever baseline;
+- implementa embeddings locais com `multilingual-e5-small` quantizado em ONNX e revisão fixada;
+- separa os artefatos semânticos do índice lexical/hash e valida sua coerência por hashes;
+- adiciona provisionamento explícito do modelo e reconstrução do índice semântico;
+- permite medir `semantic-only` com `orelhao knowledge evaluate --retriever semantic` no dataset congelado da v0.5;
+- mantém threshold semântico em `0.0` na primeira medição, sem fusão, tuning ou confidence gate;
+- não promove o retriever experimental antes de uma comparação A/B completa.
+
+As métricas semantic-only permanecem pendentes até que o modelo opcional seja provisionado e executado no ambiente de benchmark.
+
 ## 0.5.0
 
 - adiciona benchmark reproduzível para qualidade do retrieval;

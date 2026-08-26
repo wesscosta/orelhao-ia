@@ -107,3 +107,13 @@ def test_evaluate_command_uses_versioned_dataset_by_default() -> None:
     add_knowledge_parser(subparsers)
     args = parser.parse_args(["knowledge", "evaluate"])
     assert args.dataset.name == "retrieval-v1.json"
+    assert args.retriever == "baseline"
+    assert args.min_score is None
+
+
+def test_evaluate_command_accepts_semantic_retriever() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+    args = parser.parse_args(["knowledge", "evaluate", "--retriever", "semantic"])
+    assert args.retriever == "semantic"
