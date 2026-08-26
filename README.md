@@ -190,19 +190,19 @@ Resultados semantic-only no mesmo dataset:
 
 O candidato melhorou ranking e preservou a abstenção da baseline, mas não foi promovido devido ao custo operacional e ao risco de calibração sobre o mesmo dataset.
 
-Para medir a fusão RRF da alpha.2:
+Fusão RRF medida na alpha.2:
 
 ```bash
 orelhao knowledge evaluate --retriever fusion --json
 ```
 
-A fusão utiliza os gates `0.40` da baseline e `0.852` do semântico e combina apenas posições. O resultado permanece pendente de benchmark A/B.
+A fusão utiliza os gates `0.40` da baseline e `0.852` do semântico e combina apenas posições. No benchmark, obteve Hit@1 `0.833`, Hit@4 `0.933`, MRR `0.872`, abstenção `0.500` e latência aproximada de `34–36 ms`. Embora tenha melhorado recall e ranking, não foi promovida porque degradou a abstenção em relação à baseline e ao semantic-only calibrado.
 
 Fluxo futuro preservado:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 
-A implementação deve preservar o funcionamento offline-first. Confidence gate e promoção do mecanismo permanecem etapas posteriores.
+A implementação deve preservar o funcionamento offline-first. O próximo incremento deve diagnosticar os casos divergentes antes de experimentar um gate de consenso/confiança; não haverá tuning adicional de RRF nesta etapa.
 
 ## Escopo futuro
 

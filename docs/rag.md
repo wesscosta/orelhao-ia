@@ -94,4 +94,12 @@ orelhao knowledge evaluate --retriever fusion --json
 
 Não há pesos treinados, regras específicas do benchmark ou confidence gate. A fusão permanece experimental até comparação A/B no mesmo corpus, índice e dataset.
 
-Confidence gate e promoção do novo retrieval pertencem a incrementos posteriores e exigem ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.
+Resultado medido:
+
+| Configuração | Hit@1 | Hit@4 | MRR | Abstenção | Latência média |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| RRF, baseline `0.40` + semântico `0.852` | 0.833 | 0.933 | 0.872 | 0.500 | 34–36 ms |
+
+O pico de memória permaneceu em aproximadamente `772 MiB`, pois o custo dominante continua sendo o modelo semântico. A fusão recuperou mais fontes relevantes e melhorou o ranking, mas a união das listas permitiu um falso positivo adicional em casos de abstenção. Como houve regressão de `0.600` para `0.500`, o mecanismo não foi promovido.
+
+O próximo incremento deve expor os casos divergentes do benchmark e testar uma política de gate isolada, sem alterar simultaneamente RRF, thresholds ou corpus. A promoção continua exigindo ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.

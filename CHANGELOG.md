@@ -1,4 +1,4 @@
-## 0.6.0-alpha.2 — em desenvolvimento
+## 0.6.0-alpha.2
 
 - adiciona `ReciprocalRankFusionRetriever` para combinar rankings sem misturar scores de escalas diferentes;
 - preserva os gates independentes da baseline (`0.40`) e do semântico experimental (`0.852`);
@@ -6,6 +6,8 @@
 - utiliza RRF com constante `60`, sem pesos treinados, regras por pergunta ou confidence gate;
 - adiciona testes de consenso, candidatos complementares, abstenção e parâmetros inválidos;
 - mantém a fusão como experimento até a comparação A/B.
+
+No dataset congelado, a fusão obteve Hit@1 `0.833`, Hit@4 `0.933`, MRR `0.872` e abstenção `0.500`, com latência média aproximada de `34–36 ms` e pico de memória de aproximadamente `772 MiB`. O ganho de recall e ranking veio acompanhado de regressão de abstenção; por isso, a fusão não foi promovida.
 
 ## 0.6.0-alpha.1
 
