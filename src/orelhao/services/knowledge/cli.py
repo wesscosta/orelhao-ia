@@ -7,7 +7,7 @@ from pathlib import Path
 from orelhao.runtime_paths import resolve_project_path
 
 from .context import ContextBuilder
-from .evaluation import evaluate_retriever, load_evaluation_cases
+from .evaluation import evaluate_retriever, evaluate_retriever_detailed, load_evaluation_cases
 from .fusion import RRF_RANK_CONSTANT, ReciprocalRankFusionRetriever
 from .index import build_index
 from .paths import default_knowledge_paths
@@ -66,6 +66,11 @@ def add_knowledge_parser(
         help="mecanismo medido no mesmo dataset (padrão: baseline)",
     )
     evaluate.add_argument("--json", action="store_true", dest="as_json")
+    evaluate.add_argument(
+        "--diagnostics",
+        action="store_true",
+        help="expõe o resultado de cada caso para diagnóstico de divergências",
+    )
     evaluate.set_defaults(handler=_evaluate)
 
 
@@ -155,8 +160,13 @@ def _evaluate(args: argparse.Namespace) -> None:
     else:
         min_score = 0.40 if args.min_score is None else args.min_score
         retriever = PersistentVectorRetriever(paths.index, min_score=min_score)
-    metrics = evaluate_retriever(retriever, cases, limit=args.limit)
-    payload = metrics.as_dict()
+    if args.diagnostics:
+        report = evaluate_retriever_detailed(retriever, cases, limit=args.limit)
+        metrics = report.metrics
+    else:
+        report = None
+        metrics = evaluate_retriever(retriever, cases, limit=args.limit)
+    payload: dict[str, object] = dict(metrics.as_dict())
     if args.as_json:
         payload["retriever"] = args.retriever
         payload["min_score"] = min_score
@@ -164,6 +174,8 @@ def _evaluate(args: argparse.Namespace) -> None:
             payload["baseline_min_score"] = 0.40
             payload["semantic_min_score"] = min_score
             payload["rrf_rank_constant"] = RRF_RANK_CONSTANT
+        if report is not None:
+            payload["results"] = [result.as_dict() for result in report.results]
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     print(f"Retriever: {args.retriever} | threshold={min_score:.3f}")
@@ -173,3 +185,13 @@ def _evaluate(args: argparse.Namespace) -> None:
     print(f"MRR: {metrics.mrr:.3f}")
     print(f"Abstenção: {metrics.abstention_accuracy:.3f}")
     print(f"Latência média: {metrics.mean_latency_ms:.2f}ms")
+    if report is not None:
+        print("\nDiagnóstico por caso:")
+        for result in report.results:
+            status = "correto" if result.correct else "incorreto"
+            returned = ", ".join(
+                f"{source} ({score:.3f})"
+                for source, score in zip(result.sources, result.scores, strict=True)
+            )
+            print(f"- [{status}] {result.query}")
+            print(f"  retorno: {returned or 'abstenção'}")

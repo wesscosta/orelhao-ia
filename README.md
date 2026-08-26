@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.2 em desenvolvimento
+## Estado atual — v0.6.0-alpha.3 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avalia fusão lexical + semântica por ranking, ainda sem promover o mecanismo.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 diagnostica as divergências antes de definir um gate, ainda sem promover o mecanismo.
 
 Pipeline de voz já validado:
 
@@ -197,6 +197,16 @@ orelhao knowledge evaluate --retriever fusion --json
 ```
 
 A fusão utiliza os gates `0.40` da baseline e `0.852` do semântico e combina apenas posições. No benchmark, obteve Hit@1 `0.833`, Hit@4 `0.933`, MRR `0.872`, abstenção `0.500` e latência aproximada de `34–36 ms`. Embora tenha melhorado recall e ranking, não foi promovida porque degradou a abstenção em relação à baseline e ao semantic-only calibrado.
+
+Diagnóstico por caso da alpha.3:
+
+```bash
+orelhao knowledge evaluate --retriever baseline --diagnostics --json > /tmp/baseline-details.json
+orelhao knowledge evaluate --retriever semantic --min-score 0.852 --diagnostics --json > /tmp/semantic-details.json
+orelhao knowledge evaluate --retriever fusion --diagnostics --json > /tmp/fusion-details.json
+```
+
+A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Esse diagnóstico não modifica ranking ou abstenção.
 
 Fluxo futuro preservado:
 

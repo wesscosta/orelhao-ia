@@ -1,3 +1,12 @@
+## 0.6.0-alpha.3
+
+- adiciona `orelhao knowledge evaluate --diagnostics` sem alterar o comportamento dos retrievers;
+- expõe, por caso, fontes retornadas, scores, posição da fonte esperada e resultado correto/incorreto;
+- mantém dataset, corpus, thresholds e RRF congelados para permitir a comparação causal entre baseline, semantic-only e fusão;
+- adiciona testes do relatório detalhado e da nova opção da CLI.
+
+Esta primeira parte da alpha.3 é exclusivamente diagnóstica. O confidence gate somente será definido após comparar os casos divergentes produzidos pelos três retrievers no mesmo benchmark.
+
 ## 0.6.0-alpha.2
 
 - adiciona `ReciprocalRankFusionRetriever` para combinar rankings sem misturar scores de escalas diferentes;

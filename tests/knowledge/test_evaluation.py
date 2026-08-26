@@ -8,6 +8,7 @@ from orelhao.services.knowledge.cli import add_knowledge_parser
 from orelhao.services.knowledge.evaluation import (
     EvaluationCase,
     evaluate_retriever,
+    evaluate_retriever_detailed,
     load_evaluation_cases,
 )
 from orelhao.services.knowledge.index import build_index
@@ -90,6 +91,25 @@ def test_evaluate_retriever_accepts_multiple_expected_sources(tmp_path: Path) ->
     assert metrics.mrr == 1.0
 
 
+def test_detailed_evaluation_exposes_sources_scores_and_outcome(tmp_path: Path) -> None:
+    report = evaluate_retriever_detailed(
+        _retriever(tmp_path),
+        [
+            EvaluationCase("qual o endereço da unidade?", ("local.md",)),
+            EvaluationCase("qual é a temperatura de Marte?", abstain=True),
+        ],
+    )
+
+    relevant, abstention = report.results
+    assert relevant.sources[0] == "local.md"
+    assert relevant.scores[0] >= 0.0
+    assert relevant.relevant_rank == 1
+    assert relevant.correct
+    assert abstention.sources == ()
+    assert abstention.expected_abstention
+    assert abstention.correct
+
+
 @pytest.mark.parametrize("limit", [0, -1])
 def test_evaluate_retriever_rejects_invalid_limit(tmp_path: Path, limit: int) -> None:
     with pytest.raises(ValueError, match="limit"):
@@ -125,3 +145,12 @@ def test_evaluate_command_accepts_fusion_retriever() -> None:
     add_knowledge_parser(subparsers)
     args = parser.parse_args(["knowledge", "evaluate", "--retriever", "fusion"])
     assert args.retriever == "fusion"
+
+
+def test_evaluate_command_accepts_diagnostics() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+    args = parser.parse_args(["knowledge", "evaluate", "--diagnostics", "--json"])
+    assert args.diagnostics
+    assert args.as_json

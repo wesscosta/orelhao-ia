@@ -36,6 +36,34 @@ class EvaluationMetrics:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class EvaluationCaseResult:
+    query: str
+    expected_sources: tuple[str, ...]
+    expected_abstention: bool
+    sources: tuple[str, ...]
+    scores: tuple[float, ...]
+    relevant_rank: int | None
+    correct: bool
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "query": self.query,
+            "expected_sources": list(self.expected_sources),
+            "expected_abstention": self.expected_abstention,
+            "sources": list(self.sources),
+            "scores": list(self.scores),
+            "relevant_rank": self.relevant_rank,
+            "correct": self.correct,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class EvaluationReport:
+    metrics: EvaluationMetrics
+    results: tuple[EvaluationCaseResult, ...]
+
+
 def load_evaluation_cases(path: Path) -> list[EvaluationCase]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
@@ -64,6 +92,15 @@ def evaluate_retriever(
     *,
     limit: int = 4,
 ) -> EvaluationMetrics:
+    return evaluate_retriever_detailed(retriever, cases, limit=limit).metrics
+
+
+def evaluate_retriever_detailed(
+    retriever: Retriever,
+    cases: list[EvaluationCase],
+    *,
+    limit: int = 4,
+) -> EvaluationReport:
     if not cases:
         raise ValueError("a avaliação exige pelo menos um caso")
     if limit <= 0:
@@ -73,14 +110,28 @@ def evaluate_retriever(
     reciprocal_ranks: list[float] = []
     abstention_checks: list[float] = []
     latencies: list[float] = []
+    case_results: list[EvaluationCaseResult] = []
 
     for case in cases:
         started = time.perf_counter()
         results = retriever.search(case.query, limit=limit)
         latencies.append((time.perf_counter() - started) * 1000.0)
         sources = [result.chunk.source for result in results]
+        scores = [result.score for result in results]
         if case.abstain:
-            abstention_checks.append(float(not results))
+            correct = not results
+            abstention_checks.append(float(correct))
+            case_results.append(
+                EvaluationCaseResult(
+                    query=case.query,
+                    expected_sources=case.expected_sources,
+                    expected_abstention=True,
+                    sources=tuple(sources),
+                    scores=tuple(scores),
+                    relevant_rank=None,
+                    correct=correct,
+                )
+            )
             continue
 
         expected = set(case.expected_sources)
@@ -88,13 +139,27 @@ def evaluate_retriever(
         hits_k += int(any(source in expected for source in sources))
         rank = next((index for index, source in enumerate(sources, 1) if source in expected), None)
         reciprocal_ranks.append(0.0 if rank is None else 1.0 / rank)
+        case_results.append(
+            EvaluationCaseResult(
+                query=case.query,
+                expected_sources=case.expected_sources,
+                expected_abstention=False,
+                sources=tuple(sources),
+                scores=tuple(scores),
+                relevant_rank=rank,
+                correct=rank is not None,
+            )
+        )
 
     relevant_count = sum(not case.abstain for case in cases)
-    return EvaluationMetrics(
-        cases=len(cases),
-        hit_at_1=hits_1 / relevant_count if relevant_count else 0.0,
-        hit_at_k=hits_k / relevant_count if relevant_count else 0.0,
-        mrr=mean(reciprocal_ranks) if reciprocal_ranks else 0.0,
-        abstention_accuracy=mean(abstention_checks) if abstention_checks else 0.0,
-        mean_latency_ms=mean(latencies),
+    return EvaluationReport(
+        metrics=EvaluationMetrics(
+            cases=len(cases),
+            hit_at_1=hits_1 / relevant_count if relevant_count else 0.0,
+            hit_at_k=hits_k / relevant_count if relevant_count else 0.0,
+            mrr=mean(reciprocal_ranks) if reciprocal_ranks else 0.0,
+            abstention_accuracy=mean(abstention_checks) if abstention_checks else 0.0,
+            mean_latency_ms=mean(latencies),
+        ),
+        results=tuple(case_results),
     )

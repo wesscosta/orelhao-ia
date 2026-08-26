@@ -103,3 +103,15 @@ Resultado medido:
 O pico de memória permaneceu em aproximadamente `772 MiB`, pois o custo dominante continua sendo o modelo semântico. A fusão recuperou mais fontes relevantes e melhorou o ranking, mas a união das listas permitiu um falso positivo adicional em casos de abstenção. Como houve regressão de `0.600` para `0.500`, o mecanismo não foi promovido.
 
 O próximo incremento deve expor os casos divergentes do benchmark e testar uma política de gate isolada, sem alterar simultaneamente RRF, thresholds ou corpus. A promoção continua exigindo ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.
+
+## Diagnóstico da v0.6.0-alpha.3
+
+O Evaluation Harness pode expor o resultado individual dos casos sem alterar o retriever:
+
+```bash
+orelhao knowledge evaluate --retriever baseline --diagnostics --json
+orelhao knowledge evaluate --retriever semantic --min-score 0.852 --diagnostics --json
+orelhao knowledge evaluate --retriever fusion --diagnostics --json
+```
+
+Cada item informa fontes e scores retornados, posição da fonte esperada e se o comportamento foi correto. Dataset, corpus, thresholds e RRF permanecem congelados. A política de gate será escolhida somente após a comparação dessas divergências.
