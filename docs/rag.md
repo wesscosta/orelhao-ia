@@ -153,3 +153,29 @@ O dataset contém 20 pares respondíveis e 20 não respondíveis em pt-BR. Os ca
 Métricas: acurácia, acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência média por par. A ROC AUC permite comparar ordenação dos scores sem fixar antecipadamente um threshold. O argumento `--model-dir` permite avaliar candidatos locais compatíveis usando exatamente os mesmos pares.
 
 `evidence-v1.json` é um conjunto de desenvolvimento/calibração. Um modelo não deve ser promovido sem validação posterior em casos independentes e sem novo A/B ponta a ponta no benchmark congelado de retrieval.
+
+## Holdout da v0.6.0-alpha.6
+
+O dataset `evidence-v2-holdout.json` congela 40 pares inéditos e balanceados. Nenhuma consulta de `evidence-v1.json` foi reutilizada. As categorias permitem distinguir capacidade extrativa de limitações temporais, incompatibilidade de entidade e documentos apenas relacionados.
+
+As três políticas foram congeladas antes da execução:
+
+- `initial`: `0.50`;
+- `conservative`: `0.69740408`;
+- `balanced`: `0.00016509`.
+
+```bash
+for policy in initial conservative balanced; do
+  orelhao knowledge evidence-evaluate \
+    knowledge/evaluation/evidence-v2-holdout.json \
+    --threshold-policy "$policy" \
+    --diagnostics --json \
+    > "/tmp/orelhao-evidence-holdout-${policy}.json"
+done
+```
+
+O holdout mede generalização e não deve ser usado para escolher um novo threshold. O relatório expõe `category_metrics`, categoria e motivo esperado de abstenção por caso.
+
+### Contrato de abstenção
+
+`EvidenceDecision` separa decisão factual de formulação linguística. Uma abstenção sempre possui `AbstentionReason`: `no_relevant_evidence`, `specific_information_missing`, `temporal_evidence_unavailable` ou `entity_mismatch`. Mensagens pt-BR curtas podem ser geradas pelo contrato, sem permitir que uma LLM complete valores, datas, vagas, contatos ou entidades ausentes.

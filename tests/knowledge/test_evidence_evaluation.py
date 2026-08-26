@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from orelhao.services.knowledge.evidence_decision import AbstentionReason
 from orelhao.services.knowledge.evidence_evaluation import (
     EvidenceEvaluationCase,
     evaluate_evidence_verifier,
@@ -45,6 +46,38 @@ def test_load_evidence_cases_requires_both_classes(tmp_path: Path) -> None:
         load_evidence_evaluation_cases(dataset)
 
 
+def test_load_evidence_cases_preserves_category_and_abstention_reason(
+    tmp_path: Path,
+) -> None:
+    dataset = tmp_path / "evidence.json"
+    dataset.write_text(
+        json.dumps(
+            [
+                {
+                    "query": "Pergunta positiva",
+                    "chunk_id": "base.md:0",
+                    "answerable": True,
+                    "category": "paraphrase",
+                },
+                {
+                    "query": "Pergunta temporal",
+                    "chunk_id": "base.md:0",
+                    "answerable": False,
+                    "category": "temporal",
+                    "abstention_reason": "temporal_evidence_unavailable",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    positive, negative = load_evidence_evaluation_cases(dataset)
+
+    assert positive.category == "paraphrase"
+    assert negative.category == "temporal"
+    assert negative.abstention_reason is AbstentionReason.TEMPORAL_EVIDENCE_UNAVAILABLE
+
+
 def test_evidence_evaluation_measures_classifier_and_auc(tmp_path: Path) -> None:
     index = _index(tmp_path)
     passage = "A resposta correta é azul."
@@ -68,6 +101,7 @@ def test_evidence_evaluation_measures_classifier_and_auc(tmp_path: Path) -> None
     assert report.metrics.specificity == 1.0
     assert report.metrics.f1 == 1.0
     assert report.metrics.roc_auc == 1.0
+    assert report.category_metrics["uncategorized"].cases == 2
     assert len(report.results) == 2
 
 

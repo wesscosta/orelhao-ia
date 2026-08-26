@@ -4,6 +4,7 @@
 - `index/`: artefatos derivados e reconstruíveis. Pode ser apagado e recriado com `orelhao knowledge index`.
 - `evaluation/retrieval-v1.json`: benchmark congelado do retrieval, executado com `orelhao knowledge evaluate`.
 - `evaluation/evidence-v1.json`: benchmark pt-BR separado de answerability por pergunta/chunk, executado com `orelhao knowledge evidence-evaluate`.
+- `evaluation/evidence-v2-holdout.json`: conjunto independente e categorizado para validar generalização das políticas congeladas da alpha.6.
 
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 

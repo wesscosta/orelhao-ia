@@ -172,7 +172,21 @@ def test_evidence_evaluate_command_uses_separate_dataset() -> None:
 
     assert args.dataset.name == "evidence-v1.json"
     assert args.threshold == 0.2
+    assert args.threshold_policy is None
     assert args.model_dir.name == "xlm-roberta-base-squad2-distilled"
+
+
+def test_evidence_evaluate_command_accepts_frozen_threshold_policy() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    args = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--threshold-policy", "conservative"]
+    )
+
+    assert args.threshold is None
+    assert args.threshold_policy == "conservative"
 
 
 def test_evaluate_command_accepts_diagnostics() -> None:

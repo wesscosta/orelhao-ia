@@ -7,7 +7,14 @@ from pathlib import Path
 from statistics import mean
 
 from .evidence import EvidenceVerifier
+from .evidence_decision import AbstentionReason
 from .index import load_chunks
+
+EVIDENCE_THRESHOLD_POLICIES = {
+    "initial": 0.5,
+    "conservative": 0.69740408,
+    "balanced": 0.00016509,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,6 +22,8 @@ class EvidenceEvaluationCase:
     query: str
     chunk_id: str
     answerable: bool
+    category: str = "uncategorized"
+    abstention_reason: AbstentionReason | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,18 +31,24 @@ class EvidenceEvaluationResult:
     query: str
     chunk_id: str
     expected_answerable: bool
+    category: str
+    expected_abstention_reason: AbstentionReason | None
     support: float
     predicted_answerable: bool
     correct: bool
+    latency_ms: float
 
     def as_dict(self) -> dict[str, object]:
         return {
             "query": self.query,
             "chunk_id": self.chunk_id,
             "expected_answerable": self.expected_answerable,
+            "category": self.category,
+            "expected_abstention_reason": self.expected_abstention_reason,
             "support": self.support,
             "predicted_answerable": self.predicted_answerable,
             "correct": self.correct,
+            "latency_ms": self.latency_ms,
         }
 
 
@@ -70,6 +85,7 @@ class EvidenceEvaluationMetrics:
 @dataclass(frozen=True, slots=True)
 class EvidenceEvaluationReport:
     metrics: EvidenceEvaluationMetrics
+    category_metrics: dict[str, EvidenceEvaluationMetrics]
     results: tuple[EvidenceEvaluationResult, ...]
 
 
@@ -86,17 +102,27 @@ def load_evidence_evaluation_cases(path: Path) -> list[EvidenceEvaluationCase]:
         query = item.get("query")
         chunk_id = item.get("chunk_id")
         answerable = item.get("answerable")
+        category = item.get("category", "uncategorized")
+        raw_reason = item.get("abstention_reason")
         if not isinstance(query, str) or not query.strip():
             raise ValueError("cada caso deve conter query não vazia")
         if not isinstance(chunk_id, str) or not chunk_id.strip():
             raise ValueError("cada caso deve conter chunk_id não vazio")
         if not isinstance(answerable, bool):
             raise TypeError("answerable deve ser booleano")
+        if not isinstance(category, str) or not category.strip():
+            raise ValueError("category deve ser uma string não vazia")
+        try:
+            reason = None if raw_reason is None else AbstentionReason(raw_reason)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("abstention_reason inválido") from exc
+        if answerable and reason is not None:
+            raise ValueError("caso respondível não deve declarar abstention_reason")
         identity = (query, chunk_id)
         if identity in identities:
             raise ValueError("dataset de evidência contém caso duplicado")
         identities.add(identity)
-        cases.append(EvidenceEvaluationCase(query, chunk_id, answerable))
+        cases.append(EvidenceEvaluationCase(query, chunk_id, answerable, category, reason))
 
     if not cases:
         raise ValueError("dataset de evidência está vazio")
@@ -122,24 +148,40 @@ def evaluate_evidence_verifier(
     if missing:
         raise ValueError("chunks ausentes no índice: " + ", ".join(missing))
 
-    latencies: list[float] = []
     results: list[EvidenceEvaluationResult] = []
     for case in cases:
         started = time.perf_counter()
         support = verifier.support_score(case.query, chunks[case.chunk_id].text)
-        latencies.append((time.perf_counter() - started) * 1000.0)
+        latency_ms = (time.perf_counter() - started) * 1000.0
         predicted = support >= threshold
         results.append(
             EvidenceEvaluationResult(
                 query=case.query,
                 chunk_id=case.chunk_id,
                 expected_answerable=case.answerable,
+                category=case.category,
+                expected_abstention_reason=case.abstention_reason,
                 support=support,
                 predicted_answerable=predicted,
                 correct=predicted is case.answerable,
+                latency_ms=latency_ms,
             )
         )
 
+    metrics = _calculate_metrics(results)
+    categories = sorted({result.category for result in results})
+    category_metrics = {
+        category: _calculate_metrics(
+            [result for result in results if result.category == category]
+        )
+        for category in categories
+    }
+    return EvidenceEvaluationReport(metrics, category_metrics, tuple(results))
+
+
+def _calculate_metrics(
+    results: list[EvidenceEvaluationResult],
+) -> EvidenceEvaluationMetrics:
     true_positive = sum(r.expected_answerable and r.predicted_answerable for r in results)
     false_positive = sum(not r.expected_answerable and r.predicted_answerable for r in results)
     true_negative = sum(not r.expected_answerable and not r.predicted_answerable for r in results)
@@ -150,7 +192,7 @@ def evaluate_evidence_verifier(
     recall = _divide(true_positive, positives)
     specificity = _divide(true_negative, negatives)
 
-    metrics = EvidenceEvaluationMetrics(
+    return EvidenceEvaluationMetrics(
         cases=len(results),
         answerable_cases=positives,
         unanswerable_cases=negatives,
@@ -161,9 +203,8 @@ def evaluate_evidence_verifier(
         specificity=specificity,
         f1=_divide(2.0 * precision * recall, precision + recall),
         roc_auc=_roc_auc(results),
-        mean_latency_ms=mean(latencies),
+        mean_latency_ms=mean(result.latency_ms for result in results),
     )
-    return EvidenceEvaluationReport(metrics, tuple(results))
 
 
 def _roc_auc(results: list[EvidenceEvaluationResult]) -> float:

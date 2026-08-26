@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.5 em desenvolvimento
+## Estado atual — v0.6.0-alpha.6 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability por perda relevante de recall e custo operacional. A alpha.5 separa a avaliação de evidência do benchmark de retrieval para permitir comparação objetiva de modelos pt-BR.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mede generalização em holdout categorizado antes de qualquer nova integração.
 
 Pipeline de voz já validado:
 
@@ -239,6 +239,25 @@ orelhao knowledge evidence-evaluate --threshold 0.50 --diagnostics --json
 O dataset `evidence-v1.json` contém 40 pares pt-BR balanceados. Cada caso referencia um `chunk_id` reconstruível do índice e declara `answerable`. O relatório inclui acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência. `--model-dir` permite avaliar outro modelo ONNX compatível no mesmo conjunto.
 
 Este primeiro dataset serve para desenvolvimento e calibração. A promoção de um modelo exige confirmação em um conjunto independente, evitando selecionar modelo e threshold sobre os mesmos exemplos.
+
+## Holdout categorizado da v0.6.0-alpha.6
+
+O holdout `evidence-v2-holdout.json` contém 40 consultas inéditas: 20 respondíveis e 20 não respondíveis. Os negativos distinguem ausência de atualidade, entidade incorreta e informação específica ausente. Execute exatamente as três políticas congeladas:
+
+```bash
+for policy in initial conservative balanced; do
+  orelhao knowledge evidence-evaluate \
+    knowledge/evaluation/evidence-v2-holdout.json \
+    --threshold-policy "$policy" \
+    --diagnostics \
+    --json \
+    > "/tmp/orelhao-evidence-holdout-${policy}.json"
+done
+```
+
+As políticas são `initial=0.50`, `conservative=0.69740408` e `balanced=0.00016509`. Elas foram definidas antes da execução no holdout e não devem ser recalibradas nesse conjunto. O relatório inclui métricas agregadas e `category_metrics`.
+
+Quando a decisão for abster, `EvidenceDecision` representa o motivo sem delegar a decisão à LLM. A mensagem pt-BR informa ausência de evidência suficiente, específica, atualizada ou compatível com a entidade solicitada. A LLM futura poderá apenas verbalizar essa decisão estruturada.
 
 Fluxo futuro preservado:
 

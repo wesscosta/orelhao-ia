@@ -1,3 +1,16 @@
+## 0.6.0-alpha.6
+
+- adiciona `evidence-v2-holdout.json` com 40 pares pt-BR inéditos e balanceados, sem reutilizar consultas da calibração;
+- categoriza casos como `literal`, `paraphrase`, `temporal`, `entity` e `related_negative`;
+- rotula abstenções esperadas por ausência de atualidade, incompatibilidade de entidade ou informação específica ausente;
+- congela as políticas `initial=0.50`, `conservative=0.69740408` e `balanced=0.00016509` antes da execução no holdout;
+- adiciona métricas por categoria e mantém métricas agregadas no mesmo relatório;
+- introduz `EvidenceDecision` e `AbstentionReason` como contrato independente da LLM;
+- fornece mensagens seguras em pt-BR para abstenção sem afirmar que a informação não existe fora da base;
+- não altera o retriever, RRF, corpus, dataset de retrieval ou gate padrão.
+
+O holdout deve ser executado uma única vez com as três políticas congeladas. O resultado mede generalização; não deve iniciar nova calibração sobre `evidence-v2-holdout.json`.
+
 ## 0.6.0-alpha.5
 
 - registra a alpha.4 como experimento não promovido: o gate alcançou abstenção `1.000`, mas reduziu Hit@4 de `0.933` para `0.533` no threshold `0.50`;
