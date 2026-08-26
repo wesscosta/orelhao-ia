@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+
+import pytest
+
+from orelhao.services.knowledge.evidence_evaluation import (
+    EvidenceEvaluationCase,
+    evaluate_evidence_verifier,
+    load_evidence_evaluation_cases,
+)
+from orelhao.services.knowledge.index import build_index
+
+
+@dataclass
+class StaticVerifier:
+    scores: dict[tuple[str, str], float]
+
+    def support_score(self, query: str, passage: str) -> float:
+        return self.scores[(query, passage)]
+
+
+def _index(tmp_path: Path) -> Path:
+    sources = tmp_path / "sources"
+    index = tmp_path / "index"
+    sources.mkdir()
+    (sources / "base.md").write_text(
+        "---\ntitle: Base\n---\n\nA resposta correta é azul.",
+        encoding="utf-8",
+    )
+    build_index(sources, index)
+    return index
+
+
+def test_load_evidence_cases_requires_both_classes(tmp_path: Path) -> None:
+    dataset = tmp_path / "evidence.json"
+    dataset.write_text(
+        json.dumps([{"query": "Pergunta", "chunk_id": "base.md:0", "answerable": True}]),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duas classes"):
+        load_evidence_evaluation_cases(dataset)
+
+
+def test_evidence_evaluation_measures_classifier_and_auc(tmp_path: Path) -> None:
+    index = _index(tmp_path)
+    passage = "A resposta correta é azul."
+    cases = [
+        EvidenceEvaluationCase("Qual é a resposta?", "base.md:0", True),
+        EvidenceEvaluationCase("Qual é o telefone?", "base.md:0", False),
+    ]
+    verifier = StaticVerifier(
+        {
+            ("Qual é a resposta?", passage): 0.9,
+            ("Qual é o telefone?", passage): 0.1,
+        }
+    )
+
+    report = evaluate_evidence_verifier(verifier, cases, index, threshold=0.5)
+
+    assert report.metrics.accuracy == 1.0
+    assert report.metrics.balanced_accuracy == 1.0
+    assert report.metrics.precision == 1.0
+    assert report.metrics.recall == 1.0
+    assert report.metrics.specificity == 1.0
+    assert report.metrics.f1 == 1.0
+    assert report.metrics.roc_auc == 1.0
+    assert len(report.results) == 2
+
+
+def test_evidence_evaluation_rejects_missing_chunk(tmp_path: Path) -> None:
+    index = _index(tmp_path)
+    cases = [EvidenceEvaluationCase("Pergunta", "ausente.md:0", True)]
+
+    with pytest.raises(ValueError, match="chunks ausentes"):
+        evaluate_evidence_verifier(StaticVerifier({}), cases, index)
+
+
+@pytest.mark.parametrize("threshold", [-0.1, 1.1])
+def test_evidence_evaluation_rejects_invalid_threshold(
+    tmp_path: Path,
+    threshold: float,
+) -> None:
+    index = _index(tmp_path)
+    cases = [EvidenceEvaluationCase("Pergunta", "base.md:0", True)]
+
+    with pytest.raises(ValueError, match="threshold"):
+        evaluate_evidence_verifier(StaticVerifier({}), cases, index, threshold=threshold)

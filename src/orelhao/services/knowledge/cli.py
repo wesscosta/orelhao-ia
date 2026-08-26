@@ -13,6 +13,10 @@ from .evidence import (
     OnnxExtractiveQaEvidenceVerifier,
     provision_evidence_model,
 )
+from .evidence_evaluation import (
+    evaluate_evidence_verifier,
+    load_evidence_evaluation_cases,
+)
 from .fusion import RRF_RANK_CONSTANT, ReciprocalRankFusionRetriever
 from .index import build_index
 from .paths import default_knowledge_paths
@@ -53,6 +57,28 @@ def add_knowledge_parser(
         help="baixa uma vez o modelo experimental de verificação de evidência",
     )
     evidence_provision.set_defaults(handler=_evidence_provision)
+
+    evidence_evaluate = actions.add_parser(
+        "evidence-evaluate",
+        help="mede answerability diretamente em pares pergunta/chunk pt-BR",
+    )
+    evidence_evaluate.add_argument(
+        "dataset",
+        nargs="?",
+        type=Path,
+        default=resolve_project_path("knowledge/evaluation/evidence-v1.json"),
+        help="dataset JSON de answerability (padrão: evidence-v1.json)",
+    )
+    evidence_evaluate.add_argument("--threshold", type=float, default=0.5)
+    evidence_evaluate.add_argument(
+        "--model-dir",
+        type=Path,
+        default=resolve_project_path("models/evidence/xlm-roberta-base-squad2-distilled"),
+        help="diretório local do modelo ONNX a avaliar",
+    )
+    evidence_evaluate.add_argument("--diagnostics", action="store_true")
+    evidence_evaluate.add_argument("--json", action="store_true", dest="as_json")
+    evidence_evaluate.set_defaults(handler=_evidence_evaluate)
 
     search = actions.add_parser("search", help="consulta o índice local")
     search.add_argument("query", help="pergunta/consulta")
@@ -138,6 +164,44 @@ def _evidence_provision(args: argparse.Namespace) -> None:
         f"tempo={elapsed:.2f}s"
     )
     print(f"Modelo: {model_dir}")
+
+
+def _evidence_evaluate(args: argparse.Namespace) -> None:
+    import json
+
+    paths = default_knowledge_paths()
+    cases = load_evidence_evaluation_cases(args.dataset)
+    verifier = OnnxExtractiveQaEvidenceVerifier(args.model_dir)
+    report = evaluate_evidence_verifier(
+        verifier,
+        cases,
+        paths.index,
+        threshold=args.threshold,
+    )
+    payload: dict[str, object] = dict(report.metrics.as_dict())
+    payload["threshold"] = args.threshold
+    payload["dataset"] = str(args.dataset)
+    payload["model_dir"] = str(args.model_dir)
+    if args.diagnostics:
+        payload["results"] = [result.as_dict() for result in report.results]
+    if args.as_json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+
+    metrics = report.metrics
+    print(f"Casos: {metrics.cases}")
+    print(
+        f"Classes: respondíveis={metrics.answerable_cases} | "
+        f"não respondíveis={metrics.unanswerable_cases}"
+    )
+    print(f"Acurácia: {metrics.accuracy:.3f}")
+    print(f"Acurácia balanceada: {metrics.balanced_accuracy:.3f}")
+    print(f"Precisão: {metrics.precision:.3f}")
+    print(f"Recall: {metrics.recall:.3f}")
+    print(f"Especificidade: {metrics.specificity:.3f}")
+    print(f"F1: {metrics.f1:.3f}")
+    print(f"ROC AUC: {metrics.roc_auc:.3f}")
+    print(f"Latência média: {metrics.mean_latency_ms:.2f}ms")
 
 
 def _search(args: argparse.Namespace) -> None:

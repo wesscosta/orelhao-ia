@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.4 em desenvolvimento
+## Estado atual — v0.6.0-alpha.5 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 demonstrou que consenso, scores, margens e cobertura lexical não separam adequadamente respostas suportadas de documentos apenas relacionados. A alpha.4 introduz um gate experimental de answerability local, ainda sem promover o mecanismo.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability por perda relevante de recall e custo operacional. A alpha.5 separa a avaliação de evidência do benchmark de retrieval para permitir comparação objetiva de modelos pt-BR.
 
 Pipeline de voz já validado:
 
@@ -208,7 +208,7 @@ orelhao knowledge evaluate --retriever fusion --diagnostics --json > /tmp/fusion
 
 A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Cada resultado também inclui `matches` com identificador, documento, posição, texto e metadados do chunk. Esse diagnóstico não modifica ranking ou abstenção.
 
-## Evidence gate experimental da v0.6.0-alpha.4
+## Gate de evidência — resultado da v0.6.0-alpha.4
 
 O gate usa QA extrativa para estimar se cada chunk contém uma resposta extraível. Ele é aplicado depois da fusão e não altera o ranking dos candidatos preservados. Provisione o artefato ONNX int8 uma vez:
 
@@ -224,14 +224,27 @@ orelhao knowledge evaluate --retriever fusion --json
 orelhao knowledge evaluate --retriever evidence --evidence-min-score 0.50 --json
 ```
 
-`0.50` é somente o ponto inicial do experimento. O modelo, o gate e o threshold não são padrão de produção e precisam ser comparados quanto a recall, ranking, abstenção, latência, memória e tamanho local.
+No dataset de retrieval, o threshold `0.50` obteve Hit@1/Hit@4/MRR `0.533`, abstenção `1.000` e latência média aproximada de `228 ms`. O processo atingiu aproximadamente `1.30 GiB` de RAM e o modelo ocupa cerca de `283 MiB`. A varredura posterior não encontrou threshold que preservasse recall e abstenção simultaneamente. O gate e o modelo não foram promovidos.
 Com `--diagnostics`, o metadado `evidence_support` registra o suporte estimado de cada chunk preservado. Use threshold `0.0` para observar a distribuição antes de selecionar um candidato.
+
+## Benchmark de answerability da v0.6.0-alpha.5
+
+O benchmark separado mede diretamente se um chunk contém resposta para uma pergunta. Ele não executa retrieval e não modifica `retrieval-v1.json`:
+
+```bash
+orelhao knowledge evidence-evaluate --json
+orelhao knowledge evidence-evaluate --threshold 0.50 --diagnostics --json
+```
+
+O dataset `evidence-v1.json` contém 40 pares pt-BR balanceados. Cada caso referencia um `chunk_id` reconstruível do índice e declara `answerable`. O relatório inclui acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência. `--model-dir` permite avaliar outro modelo ONNX compatível no mesmo conjunto.
+
+Este primeiro dataset serve para desenvolvimento e calibração. A promoção de um modelo exige confirmação em um conjunto independente, evitando selecionar modelo e threshold sobre os mesmos exemplos.
 
 Fluxo futuro preservado:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 
-A implementação deve preservar o funcionamento offline-first. O próximo incremento deve diagnosticar os casos divergentes antes de experimentar um gate de consenso/confiança; não haverá tuning adicional de RRF nesta etapa.
+A implementação deve preservar o funcionamento offline-first. Não haverá tuning adicional de RRF nesta etapa.
 
 ## Escopo futuro
 

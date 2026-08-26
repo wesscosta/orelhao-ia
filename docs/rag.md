@@ -134,3 +134,22 @@ orelhao knowledge evaluate --retriever evidence --evidence-min-score 0.50 --json
 
 O mecanismo não corrige as falhas conhecidas de recall para missão e telefone geral; esta etapa mede isoladamente suporte da evidência e abstenção. Nenhum threshold deve ser promovido sem varredura sistemática e avaliação A/B completa.
 Nos diagnósticos, chunks preservados recebem o metadado efêmero `evidence_support`. Uma execução com threshold `0.0` permite inspecionar toda a distribuição sem filtrar candidatos.
+
+### Resultado
+
+O threshold `0.50` elevou a abstenção para `1.000`, mas reduziu Hit@1, Hit@4 e MRR para `0.533`. A latência média foi de aproximadamente `228 ms`, o pico de memória ficou em aproximadamente `1.30 GiB` e o modelo local ocupa cerca de `283 MiB`. Thresholds próximos de zero também eliminaram chunks positivos legítimos. O candidato foi rejeitado para promoção.
+
+## Benchmark de answerability da v0.6.0-alpha.5
+
+`retrieval-v1.json` mede se o mecanismo recupera uma fonte aceitável. Ele não determina se cada chunk individual contém a resposta. A alpha.5 introduz `evidence-v1.json` para medir essa segunda tarefa isoladamente:
+
+```bash
+orelhao knowledge evidence-evaluate --json
+orelhao knowledge evidence-evaluate --threshold 0.50 --diagnostics --json
+```
+
+O dataset contém 20 pares respondíveis e 20 não respondíveis em pt-BR. Os casos referenciam chunks do índice por ID, evitando duplicar o texto do corpus. O comando falha explicitamente se uma referência deixar de existir após reconstrução do índice.
+
+Métricas: acurácia, acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência média por par. A ROC AUC permite comparar ordenação dos scores sem fixar antecipadamente um threshold. O argumento `--model-dir` permite avaliar candidatos locais compatíveis usando exatamente os mesmos pares.
+
+`evidence-v1.json` é um conjunto de desenvolvimento/calibração. Um modelo não deve ser promovido sem validação posterior em casos independentes e sem novo A/B ponta a ponta no benchmark congelado de retrieval.

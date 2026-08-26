@@ -1,3 +1,15 @@
+## 0.6.0-alpha.5
+
+- registra a alpha.4 como experimento não promovido: o gate alcançou abstenção `1.000`, mas reduziu Hit@4 de `0.933` para `0.533` no threshold `0.50`;
+- preserva `retrieval-v1.json`, o RRF, o corpus e todos os thresholds anteriores;
+- adiciona o dataset independente `knowledge/evaluation/evidence-v1.json`, com 40 pares pt-BR balanceados entre chunks respondíveis e não respondíveis;
+- adiciona `orelhao knowledge evidence-evaluate` para medir o verificador sem interferência do retrieval;
+- mede acurácia, acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência;
+- permite comparar diretórios de modelos locais pelo mesmo dataset e expor diagnósticos por par pergunta/chunk;
+- adiciona validação de schema, classes, duplicidade, referências de chunks e threshold.
+
+O dataset `evidence-v1.json` é de desenvolvimento e calibração. Ele não autoriza promoção por si só: um modelo candidato ainda precisa ser confirmado em um conjunto independente antes de integrar o caminho crítico.
+
 ## 0.6.0-alpha.4
 
 - introduz o contrato `EvidenceVerifier`, independente do retrieval e do corpus;
@@ -8,7 +20,7 @@
 - mantém scores, thresholds, RRF, corpus e dataset anteriores sem alteração;
 - adiciona testes de preservação de ranking, filtragem, abstenção e validação do threshold.
 
-O evidence gate permanece experimental. Nenhum threshold foi promovido e a alpha.4 somente poderá ser mantida após comparação A/B de qualidade, abstenção, latência, memória e tamanho dos artefatos.
+O evidence gate permaneceu experimental. Na validação posterior, nenhum threshold apresentou equilíbrio suficiente para promoção.
 
 ## 0.6.0-alpha.3
 

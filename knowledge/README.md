@@ -2,7 +2,10 @@
 
 - `sources/`: fonte da verdade editável da implantação. Markdown (`.md`) é o formato preferencial; `.txt` também é aceito nesta etapa.
 - `index/`: artefatos derivados e reconstruíveis. Pode ser apagado e recriado com `orelhao knowledge index`.
-- `evaluation/`: dataset versionado de avaliação, mantido fora do índice de produção e executado com `orelhao knowledge evaluate`.
+- `evaluation/retrieval-v1.json`: benchmark congelado do retrieval, executado com `orelhao knowledge evaluate`.
+- `evaluation/evidence-v1.json`: benchmark pt-BR separado de answerability por pergunta/chunk, executado com `orelhao knowledge evidence-evaluate`.
+
+Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.
 

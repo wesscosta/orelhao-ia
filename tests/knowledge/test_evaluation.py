@@ -163,6 +163,18 @@ def test_evaluate_command_accepts_evidence_retriever() -> None:
     assert args.evidence_min_score == 0.7
 
 
+def test_evidence_evaluate_command_uses_separate_dataset() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    args = parser.parse_args(["knowledge", "evidence-evaluate", "--threshold", "0.2"])
+
+    assert args.dataset.name == "evidence-v1.json"
+    assert args.threshold == 0.2
+    assert args.model_dir.name == "xlm-roberta-base-squad2-distilled"
+
+
 def test_evaluate_command_accepts_diagnostics() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
