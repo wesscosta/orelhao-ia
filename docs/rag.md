@@ -115,3 +115,22 @@ orelhao knowledge evaluate --retriever fusion --diagnostics --json
 ```
 
 Cada item informa fontes e scores retornados, posição da fonte esperada e se o comportamento foi correto. O campo `matches` inclui identificador, documento, posição, texto e metadados de cada chunk recuperado. Dataset, corpus, thresholds e RRF permanecem congelados. A política de gate será escolhida somente após a comparação dessas divergências.
+
+## Evidence gate experimental da v0.6.0-alpha.4
+
+Os diagnósticos demonstraram que consenso, score, margem e cobertura lexical não separam os casos suportados dos documentos apenas relacionados. A alpha.4 testa QA extrativa com capacidade de indicar ausência de resposta:
+
+```text
+baseline + semântico → RRF → EvidenceVerifier por chunk → ranking preservado ou abstenção
+```
+
+O candidato é `onnx-community/xlm-roberta-base-squad2-distilled-ONNX`, revisão fixa, usando apenas `model_int8.onnx`. O provisionamento baixa aproximadamente 279 MB; tokenizer, pesos e execução permanecem locais:
+
+```bash
+pip install -e '.[semantic,evidence]'
+orelhao knowledge evidence-provision
+orelhao knowledge evaluate --retriever evidence --evidence-min-score 0.50 --json
+```
+
+O mecanismo não corrige as falhas conhecidas de recall para missão e telefone geral; esta etapa mede isoladamente suporte da evidência e abstenção. Nenhum threshold deve ser promovido sem varredura sistemática e avaliação A/B completa.
+Nos diagnósticos, chunks preservados recebem o metadado efêmero `evidence_support`. Uma execução com threshold `0.0` permite inspecionar toda a distribuição sem filtrar candidatos.

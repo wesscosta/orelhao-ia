@@ -1,3 +1,15 @@
+## 0.6.0-alpha.4
+
+- introduz o contrato `EvidenceVerifier`, independente do retrieval e do corpus;
+- adiciona `EvidenceFilteredRetriever` como gate experimental após a fusão RRF;
+- utiliza QA extrativa com suporte a ausência de resposta, em vez de aplicar NLI diretamente a perguntas;
+- adiciona provisionamento explícito de `xlm-roberta-base-squad2-distilled` em ONNX int8, com revisão fixada e operação offline após download;
+- adiciona `orelhao knowledge evaluate --retriever evidence --evidence-min-score` ao mesmo benchmark congelado;
+- mantém scores, thresholds, RRF, corpus e dataset anteriores sem alteração;
+- adiciona testes de preservação de ranking, filtragem, abstenção e validação do threshold.
+
+O evidence gate permanece experimental. Nenhum threshold foi promovido e a alpha.4 somente poderá ser mantida após comparação A/B de qualidade, abstenção, latência, memória e tamanho dos artefatos.
+
 ## 0.6.0-alpha.3
 
 - adiciona `orelhao knowledge evaluate --diagnostics` sem alterar o comportamento dos retrievers;

@@ -8,6 +8,11 @@ from orelhao.runtime_paths import resolve_project_path
 
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, evaluate_retriever_detailed, load_evaluation_cases
+from .evidence import (
+    EvidenceFilteredRetriever,
+    OnnxExtractiveQaEvidenceVerifier,
+    provision_evidence_model,
+)
 from .fusion import RRF_RANK_CONSTANT, ReciprocalRankFusionRetriever
 from .index import build_index
 from .paths import default_knowledge_paths
@@ -43,6 +48,12 @@ def add_knowledge_parser(
     semantic_index.add_argument("--batch-size", type=int, default=8)
     semantic_index.set_defaults(handler=_semantic_index)
 
+    evidence_provision = actions.add_parser(
+        "evidence-provision",
+        help="baixa uma vez o modelo experimental de verificação de evidência",
+    )
+    evidence_provision.set_defaults(handler=_evidence_provision)
+
     search = actions.add_parser("search", help="consulta o índice local")
     search.add_argument("query", help="pergunta/consulta")
     search.add_argument("--limit", type=int, default=4)
@@ -61,11 +72,12 @@ def add_knowledge_parser(
     evaluate.add_argument("--min-score", type=float)
     evaluate.add_argument(
         "--retriever",
-        choices=("baseline", "semantic", "fusion"),
+        choices=("baseline", "semantic", "fusion", "evidence"),
         default="baseline",
         help="mecanismo medido no mesmo dataset (padrão: baseline)",
     )
     evaluate.add_argument("--json", action="store_true", dest="as_json")
+    evaluate.add_argument("--evidence-min-score", type=float, default=0.5)
     evaluate.add_argument(
         "--diagnostics",
         action="store_true",
@@ -115,6 +127,19 @@ def _semantic_index(args: argparse.Namespace) -> None:
     print(f"Índice: {paths.index}")
 
 
+def _evidence_provision(args: argparse.Namespace) -> None:
+    del args
+    model_dir = resolve_project_path("models/evidence/xlm-roberta-base-squad2-distilled")
+    started = time.perf_counter()
+    manifest = provision_evidence_model(model_dir)
+    elapsed = time.perf_counter() - started
+    print(
+        f"Modelo de evidência provisionado: {manifest['model_id']}@{manifest['revision']} | "
+        f"tempo={elapsed:.2f}s"
+    )
+    print(f"Modelo: {model_dir}")
+
+
 def _search(args: argparse.Namespace) -> None:
     paths = default_knowledge_paths()
     started = time.perf_counter()
@@ -138,9 +163,9 @@ def _evaluate(args: argparse.Namespace) -> None:
     paths = default_knowledge_paths()
     cases = load_evaluation_cases(args.dataset)
     retriever: Retriever
-    if args.retriever in {"semantic", "fusion"}:
+    if args.retriever in {"semantic", "fusion", "evidence"}:
         min_score = 0.0 if args.min_score is None else args.min_score
-        if args.retriever == "fusion" and args.min_score is None:
+        if args.retriever in {"fusion", "evidence"} and args.min_score is None:
             min_score = 0.852
         model_dir = resolve_project_path("models/embeddings/multilingual-e5-small")
         semantic_retriever = SemanticRetriever(
@@ -148,13 +173,24 @@ def _evaluate(args: argparse.Namespace) -> None:
             OnnxE5Vectorizer(model_dir),
             min_score=min_score,
         )
-        if args.retriever == "fusion":
-            retriever = ReciprocalRankFusionRetriever(
+        if args.retriever in {"fusion", "evidence"}:
+            fusion_retriever = ReciprocalRankFusionRetriever(
                 [
                     PersistentVectorRetriever(paths.index, min_score=0.40),
                     semantic_retriever,
                 ]
             )
+            if args.retriever == "evidence":
+                evidence_dir = resolve_project_path(
+                    "models/evidence/xlm-roberta-base-squad2-distilled"
+                )
+                retriever = EvidenceFilteredRetriever(
+                    fusion_retriever,
+                    OnnxExtractiveQaEvidenceVerifier(evidence_dir),
+                    min_support=args.evidence_min_score,
+                )
+            else:
+                retriever = fusion_retriever
         else:
             retriever = semantic_retriever
     else:
@@ -170,10 +206,12 @@ def _evaluate(args: argparse.Namespace) -> None:
     if args.as_json:
         payload["retriever"] = args.retriever
         payload["min_score"] = min_score
-        if args.retriever == "fusion":
+        if args.retriever in {"fusion", "evidence"}:
             payload["baseline_min_score"] = 0.40
             payload["semantic_min_score"] = min_score
             payload["rrf_rank_constant"] = RRF_RANK_CONSTANT
+        if args.retriever == "evidence":
+            payload["evidence_min_score"] = args.evidence_min_score
         if report is not None:
             payload["results"] = [result.as_dict() for result in report.results]
         print(json.dumps(payload, ensure_ascii=False, indent=2))

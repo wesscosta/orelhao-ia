@@ -152,6 +152,17 @@ def test_evaluate_command_accepts_fusion_retriever() -> None:
     assert args.retriever == "fusion"
 
 
+def test_evaluate_command_accepts_evidence_retriever() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+    args = parser.parse_args(
+        ["knowledge", "evaluate", "--retriever", "evidence", "--evidence-min-score", "0.7"]
+    )
+    assert args.retriever == "evidence"
+    assert args.evidence_min_score == 0.7
+
+
 def test_evaluate_command_accepts_diagnostics() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)

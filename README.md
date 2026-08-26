@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.3 em desenvolvimento
+## Estado atual — v0.6.0-alpha.4 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 diagnostica as divergências antes de definir um gate, ainda sem promover o mecanismo.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 demonstrou que consenso, scores, margens e cobertura lexical não separam adequadamente respostas suportadas de documentos apenas relacionados. A alpha.4 introduz um gate experimental de answerability local, ainda sem promover o mecanismo.
 
 Pipeline de voz já validado:
 
@@ -44,7 +44,7 @@ A aplicação permanece um **monólito modular**, com contratos entre Core, Serv
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e '.[dev,audio,stt,tts,vad,semantic]'
+pip install -e '.[dev,audio,stt,tts,vad,semantic,evidence]'
 ```
 
 ## Diagnóstico de áudio
@@ -207,6 +207,25 @@ orelhao knowledge evaluate --retriever fusion --diagnostics --json > /tmp/fusion
 ```
 
 A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Cada resultado também inclui `matches` com identificador, documento, posição, texto e metadados do chunk. Esse diagnóstico não modifica ranking ou abstenção.
+
+## Evidence gate experimental da v0.6.0-alpha.4
+
+O gate usa QA extrativa para estimar se cada chunk contém uma resposta extraível. Ele é aplicado depois da fusão e não altera o ranking dos candidatos preservados. Provisione o artefato ONNX int8 uma vez:
+
+```bash
+pip install -e '.[semantic,evidence]'
+orelhao knowledge evidence-provision
+```
+
+Execute o A/B no dataset congelado:
+
+```bash
+orelhao knowledge evaluate --retriever fusion --json
+orelhao knowledge evaluate --retriever evidence --evidence-min-score 0.50 --json
+```
+
+`0.50` é somente o ponto inicial do experimento. O modelo, o gate e o threshold não são padrão de produção e precisam ser comparados quanto a recall, ranking, abstenção, latência, memória e tamanho local.
+Com `--diagnostics`, o metadado `evidence_support` registra o suporte estimado de cada chunk preservado. Use threshold `0.0` para observar a distribuição antes de selecionar um candidato.
 
 Fluxo futuro preservado:
 
