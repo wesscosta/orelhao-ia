@@ -9,9 +9,11 @@ from orelhao.runtime_paths import resolve_project_path
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, evaluate_retriever_detailed, load_evaluation_cases
 from .evidence import (
-    EVIDENCE_MODEL_VARIANTS,
+    EVIDENCE_DEFAULT_MODEL,
+    EVIDENCE_MODELS,
     EvidenceFilteredRetriever,
     OnnxExtractiveQaEvidenceVerifier,
+    evidence_model_directory,
     evidence_model_filename,
     provision_evidence_model,
 )
@@ -60,8 +62,14 @@ def add_knowledge_parser(
         help="baixa uma vez o modelo experimental de verificação de evidência",
     )
     evidence_provision.add_argument(
+        "--model",
+        choices=tuple(EVIDENCE_MODELS),
+        default=EVIDENCE_DEFAULT_MODEL,
+        help="arquitetura local a provisionar (padrão: xlm-roberta)",
+    )
+    evidence_provision.add_argument(
         "--variant",
-        choices=tuple(EVIDENCE_MODEL_VARIANTS),
+        choices=tuple({variant for spec in EVIDENCE_MODELS.values() for variant in spec["variants"]}),
         default="int8",
         help="precisão do artefato local (padrão: int8)",
     )
@@ -79,8 +87,14 @@ def add_knowledge_parser(
         help="dataset JSON de answerability (padrão: evidence-v1.json)",
     )
     evidence_evaluate.add_argument(
+        "--model",
+        choices=tuple(EVIDENCE_MODELS),
+        default=EVIDENCE_DEFAULT_MODEL,
+        help="arquitetura local a avaliar (padrão: xlm-roberta)",
+    )
+    evidence_evaluate.add_argument(
         "--model-variant",
-        choices=tuple(EVIDENCE_MODEL_VARIANTS),
+        choices=tuple({variant for spec in EVIDENCE_MODELS.values() for variant in spec["variants"]}),
         default="int8",
         help="variante do mesmo modelo ONNX (padrão: int8)",
     )
@@ -94,8 +108,8 @@ def add_knowledge_parser(
     evidence_evaluate.add_argument(
         "--model-dir",
         type=Path,
-        default=resolve_project_path("models/evidence/xlm-roberta-base-squad2-distilled"),
-        help="diretório local do modelo ONNX a avaliar",
+        default=None,
+        help="diretório local opcional; por padrão deriva de --model",
     )
     evidence_evaluate.add_argument("--diagnostics", action="store_true")
     evidence_evaluate.add_argument("--json", action="store_true", dest="as_json")
@@ -175,13 +189,15 @@ def _semantic_index(args: argparse.Namespace) -> None:
 
 
 def _evidence_provision(args: argparse.Namespace) -> None:
-    model_dir = resolve_project_path("models/evidence/xlm-roberta-base-squad2-distilled")
+    model_dir = resolve_project_path(
+        f"models/evidence/{evidence_model_directory(args.model)}"
+    )
     started = time.perf_counter()
-    manifest = provision_evidence_model(model_dir, variant=args.variant)
+    manifest = provision_evidence_model(model_dir, model=args.model, variant=args.variant)
     elapsed = time.perf_counter() - started
     print(
         f"Modelo de evidência provisionado: {manifest['model_id']}@{manifest['revision']} | "
-        f"variante={manifest['variant']} | "
+        f"modelo={manifest['model']} | variante={manifest['variant']} | "
         f"tempo={elapsed:.2f}s"
     )
     print(f"Modelo: {model_dir}")
@@ -192,8 +208,12 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
 
     paths = default_knowledge_paths()
     cases = load_evidence_evaluation_cases(args.dataset)
+    model_dir = args.model_dir or resolve_project_path(
+        f"models/evidence/{evidence_model_directory(args.model)}"
+    )
     verifier = OnnxExtractiveQaEvidenceVerifier(
-        args.model_dir,
+        model_dir,
+        model=args.model,
         variant=args.model_variant,
     )
     policy = args.threshold_policy or "initial"
@@ -212,9 +232,10 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     payload["threshold"] = threshold
     payload["threshold_policy"] = None if args.threshold is not None else policy
     payload["dataset"] = str(args.dataset)
-    payload["model_dir"] = str(args.model_dir)
+    payload["model"] = args.model
+    payload["model_dir"] = str(model_dir)
     payload["model_variant"] = args.model_variant
-    model_path = args.model_dir / evidence_model_filename(args.model_variant)
+    model_path = model_dir / evidence_model_filename(args.model_variant, model=args.model)
     payload["model_size_bytes"] = model_path.stat().st_size
     if args.diagnostics:
         payload["results"] = [result.as_dict() for result in report.results]

@@ -10,6 +10,7 @@ import pytest
 
 from orelhao.services.knowledge.evidence import (
     EvidenceFilteredRetriever,
+    evidence_model_directory,
     evidence_model_filename,
     provision_evidence_model,
 )
@@ -82,6 +83,13 @@ def test_evidence_model_rejects_unknown_variant() -> None:
         evidence_model_filename("unknown")
 
 
+def test_mdeberta_candidate_supports_only_int8() -> None:
+    assert evidence_model_directory("mdeberta-v3") == "mdeberta-v3-base-squad2"
+    assert evidence_model_filename("int8", model="mdeberta-v3") == "model_int8.onnx"
+    with pytest.raises(ValueError, match="variant"):
+        evidence_model_filename("fp32", model="mdeberta-v3")
+
+
 def test_provision_evidence_model_keeps_variants_side_by_side(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -101,7 +109,7 @@ def test_provision_evidence_model_keeps_variants_side_by_side(
     )
     model_dir = tmp_path / "model"
 
-    manifest = provision_evidence_model(model_dir, variant="fp32")
+    manifest = provision_evidence_model(model_dir, model="xlm-roberta", variant="fp32")
 
     assert (model_dir / "model_fp32.onnx").read_bytes() == b"fp32"
     assert not (model_dir / "model_int8.onnx").exists()

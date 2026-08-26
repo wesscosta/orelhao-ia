@@ -194,3 +194,20 @@ orelhao knowledge evidence-evaluate \
 As variantes são armazenadas como `model_int8.onnx` e `model_fp32.onnx`, com manifestos separados. O JSON registra `model_variant` e `model_size_bytes`. INT8 permanece padrão e nenhum resultado altera automaticamente o gate experimental.
 
 O protocolo compara primeiro ROC AUC e distribuição dos scores, que não dependem de reutilizar o threshold INT8. Se houver ganho material, um threshold FP32 pode ser definido apenas no conjunto de calibração `evidence-v1.json` por regra declarada previamente e então congelado. O holdout não deve ser usado para escolher esse threshold. Também devem ser registrados tempo de parede, pico de memória residente e tamanho local do modelo.
+
+### Resultado da alpha.7
+
+FP32 não foi promovido. No holdout, sua ROC AUC foi `0.907`, contra `0.905` do INT8. A política balanced obteve recall `0.900` e especificidade `0.750`; a conservative obteve recall `0.400` e especificidade `1.000`. O processo FP32 utilizou aproximadamente `2.155 MiB` de RAM, artefato de `1.059 MiB` e latência média de `47–49 ms`. A quantização explica casos isolados, mas não a limitação estrutural de answerability.
+
+## Candidato mDeBERTa-v3 da v0.6.0-alpha.8
+
+A próxima hipótese troca uma única dimensão: arquitetura. `mdeberta-v3-base-squad2` INT8 é avaliado lado a lado sem substituir XLM-RoBERTa:
+
+```bash
+orelhao knowledge evidence-provision --model mdeberta-v3
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/evidence-v1.json \
+  --model mdeberta-v3 --diagnostics --json
+```
+
+Cada modelo possui diretório, revisão e manifesto próprios. `--model xlm-roberta` continua sendo o padrão. O candidato somente avança ao holdout depois de comparação no conjunto de calibração e congelamento explícito de thresholds.

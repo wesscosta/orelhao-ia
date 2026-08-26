@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.7 em desenvolvimento
+## Estado atual — v0.6.0-alpha.8 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 compara INT8 e FP32 da mesma arquitetura antes de atribuir os erros ao modelo ou ao hardware.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 compara uma única arquitetura multilíngue diferente em INT8.
 
 Pipeline de voz já validado:
 
@@ -269,6 +269,21 @@ orelhao knowledge evidence-evaluate --model-variant fp32 --diagnostics --json
 ```
 
 INT8 continua sendo o padrão. A comparação deve usar os mesmos datasets e registrar ROC AUC, métricas por categoria, latência, pico de memória e tamanho do artefato. Um threshold escolhido em `evidence-v1.json` deve ser congelado antes de qualquer avaliação confirmatória; `evidence-v2-holdout.json` não deve ser reutilizado para calibrar FP32.
+
+No holdout, a ROC AUC FP32 foi `0.907`, praticamente igual à INT8 (`0.905`). FP32 balanced elevou recall para `0.900`, mas reduziu especificidade para `0.750`; o conservative preservou especificidade `1.000`, mas recall caiu para `0.400`. Com aproximadamente `2.155 MiB` de RAM e artefato de `1.059 MiB`, FP32 foi rejeitado.
+
+## Candidato mDeBERTa da v0.6.0-alpha.8
+
+A alpha.8 testa somente `mdeberta-v3-base-squad2` em ONNX INT8, sem alterar o padrão:
+
+```bash
+orelhao knowledge evidence-provision --model mdeberta-v3
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/evidence-v1.json \
+  --model mdeberta-v3 --diagnostics --json
+```
+
+O candidato usa arquitetura multilíngue diferente e foi treinado com casos sem resposta. O primeiro objetivo é comparar ROC AUC, distribuição dos scores, categorias, latência, memória e tamanho contra XLM-RoBERTa INT8. Thresholds serão calibrados somente em `evidence-v1.json` e congelados antes do holdout.
 
 Fluxo futuro preservado:
 

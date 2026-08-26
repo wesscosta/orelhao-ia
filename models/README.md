@@ -30,6 +30,15 @@ orelhao knowledge evidence-evaluate --model-variant fp32 --json
 
 Os arquivos locais são `model_int8.onnx` e `model_fp32.onnx`. INT8 continua sendo o padrão; nenhum peso deve ser adicionado ao Git.
 
+O candidato de arquitetura da alpha.8 é provisionado em diretório independente:
+
+```bash
+orelhao knowledge evidence-provision --model mdeberta-v3
+orelhao knowledge evidence-evaluate --model mdeberta-v3 --json
+```
+
+O candidato mDeBERTa-v3 usa somente INT8 nesta etapa. XLM-RoBERTa INT8 permanece padrão até uma comparação completa favorável.
+
 Compare verificadores locais pelo benchmark separado, sem promover automaticamente o modelo:
 
 ```bash

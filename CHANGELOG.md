@@ -1,3 +1,13 @@
+## 0.6.0-alpha.8
+
+- encerra a ablação da alpha.7 sem promover FP32: no holdout, a ROC AUC ficou em `0.907` contra `0.905` do INT8, com custo muito superior de memória, latência e armazenamento;
+- preserva `xlm-roberta` INT8 como modelo padrão experimental;
+- adiciona `mdeberta-v3` INT8 como único candidato de arquitetura diferente;
+- generaliza provisionamento e avaliação por `--model`, mantendo revisão imutável, artefatos locais separados e runtime offline;
+- não altera corpus, datasets, retrieval, RRF, thresholds promovidos ou caminho crítico.
+
+A alpha.8 mede primeiro o candidato em `evidence-v1.json`. Thresholds serão definidos apenas nesse conjunto e congelados antes do holdout. Nenhuma regra específica por pergunta será introduzida.
+
 ## 0.6.0-alpha.7
 
 - adiciona uma ablação controlada entre os artefatos ONNX INT8 e FP32 da mesma arquitetura de QA extrativa;
@@ -8,6 +18,8 @@
 - mantém manifestos separados e revisão imutável do modelo, preservando a operação offline após o provisionamento.
 
 Esta etapa mede se a quantização explica parte da perda de separação observada. FP32 não deve ser promovido apenas por melhorar um threshold: a comparação principal usa ROC AUC, métricas congeladas, latência, memória e tamanho do artefato.
+
+No holdout, FP32 balanced obteve acurácia balanceada `0.825`, recall `0.900`, especificidade `0.750`, F1 `0.837` e ROC AUC `0.907`. O modo conservative obteve acurácia balanceada `0.700`, recall `0.400` e especificidade `1.000`. O artefato ocupa aproximadamente `1.059 MiB`, usou cerca de `2.155 MiB` de RAM e apresentou latência média de `47–49 ms`. Como a ROC AUC INT8 no mesmo holdout foi `0.905`, a diferença de ordenação não compensou o custo nem a regressão de abstenção.
 
 ## 0.6.0-alpha.6
 

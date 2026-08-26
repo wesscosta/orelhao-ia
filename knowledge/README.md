@@ -8,6 +8,8 @@
 
 A alpha.7 reutiliza esses mesmos datasets para comparar INT8 e FP32 da mesma arquitetura. Não crie casos específicos para favorecer uma variante e não calibre thresholds no holdout.
 
+A alpha.8 reutiliza os datasets sem alterações para comparar XLM-RoBERTa INT8 com mDeBERTa-v3 INT8. Apenas uma arquitetura muda; corpus e rótulos permanecem congelados.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.

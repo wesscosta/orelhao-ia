@@ -173,7 +173,8 @@ def test_evidence_evaluate_command_uses_separate_dataset() -> None:
     assert args.dataset.name == "evidence-v1.json"
     assert args.threshold == 0.2
     assert args.threshold_policy is None
-    assert args.model_dir.name == "xlm-roberta-base-squad2-distilled"
+    assert args.model == "xlm-roberta"
+    assert args.model_dir is None
 
 
 def test_evidence_evaluate_command_accepts_frozen_threshold_policy() -> None:
@@ -203,6 +204,24 @@ def test_evidence_commands_accept_fp32_variant() -> None:
 
     assert provision.variant == "fp32"
     assert evaluate.model_variant == "fp32"
+
+
+def test_evidence_commands_accept_mdeberta_candidate() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    provision = parser.parse_args(
+        ["knowledge", "evidence-provision", "--model", "mdeberta-v3"]
+    )
+    evaluate = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--model", "mdeberta-v3"]
+    )
+
+    assert provision.model == "mdeberta-v3"
+    assert provision.variant == "int8"
+    assert evaluate.model == "mdeberta-v3"
+    assert evaluate.model_dir is None
 
 
 def test_evaluate_command_accepts_diagnostics() -> None:

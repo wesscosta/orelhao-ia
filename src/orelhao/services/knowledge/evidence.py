@@ -6,25 +6,58 @@ import math
 import shutil
 from dataclasses import replace
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, TypedDict
 
 import numpy as np
 
 from .models import SearchResult
 from .retriever import Retriever
 
-EVIDENCE_MODEL_ID = "onnx-community/xlm-roberta-base-squad2-distilled-ONNX"
-EVIDENCE_MODEL_REVISION = "484112fae76dde6ad01b640192d559cbc2d488e1"
-EVIDENCE_MODEL_VARIANTS = {
-    "int8": {
-        "remote": "onnx/model_int8.onnx",
-        "local": "model_int8.onnx",
+
+class EvidenceVariantSpec(TypedDict):
+    remote: str
+    local: str
+
+
+class EvidenceModelSpec(TypedDict):
+    model_id: str
+    revision: str
+    directory: str
+    variants: dict[str, EvidenceVariantSpec]
+
+
+EVIDENCE_DEFAULT_MODEL = "xlm-roberta"
+EVIDENCE_MODELS: dict[str, EvidenceModelSpec] = {
+    "xlm-roberta": {
+        "model_id": "onnx-community/xlm-roberta-base-squad2-distilled-ONNX",
+        "revision": "484112fae76dde6ad01b640192d559cbc2d488e1",
+        "directory": "xlm-roberta-base-squad2-distilled",
+        "variants": {
+            "int8": {
+                "remote": "onnx/model_int8.onnx",
+                "local": "model_int8.onnx",
+            },
+            "fp32": {
+                "remote": "onnx/model.onnx",
+                "local": "model_fp32.onnx",
+            },
+        },
     },
-    "fp32": {
-        "remote": "onnx/model.onnx",
-        "local": "model_fp32.onnx",
+    "mdeberta-v3": {
+        "model_id": "dewdev/mdeberta-v3-base-squad2-onnx",
+        "revision": "0eb5eecea371d8b499379ca7f5488693c15e1d35",
+        "directory": "mdeberta-v3-base-squad2",
+        "variants": {
+            "int8": {
+                "remote": "onnx/model_int8.onnx",
+                "local": "model_int8.onnx",
+            },
+        },
     },
 }
+EVIDENCE_MODEL_ID = EVIDENCE_MODELS[EVIDENCE_DEFAULT_MODEL]["model_id"]
+EVIDENCE_MODEL_REVISION = EVIDENCE_MODELS[EVIDENCE_DEFAULT_MODEL]["revision"]
+EVIDENCE_MODEL_VARIANTS = EVIDENCE_MODELS[EVIDENCE_DEFAULT_MODEL]["variants"]
 EVIDENCE_MODEL_FILENAME = EVIDENCE_MODEL_VARIANTS["int8"]["local"]
 
 
@@ -32,20 +65,39 @@ class EvidenceVerifier(Protocol):
     def support_score(self, query: str, passage: str) -> float: ...
 
 
-def evidence_model_filename(variant: str) -> str:
+def evidence_model_filename(
+    variant: str,
+    *,
+    model: str = EVIDENCE_DEFAULT_MODEL,
+) -> str:
     try:
-        return EVIDENCE_MODEL_VARIANTS[variant]["local"]
+        variants = EVIDENCE_MODELS[model]["variants"]
+        return variants[variant]["local"]
     except KeyError as exc:
-        choices = ", ".join(EVIDENCE_MODEL_VARIANTS)
-        raise ValueError(f"variant deve ser uma de: {choices}") from exc
+        if model not in EVIDENCE_MODELS:
+            choices = ", ".join(EVIDENCE_MODELS)
+            raise ValueError(f"model deve ser um de: {choices}") from exc
+        choices = ", ".join(EVIDENCE_MODELS[model]["variants"])
+        raise ValueError(f"variant para {model} deve ser uma de: {choices}") from exc
+
+
+def evidence_model_directory(model: str) -> str:
+    try:
+        return EVIDENCE_MODELS[model]["directory"]
+    except KeyError as exc:
+        choices = ", ".join(EVIDENCE_MODELS)
+        raise ValueError(f"model deve ser um de: {choices}") from exc
 
 
 def provision_evidence_model(
     model_dir: Path,
     *,
+    model: str = EVIDENCE_DEFAULT_MODEL,
     variant: str = "int8",
 ) -> dict[str, str | int]:
-    model_filename = evidence_model_filename(variant)
+    model_filename = evidence_model_filename(variant, model=model)
+    model_spec = EVIDENCE_MODELS[model]
+    variants = model_spec["variants"]
     try:
         from huggingface_hub import hf_hub_download
     except ImportError as exc:  # pragma: no cover - depende do extra opcional
@@ -55,20 +107,21 @@ def provision_evidence_model(
 
     model_dir.mkdir(parents=True, exist_ok=True)
     files = {
-        model_filename: EVIDENCE_MODEL_VARIANTS[variant]["remote"],
+        model_filename: variants[variant]["remote"],
         "tokenizer.json": "tokenizer.json",
     }
     for local_name, remote_name in files.items():
         downloaded = hf_hub_download(
-            repo_id=EVIDENCE_MODEL_ID,
+            repo_id=model_spec["model_id"],
             filename=remote_name,
-            revision=EVIDENCE_MODEL_REVISION,
+            revision=model_spec["revision"],
         )
         shutil.copyfile(downloaded, model_dir / local_name)
 
     manifest: dict[str, str | int] = {
-        "model_id": EVIDENCE_MODEL_ID,
-        "revision": EVIDENCE_MODEL_REVISION,
+        "model": model,
+        "model_id": model_spec["model_id"],
+        "revision": model_spec["revision"],
         "variant": variant,
         "model_file": model_filename,
         "model_size_bytes": (model_dir / model_filename).stat().st_size,
@@ -93,6 +146,7 @@ class OnnxExtractiveQaEvidenceVerifier:
         self,
         model_dir: Path,
         *,
+        model: str = EVIDENCE_DEFAULT_MODEL,
         variant: str = "int8",
         max_length: int = 384,
         max_answer_tokens: int = 32,
@@ -107,12 +161,12 @@ class OnnxExtractiveQaEvidenceVerifier:
                 "Dependências de evidência ausentes. Instale: pip install -e '.[evidence]'"
             ) from exc
 
-        model_path = model_dir / evidence_model_filename(variant)
+        model_path = model_dir / evidence_model_filename(variant, model=model)
         tokenizer_path = model_dir / "tokenizer.json"
         if not model_path.exists() or not tokenizer_path.exists():
             raise RuntimeError(
                 "Modelo de evidência local inexistente. Execute: "
-                f"orelhao knowledge evidence-provision --variant {variant}"
+                f"orelhao knowledge evidence-provision --model {model} --variant {variant}"
             )
 
         self._tokenizer = Tokenizer.from_file(str(tokenizer_path))
@@ -125,6 +179,7 @@ class OnnxExtractiveQaEvidenceVerifier:
         self._output_names = [item.name for item in self._session.get_outputs()]
         self._max_answer_tokens = max_answer_tokens
         self.variant = variant
+        self.model = model
         self.model_path = model_path
 
     def support_score(self, query: str, passage: str) -> float:
