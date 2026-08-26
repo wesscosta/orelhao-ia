@@ -189,6 +189,22 @@ def test_evidence_evaluate_command_accepts_frozen_threshold_policy() -> None:
     assert args.threshold_policy == "conservative"
 
 
+def test_evidence_commands_accept_fp32_variant() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    provision = parser.parse_args(
+        ["knowledge", "evidence-provision", "--variant", "fp32"]
+    )
+    evaluate = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--model-variant", "fp32"]
+    )
+
+    assert provision.variant == "fp32"
+    assert evaluate.model_variant == "fp32"
+
+
 def test_evaluate_command_accepts_diagnostics() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)

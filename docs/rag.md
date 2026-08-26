@@ -179,3 +179,18 @@ O holdout mede generalização e não deve ser usado para escolher um novo thres
 ### Contrato de abstenção
 
 `EvidenceDecision` separa decisão factual de formulação linguística. Uma abstenção sempre possui `AbstentionReason`: `no_relevant_evidence`, `specific_information_missing`, `temporal_evidence_unavailable` ou `entity_mismatch`. Mensagens pt-BR curtas podem ser geradas pelo contrato, sem permitir que uma LLM complete valores, datas, vagas, contatos ou entidades ausentes.
+
+## Ablação INT8 × FP32 da v0.6.0-alpha.7
+
+O artefato INT8 preserva todas as camadas da arquitetura, mas quantiza seus pesos. A alpha.7 isola essa variável usando o FP32 do mesmo repositório e da mesma revisão:
+
+```bash
+orelhao knowledge evidence-provision --variant fp32
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/evidence-v1.json \
+  --model-variant fp32 --diagnostics --json
+```
+
+As variantes são armazenadas como `model_int8.onnx` e `model_fp32.onnx`, com manifestos separados. O JSON registra `model_variant` e `model_size_bytes`. INT8 permanece padrão e nenhum resultado altera automaticamente o gate experimental.
+
+O protocolo compara primeiro ROC AUC e distribuição dos scores, que não dependem de reutilizar o threshold INT8. Se houver ganho material, um threshold FP32 pode ser definido apenas no conjunto de calibração `evidence-v1.json` por regra declarada previamente e então congelado. O holdout não deve ser usado para escolher esse threshold. Também devem ser registrados tempo de parede, pico de memória residente e tamanho local do modelo.

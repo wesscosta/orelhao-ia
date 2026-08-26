@@ -1,3 +1,14 @@
+## 0.6.0-alpha.7
+
+- adiciona uma ablação controlada entre os artefatos ONNX INT8 e FP32 da mesma arquitetura de QA extrativa;
+- mantém INT8 como variante padrão e preserva o retriever, o corpus, os datasets e as políticas já congeladas;
+- permite provisionar as variantes lado a lado com `evidence-provision --variant`;
+- permite selecionar a variante em `evidence-evaluate --model-variant`;
+- registra variante e tamanho do artefato no relatório JSON para tornar a comparação reproduzível;
+- mantém manifestos separados e revisão imutável do modelo, preservando a operação offline após o provisionamento.
+
+Esta etapa mede se a quantização explica parte da perda de separação observada. FP32 não deve ser promovido apenas por melhorar um threshold: a comparação principal usa ROC AUC, métricas congeladas, latência, memória e tamanho do artefato.
+
 ## 0.6.0-alpha.6
 
 - adiciona `evidence-v2-holdout.json` com 40 pares pt-BR inéditos e balanceados, sem reutilizar consultas da calibração;

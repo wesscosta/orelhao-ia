@@ -15,14 +15,37 @@ from .retriever import Retriever
 
 EVIDENCE_MODEL_ID = "onnx-community/xlm-roberta-base-squad2-distilled-ONNX"
 EVIDENCE_MODEL_REVISION = "484112fae76dde6ad01b640192d559cbc2d488e1"
-EVIDENCE_MODEL_FILENAME = "model_int8.onnx"
+EVIDENCE_MODEL_VARIANTS = {
+    "int8": {
+        "remote": "onnx/model_int8.onnx",
+        "local": "model_int8.onnx",
+    },
+    "fp32": {
+        "remote": "onnx/model.onnx",
+        "local": "model_fp32.onnx",
+    },
+}
+EVIDENCE_MODEL_FILENAME = EVIDENCE_MODEL_VARIANTS["int8"]["local"]
 
 
 class EvidenceVerifier(Protocol):
     def support_score(self, query: str, passage: str) -> float: ...
 
 
-def provision_evidence_model(model_dir: Path) -> dict[str, str | int]:
+def evidence_model_filename(variant: str) -> str:
+    try:
+        return EVIDENCE_MODEL_VARIANTS[variant]["local"]
+    except KeyError as exc:
+        choices = ", ".join(EVIDENCE_MODEL_VARIANTS)
+        raise ValueError(f"variant deve ser uma de: {choices}") from exc
+
+
+def provision_evidence_model(
+    model_dir: Path,
+    *,
+    variant: str = "int8",
+) -> dict[str, str | int]:
+    model_filename = evidence_model_filename(variant)
     try:
         from huggingface_hub import hf_hub_download
     except ImportError as exc:  # pragma: no cover - depende do extra opcional
@@ -32,7 +55,7 @@ def provision_evidence_model(model_dir: Path) -> dict[str, str | int]:
 
     model_dir.mkdir(parents=True, exist_ok=True)
     files = {
-        EVIDENCE_MODEL_FILENAME: "onnx/model_int8.onnx",
+        model_filename: EVIDENCE_MODEL_VARIANTS[variant]["remote"],
         "tokenizer.json": "tokenizer.json",
     }
     for local_name, remote_name in files.items():
@@ -46,13 +69,20 @@ def provision_evidence_model(model_dir: Path) -> dict[str, str | int]:
     manifest: dict[str, str | int] = {
         "model_id": EVIDENCE_MODEL_ID,
         "revision": EVIDENCE_MODEL_REVISION,
-        "model_file": EVIDENCE_MODEL_FILENAME,
-        "model_sha256": _sha256(model_dir / EVIDENCE_MODEL_FILENAME),
+        "variant": variant,
+        "model_file": model_filename,
+        "model_size_bytes": (model_dir / model_filename).stat().st_size,
+        "model_sha256": _sha256(model_dir / model_filename),
     }
-    (model_dir / "manifest.json").write_text(
+    (model_dir / f"manifest-{variant}.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    if variant == "int8":
+        (model_dir / "manifest.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     return manifest
 
 
@@ -63,6 +93,7 @@ class OnnxExtractiveQaEvidenceVerifier:
         self,
         model_dir: Path,
         *,
+        variant: str = "int8",
         max_length: int = 384,
         max_answer_tokens: int = 32,
     ) -> None:
@@ -76,12 +107,12 @@ class OnnxExtractiveQaEvidenceVerifier:
                 "Dependências de evidência ausentes. Instale: pip install -e '.[evidence]'"
             ) from exc
 
-        model_path = model_dir / EVIDENCE_MODEL_FILENAME
+        model_path = model_dir / evidence_model_filename(variant)
         tokenizer_path = model_dir / "tokenizer.json"
         if not model_path.exists() or not tokenizer_path.exists():
             raise RuntimeError(
                 "Modelo de evidência local inexistente. Execute: "
-                "orelhao knowledge evidence-provision"
+                f"orelhao knowledge evidence-provision --variant {variant}"
             )
 
         self._tokenizer = Tokenizer.from_file(str(tokenizer_path))
@@ -93,6 +124,8 @@ class OnnxExtractiveQaEvidenceVerifier:
         self._input_names = {item.name for item in self._session.get_inputs()}
         self._output_names = [item.name for item in self._session.get_outputs()]
         self._max_answer_tokens = max_answer_tokens
+        self.variant = variant
+        self.model_path = model_path
 
     def support_score(self, query: str, passage: str) -> float:
         if not query.strip() or not passage.strip():

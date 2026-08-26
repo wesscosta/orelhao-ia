@@ -9,8 +9,10 @@ from orelhao.runtime_paths import resolve_project_path
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, evaluate_retriever_detailed, load_evaluation_cases
 from .evidence import (
+    EVIDENCE_MODEL_VARIANTS,
     EvidenceFilteredRetriever,
     OnnxExtractiveQaEvidenceVerifier,
+    evidence_model_filename,
     provision_evidence_model,
 )
 from .evidence_evaluation import (
@@ -57,6 +59,12 @@ def add_knowledge_parser(
         "evidence-provision",
         help="baixa uma vez o modelo experimental de verificação de evidência",
     )
+    evidence_provision.add_argument(
+        "--variant",
+        choices=tuple(EVIDENCE_MODEL_VARIANTS),
+        default="int8",
+        help="precisão do artefato local (padrão: int8)",
+    )
     evidence_provision.set_defaults(handler=_evidence_provision)
 
     evidence_evaluate = actions.add_parser(
@@ -69,6 +77,12 @@ def add_knowledge_parser(
         type=Path,
         default=resolve_project_path("knowledge/evaluation/evidence-v1.json"),
         help="dataset JSON de answerability (padrão: evidence-v1.json)",
+    )
+    evidence_evaluate.add_argument(
+        "--model-variant",
+        choices=tuple(EVIDENCE_MODEL_VARIANTS),
+        default="int8",
+        help="variante do mesmo modelo ONNX (padrão: int8)",
     )
     threshold_group = evidence_evaluate.add_mutually_exclusive_group()
     threshold_group.add_argument("--threshold", type=float)
@@ -161,13 +175,13 @@ def _semantic_index(args: argparse.Namespace) -> None:
 
 
 def _evidence_provision(args: argparse.Namespace) -> None:
-    del args
     model_dir = resolve_project_path("models/evidence/xlm-roberta-base-squad2-distilled")
     started = time.perf_counter()
-    manifest = provision_evidence_model(model_dir)
+    manifest = provision_evidence_model(model_dir, variant=args.variant)
     elapsed = time.perf_counter() - started
     print(
         f"Modelo de evidência provisionado: {manifest['model_id']}@{manifest['revision']} | "
+        f"variante={manifest['variant']} | "
         f"tempo={elapsed:.2f}s"
     )
     print(f"Modelo: {model_dir}")
@@ -178,7 +192,10 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
 
     paths = default_knowledge_paths()
     cases = load_evidence_evaluation_cases(args.dataset)
-    verifier = OnnxExtractiveQaEvidenceVerifier(args.model_dir)
+    verifier = OnnxExtractiveQaEvidenceVerifier(
+        args.model_dir,
+        variant=args.model_variant,
+    )
     policy = args.threshold_policy or "initial"
     threshold = (
         args.threshold
@@ -196,6 +213,9 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     payload["threshold_policy"] = None if args.threshold is not None else policy
     payload["dataset"] = str(args.dataset)
     payload["model_dir"] = str(args.model_dir)
+    payload["model_variant"] = args.model_variant
+    model_path = args.model_dir / evidence_model_filename(args.model_variant)
+    payload["model_size_bytes"] = model_path.stat().st_size
     if args.diagnostics:
         payload["results"] = [result.as_dict() for result in report.results]
     payload["category_metrics"] = {

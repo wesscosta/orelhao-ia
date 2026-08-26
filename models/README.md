@@ -21,6 +21,15 @@ orelhao knowledge evidence-provision
 Ele utiliza QA extrativa multilíngue com suporte a casos sem resposta. O artefato ONNX int8
 permanece local e não é versionado no repositório.
 
+Para a ablação de precisão da alpha.7, o artefato FP32 da mesma revisão pode coexistir com o INT8:
+
+```bash
+orelhao knowledge evidence-provision --variant fp32
+orelhao knowledge evidence-evaluate --model-variant fp32 --json
+```
+
+Os arquivos locais são `model_int8.onnx` e `model_fp32.onnx`. INT8 continua sendo o padrão; nenhum peso deve ser adicionado ao Git.
+
 Compare verificadores locais pelo benchmark separado, sem promover automaticamente o modelo:
 
 ```bash

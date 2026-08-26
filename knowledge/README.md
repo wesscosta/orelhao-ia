@@ -6,6 +6,8 @@
 - `evaluation/evidence-v1.json`: benchmark pt-BR separado de answerability por pergunta/chunk, executado com `orelhao knowledge evidence-evaluate`.
 - `evaluation/evidence-v2-holdout.json`: conjunto independente e categorizado para validar generalização das políticas congeladas da alpha.6.
 
+A alpha.7 reutiliza esses mesmos datasets para comparar INT8 e FP32 da mesma arquitetura. Não crie casos específicos para favorecer uma variante e não calibre thresholds no holdout.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.
