@@ -8,6 +8,7 @@ from orelhao.runtime_paths import resolve_project_path
 
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, load_evaluation_cases
+from .fusion import RRF_RANK_CONSTANT, ReciprocalRankFusionRetriever
 from .index import build_index
 from .paths import default_knowledge_paths
 from .retriever import Retriever
@@ -60,7 +61,7 @@ def add_knowledge_parser(
     evaluate.add_argument("--min-score", type=float)
     evaluate.add_argument(
         "--retriever",
-        choices=("baseline", "semantic"),
+        choices=("baseline", "semantic", "fusion"),
         default="baseline",
         help="mecanismo medido no mesmo dataset (padrão: baseline)",
     )
@@ -132,14 +133,25 @@ def _evaluate(args: argparse.Namespace) -> None:
     paths = default_knowledge_paths()
     cases = load_evaluation_cases(args.dataset)
     retriever: Retriever
-    if args.retriever == "semantic":
+    if args.retriever in {"semantic", "fusion"}:
         min_score = 0.0 if args.min_score is None else args.min_score
+        if args.retriever == "fusion" and args.min_score is None:
+            min_score = 0.852
         model_dir = resolve_project_path("models/embeddings/multilingual-e5-small")
-        retriever = SemanticRetriever(
+        semantic_retriever = SemanticRetriever(
             paths.index,
             OnnxE5Vectorizer(model_dir),
             min_score=min_score,
         )
+        if args.retriever == "fusion":
+            retriever = ReciprocalRankFusionRetriever(
+                [
+                    PersistentVectorRetriever(paths.index, min_score=0.40),
+                    semantic_retriever,
+                ]
+            )
+        else:
+            retriever = semantic_retriever
     else:
         min_score = 0.40 if args.min_score is None else args.min_score
         retriever = PersistentVectorRetriever(paths.index, min_score=min_score)
@@ -148,6 +160,10 @@ def _evaluate(args: argparse.Namespace) -> None:
     if args.as_json:
         payload["retriever"] = args.retriever
         payload["min_score"] = min_score
+        if args.retriever == "fusion":
+            payload["baseline_min_score"] = 0.40
+            payload["semantic_min_score"] = min_score
+            payload["rrf_rank_constant"] = RRF_RANK_CONSTANT
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     print(f"Retriever: {args.retriever} | threshold={min_score:.3f}")

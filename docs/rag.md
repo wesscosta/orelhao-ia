@@ -62,7 +62,7 @@ A latência depende do hardware e deve ser comparada no mesmo ambiente. As métr
 
 Essas limitações formam a baseline; não devem ser corrigidas com exceções específicas para perguntas do benchmark.
 
-## Experimento semantic-only da v0.6
+## Experimento semantic-only da v0.6.0-alpha.1
 
 A v0.6.0-alpha.1 introduz um retriever semântico local isolado e mantém o baseline disponível para comparação. O modelo `intfloat/multilingual-e5-small`, na revisão ONNX fixada pelo código, é provisionado uma única vez:
 
@@ -75,6 +75,23 @@ orelhao knowledge evaluate --retriever semantic --json
 
 O runtime de indexação e busca carrega somente arquivos locais. `semantic-vectors.npy` e `semantic-manifest.json` são reconstruíveis e vinculados ao hash dos mesmos chunks usados pela baseline.
 
-Nesta primeira medição, `min_score=0.0` é intencional. Assim, o benchmark mede ranking semantic-only sem introduzir simultaneamente calibração de threshold; a abstenção esperada será medida e registrada, não ocultada. Ainda não há resultado A/B validado nem promoção do mecanismo.
+Resultados no dataset congelado da v0.5:
 
-Fusão lexical + semântica, novos thresholds e confidence gate pertencem a incrementos posteriores e só devem ser promovidos mediante ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.
+| Configuração | Hit@1 | Hit@4 | MRR | Abstenção |
+| --- | ---: | ---: | ---: | ---: |
+| Semantic-only, `0.0` | 0.867 | 0.900 | 0.878 | 0.000 |
+| Semantic-only, `0.852` | 0.833 | 0.833 | 0.833 | 0.600 |
+
+O candidato `0.852` foi obtido por varredura sistemática e deve ser tratado como provisório, pois calibração e avaliação utilizam o mesmo dataset. A latência média ficou em aproximadamente `33–36 ms`, o pico de memória em cerca de `772 MiB` e o modelo local em `241 MiB`. O mecanismo não foi promovido como padrão.
+
+## Experimento de fusão da v0.6.0-alpha.2
+
+A alpha.2 combina as listas já filtradas da baseline (`0.40`) e do semântico (`0.852`) por Reciprocal Rank Fusion, com constante `60`. O método usa somente posições e não presume equivalência entre scores.
+
+```bash
+orelhao knowledge evaluate --retriever fusion --json
+```
+
+Não há pesos treinados, regras específicas do benchmark ou confidence gate. A fusão permanece experimental até comparação A/B no mesmo corpus, índice e dataset.
+
+Confidence gate e promoção do novo retrieval pertencem a incrementos posteriores e exigem ganho A/B sem regressão relevante de ranking, abstenção, latência, memória ou operação offline.

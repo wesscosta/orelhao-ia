@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.1 em desenvolvimento
+## Estado atual — v0.6.0-alpha.2 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval com dataset versionado em português brasileiro e benchmark reproduzível. A v0.6.0-alpha.1 inicia, sem promover o mecanismo, o experimento `semantic-only` local.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avalia fusão lexical + semântica por ranking, ainda sem promover o mecanismo.
 
 Pipeline de voz já validado:
 
@@ -117,10 +117,10 @@ O encerramento normal de uma fala deve ocorrer por `fim=silence`. `max_duration`
 pytest
 ```
 
-Estado validado da v0.6.0-alpha.1 sem o modelo opcional:
+Estado validado antes do benchmark da v0.6.0-alpha.2:
 
 ```text
-86 passed, 1 skipped
+94 passed, 1 skipped
 ```
 
 ## Princípios de implantação
@@ -180,13 +180,29 @@ orelhao knowledge semantic-index
 orelhao knowledge evaluate --retriever semantic --json
 ```
 
-O threshold semântico padrão desta primeira medição é `0.0`: ele mede ranking sem calibrar abstenção. O resultado ainda não é uma promoção do retriever e deve ser comparado com a baseline v0.5 no mesmo dataset e hardware.
+Resultados semantic-only no mesmo dataset:
+
+- sem threshold: Hit@1 `0.867`, Hit@4 `0.900`, MRR `0.878` e abstenção `0.000`;
+- candidato `min_score=0.852`: Hit@1 `0.833`, Hit@4 `0.833`, MRR `0.833` e abstenção `0.600`;
+- latência média aproximada: `33–36 ms`;
+- pico de memória observado: aproximadamente `772 MiB`;
+- modelo local: `241 MiB`.
+
+O candidato melhorou ranking e preservou a abstenção da baseline, mas não foi promovido devido ao custo operacional e ao risco de calibração sobre o mesmo dataset.
+
+Para medir a fusão RRF da alpha.2:
+
+```bash
+orelhao knowledge evaluate --retriever fusion --json
+```
+
+A fusão utiliza os gates `0.40` da baseline e `0.852` do semântico e combina apenas posições. O resultado permanece pendente de benchmark A/B.
 
 Fluxo futuro preservado:
 
 `pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
 
-A implementação deve preservar o funcionamento offline-first. Fusão, thresholds e confidence gate serão avaliados separadamente após a comparação inicial.
+A implementação deve preservar o funcionamento offline-first. Confidence gate e promoção do mecanismo permanecem etapas posteriores.
 
 ## Escopo futuro
 

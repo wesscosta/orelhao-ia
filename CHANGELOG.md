@@ -1,14 +1,23 @@
-## 0.6.0-alpha.1 — em desenvolvimento
+## 0.6.0-alpha.2 — em desenvolvimento
+
+- adiciona `ReciprocalRankFusionRetriever` para combinar rankings sem misturar scores de escalas diferentes;
+- preserva os gates independentes da baseline (`0.40`) e do semântico experimental (`0.852`);
+- adiciona `orelhao knowledge evaluate --retriever fusion` no mesmo Evaluation Harness;
+- utiliza RRF com constante `60`, sem pesos treinados, regras por pergunta ou confidence gate;
+- adiciona testes de consenso, candidatos complementares, abstenção e parâmetros inválidos;
+- mantém a fusão como experimento até a comparação A/B.
+
+## 0.6.0-alpha.1
 
 - adiciona `SemanticVectorizer` como contrato independente do retriever baseline;
 - implementa embeddings locais com `multilingual-e5-small` quantizado em ONNX e revisão fixada;
 - separa os artefatos semânticos do índice lexical/hash e valida sua coerência por hashes;
 - adiciona provisionamento explícito do modelo e reconstrução do índice semântico;
 - permite medir `semantic-only` com `orelhao knowledge evaluate --retriever semantic` no dataset congelado da v0.5;
-- mantém threshold semântico em `0.0` na primeira medição, sem fusão, tuning ou confidence gate;
+- mede ranking semantic-only inicialmente com threshold `0.0` e calibra sistematicamente um candidato semântico, sem fusão ou confidence gate;
 - não promove o retriever experimental antes de uma comparação A/B completa.
 
-As métricas semantic-only permanecem pendentes até que o modelo opcional seja provisionado e executado no ambiente de benchmark.
+No mesmo dataset da v0.5, semantic-only sem threshold obteve Hit@1 `0.867`, Hit@4 `0.900`, MRR `0.878` e abstenção `0.000`. O candidato `min_score=0.852` obteve Hit@1 `0.833`, Hit@4 `0.833`, MRR `0.833` e abstenção `0.600`, com latência média aproximada de `33–36 ms`. O processo semântico atingiu aproximadamente `772 MiB` de RAM e os artefatos locais do modelo ocuparam `241 MiB`; portanto, o mecanismo não foi promovido como padrão.
 
 ## 0.5.0
 

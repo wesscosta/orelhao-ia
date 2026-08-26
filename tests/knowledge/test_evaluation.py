@@ -117,3 +117,11 @@ def test_evaluate_command_accepts_semantic_retriever() -> None:
     add_knowledge_parser(subparsers)
     args = parser.parse_args(["knowledge", "evaluate", "--retriever", "semantic"])
     assert args.retriever == "semantic"
+
+
+def test_evaluate_command_accepts_fusion_retriever() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+    args = parser.parse_args(["knowledge", "evaluate", "--retriever", "fusion"])
+    assert args.retriever == "fusion"
