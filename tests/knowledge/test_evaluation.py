@@ -103,9 +103,14 @@ def test_detailed_evaluation_exposes_sources_scores_and_outcome(tmp_path: Path) 
     relevant, abstention = report.results
     assert relevant.sources[0] == "local.md"
     assert relevant.scores[0] >= 0.0
+    assert relevant.matches[0].source == "local.md"
+    assert relevant.matches[0].position == 0
+    assert "Rua Central" in relevant.matches[0].text
+    assert relevant.as_dict()["matches"] == [relevant.matches[0].as_dict()]
     assert relevant.relevant_rank == 1
     assert relevant.correct
     assert abstention.sources == ()
+    assert abstention.matches == ()
     assert abstention.expected_abstention
     assert abstention.correct
 

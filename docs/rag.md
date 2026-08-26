@@ -114,4 +114,4 @@ orelhao knowledge evaluate --retriever semantic --min-score 0.852 --diagnostics 
 orelhao knowledge evaluate --retriever fusion --diagnostics --json
 ```
 
-Cada item informa fontes e scores retornados, posição da fonte esperada e se o comportamento foi correto. Dataset, corpus, thresholds e RRF permanecem congelados. A política de gate será escolhida somente após a comparação dessas divergências.
+Cada item informa fontes e scores retornados, posição da fonte esperada e se o comportamento foi correto. O campo `matches` inclui identificador, documento, posição, texto e metadados de cada chunk recuperado. Dataset, corpus, thresholds e RRF permanecem congelados. A política de gate será escolhida somente após a comparação dessas divergências.

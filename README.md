@@ -206,7 +206,7 @@ orelhao knowledge evaluate --retriever semantic --min-score 0.852 --diagnostics 
 orelhao knowledge evaluate --retriever fusion --diagnostics --json > /tmp/fusion-details.json
 ```
 
-A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Esse diagnóstico não modifica ranking ou abstenção.
+A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Cada resultado também inclui `matches` com identificador, documento, posição, texto e metadados do chunk. Esse diagnóstico não modifica ranking ou abstenção.
 
 Fluxo futuro preservado:
 

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean
 
+from .models import SearchResult
 from .retriever import Retriever
 
 
@@ -37,12 +38,48 @@ class EvaluationMetrics:
 
 
 @dataclass(frozen=True, slots=True)
+class EvaluationMatch:
+    chunk_id: str
+    document_id: str
+    source: str
+    position: int
+    score: float
+    text: str
+    metadata: dict[str, str]
+
+    @classmethod
+    def from_search_result(cls, result: SearchResult) -> EvaluationMatch:
+        chunk = result.chunk
+        return cls(
+            chunk_id=chunk.id,
+            document_id=chunk.document_id,
+            source=chunk.source,
+            position=chunk.position,
+            score=result.score,
+            text=chunk.text,
+            metadata=dict(chunk.metadata),
+        )
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "chunk_id": self.chunk_id,
+            "document_id": self.document_id,
+            "source": self.source,
+            "position": self.position,
+            "score": self.score,
+            "text": self.text,
+            "metadata": self.metadata,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class EvaluationCaseResult:
     query: str
     expected_sources: tuple[str, ...]
     expected_abstention: bool
     sources: tuple[str, ...]
     scores: tuple[float, ...]
+    matches: tuple[EvaluationMatch, ...]
     relevant_rank: int | None
     correct: bool
 
@@ -53,6 +90,7 @@ class EvaluationCaseResult:
             "expected_abstention": self.expected_abstention,
             "sources": list(self.sources),
             "scores": list(self.scores),
+            "matches": [match.as_dict() for match in self.matches],
             "relevant_rank": self.relevant_rank,
             "correct": self.correct,
         }
@@ -118,6 +156,7 @@ def evaluate_retriever_detailed(
         latencies.append((time.perf_counter() - started) * 1000.0)
         sources = [result.chunk.source for result in results]
         scores = [result.score for result in results]
+        matches = tuple(EvaluationMatch.from_search_result(result) for result in results)
         if case.abstain:
             correct = not results
             abstention_checks.append(float(correct))
@@ -128,6 +167,7 @@ def evaluate_retriever_detailed(
                     expected_abstention=True,
                     sources=tuple(sources),
                     scores=tuple(scores),
+                    matches=matches,
                     relevant_rank=None,
                     correct=correct,
                 )
@@ -146,6 +186,7 @@ def evaluate_retriever_detailed(
                 expected_abstention=False,
                 sources=tuple(sources),
                 scores=tuple(scores),
+                matches=matches,
                 relevant_rank=rank,
                 correct=rank is not None,
             )

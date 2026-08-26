@@ -2,6 +2,7 @@
 
 - adiciona `orelhao knowledge evaluate --diagnostics` sem alterar o comportamento dos retrievers;
 - expõe, por caso, fontes retornadas, scores, posição da fonte esperada e resultado correto/incorreto;
+- inclui no diagnóstico o identificador, documento, posição, texto e metadados de cada chunk recuperado;
 - mantém dataset, corpus, thresholds e RRF congelados para permitir a comparação causal entre baseline, semantic-only e fusão;
 - adiciona testes do relatório detalhado e da nova opção da CLI.
 
