@@ -224,6 +224,24 @@ def test_evidence_commands_accept_mdeberta_candidate() -> None:
     assert evaluate.model_dir is None
 
 
+def test_evidence_commands_accept_nli_grounding_candidate() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    provision = parser.parse_args(
+        ["knowledge", "evidence-provision", "--model", "nli-minilm", "--variant", "fp32"]
+    )
+    evaluate = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--model", "nli-minilm", "--model-variant", "fp32"]
+    )
+
+    assert provision.model == "nli-minilm"
+    assert provision.variant == "fp32"
+    assert evaluate.model == "nli-minilm"
+    assert evaluate.model_variant == "fp32"
+
+
 def test_evaluate_command_accepts_diagnostics() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)

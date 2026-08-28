@@ -10,6 +10,10 @@ A alpha.7 reutiliza esses mesmos datasets para comparar INT8 e FP32 da mesma arq
 
 A alpha.8 reutiliza os datasets sem alterações para comparar XLM-RoBERTa INT8 com mDeBERTa-v3 INT8. Apenas uma arquitetura muda; corpus e rótulos permanecem congelados.
 
+- `evaluation/grounding-v1.json`: calibração separada da alpha.9 para NLI. Cada caso contém uma afirmação e um chunk rotulados como suportado ou não suportado. Não substitui nem modifica os benchmarks anteriores.
+
+O holdout de evidência não é aplicável ao novo benchmark de grounding. Um conjunto confirmatório próprio só deve ser criado depois que modelo e threshold NLI forem congelados em `grounding-v1.json`.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.

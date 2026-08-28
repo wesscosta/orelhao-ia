@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.8 em desenvolvimento
+## Estado atual — v0.6.0-alpha.9 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 compara uma única arquitetura multilíngue diferente em INT8.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mede grounding factual por NLI em benchmark próprio, sem alterar o caminho crítico.
 
 Pipeline de voz já validado:
 
@@ -284,6 +284,24 @@ orelhao knowledge evidence-evaluate \
 ```
 
 O candidato usa arquitetura multilíngue diferente e foi treinado com casos sem resposta. O primeiro objetivo é comparar ROC AUC, distribuição dos scores, categorias, latência, memória e tamanho contra XLM-RoBERTa INT8. Thresholds serão calibrados somente em `evidence-v1.json` e congelados antes do holdout.
+
+Resultado: o mDeBERTa-v3 INT8 obteve ROC AUC `0.875`, acurácia balanceada `0.800`, especificidade `0.800`, latência média `263.21 ms` e artefato de `302.3 MiB`. O XLM-RoBERTa INT8 obteve ROC AUC `0.943`, acurácia balanceada `0.825`, especificidade `1.000`, latência média `125.23 ms` e `265.7 MiB` na mesma rodada. O candidato foi rejeitado antes do holdout.
+
+## Grounding factual por NLI da v0.6.0-alpha.9
+
+A alpha.9 separa uma nova tarefa: verificar se uma passagem implica uma afirmação factual. O candidato inicial é `multilingual-MiniLMv2-L6-mnli-xnli`, treinado em MNLI/XNLI e executado localmente em ONNX. A passagem é a premissa; a afirmação é a hipótese; o score é a probabilidade da classe `entailment`.
+
+```bash
+orelhao knowledge evidence-provision --model nli-minilm --variant fp32
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/grounding-v1.json \
+  --model nli-minilm \
+  --model-variant fp32 \
+  --threshold 0.5 \
+  --diagnostics --json
+```
+
+`grounding-v1.json` possui 20 afirmações suportadas e 20 não suportadas. Ele é somente de desenvolvimento e calibração. `evidence-v2-holdout.json` não será usado porque mede outra tarefa. Nenhum gate será integrado antes de congelar threshold, confirmar em holdout próprio e medir custo.
 
 Fluxo futuro preservado:
 

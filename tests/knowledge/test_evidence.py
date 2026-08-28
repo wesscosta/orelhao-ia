@@ -10,6 +10,7 @@ import pytest
 
 from orelhao.services.knowledge.evidence import (
     EvidenceFilteredRetriever,
+    OnnxNliEvidenceVerifier,
     evidence_model_directory,
     evidence_model_filename,
     provision_evidence_model,
@@ -88,6 +89,73 @@ def test_mdeberta_candidate_supports_only_int8() -> None:
     assert evidence_model_filename("int8", model="mdeberta-v3") == "model_int8.onnx"
     with pytest.raises(ValueError, match="variant"):
         evidence_model_filename("fp32", model="mdeberta-v3")
+
+
+def test_nli_candidate_supports_only_fp32() -> None:
+    assert evidence_model_directory("nli-minilm") == "multilingual-minilm-l6-nli"
+    assert evidence_model_filename("fp32", model="nli-minilm") == "model_fp32.onnx"
+    with pytest.raises(ValueError, match="variant"):
+        evidence_model_filename("int8", model="nli-minilm")
+
+
+def test_nli_verifier_rejects_qa_model(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="task nli"):
+        OnnxNliEvidenceVerifier(tmp_path, model="xlm-roberta")
+
+
+def test_nli_verifier_uses_passage_as_premise_and_entailment_logit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "model_fp32.onnx").write_bytes(b"onnx")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    encoded_pairs: list[tuple[str, str]] = []
+
+    class FakeEncoding:
+        ids = (0, 1)
+        attention_mask = (1, 1)
+        type_ids = (0, 0)
+
+    class FakeTokenizer:
+        @classmethod
+        def from_file(cls, _: str) -> FakeTokenizer:
+            return cls()
+
+        def enable_truncation(self, **_: object) -> None:
+            return None
+
+        def encode(self, premise: str, hypothesis: str) -> FakeEncoding:
+            encoded_pairs.append((premise, hypothesis))
+            return FakeEncoding()
+
+    class FakeSession:
+        def __init__(self, *_: object, **__: object) -> None:
+            return None
+
+        def get_inputs(self) -> list[SimpleNamespace]:
+            return [SimpleNamespace(name="input_ids"), SimpleNamespace(name="attention_mask")]
+
+        def run(self, *_: object) -> list[object]:
+            return [[[3.0, 1.0, 0.0]]]
+
+    monkeypatch.setitem(
+        sys.modules,
+        "onnxruntime",
+        SimpleNamespace(InferenceSession=FakeSession),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "tokenizers",
+        SimpleNamespace(Tokenizer=FakeTokenizer),
+    )
+
+    verifier = OnnxNliEvidenceVerifier(model_dir)
+    score = verifier.support_score("afirmação", "passagem")
+
+    assert encoded_pairs == [("passagem", "afirmação")]
+    assert score == pytest.approx(0.8438, abs=0.0001)
 
 
 def test_provision_evidence_model_keeps_variants_side_by_side(

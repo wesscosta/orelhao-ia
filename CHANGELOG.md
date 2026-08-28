@@ -1,3 +1,13 @@
+## 0.6.0-alpha.9
+
+- registra a rejeição do mDeBERTa-v3 INT8 na calibração da alpha.8, sem executar o holdout;
+- adiciona `nli-minilm`, um verificador ONNX multilíngue de entailment com revisão imutável;
+- adiciona `grounding-v1.json`, separado dos benchmarks de retrieval e answerability, com 40 afirmações pt-BR balanceadas;
+- usa a passagem como premissa, a afirmação como hipótese e a probabilidade de `entailment` como suporte;
+- preserva XLM-RoBERTa INT8 como baseline de answerability e não altera retrieval ou caminho crítico.
+
+Esta etapa é apenas de calibração. O holdout de answerability não deve ser usado para NLI. Promoção exige threshold congelado, holdout próprio e medição de latência, memória e armazenamento.
+
 ## 0.6.0-alpha.8
 
 - encerra a ablação da alpha.7 sem promover FP32: no holdout, a ROC AUC ficou em `0.907` contra `0.905` do INT8, com custo muito superior de memória, latência e armazenamento;

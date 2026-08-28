@@ -23,6 +23,7 @@ class EvidenceModelSpec(TypedDict):
     model_id: str
     revision: str
     directory: str
+    task: str
     variants: dict[str, EvidenceVariantSpec]
 
 
@@ -32,6 +33,7 @@ EVIDENCE_MODELS: dict[str, EvidenceModelSpec] = {
         "model_id": "onnx-community/xlm-roberta-base-squad2-distilled-ONNX",
         "revision": "484112fae76dde6ad01b640192d559cbc2d488e1",
         "directory": "xlm-roberta-base-squad2-distilled",
+        "task": "extractive-qa",
         "variants": {
             "int8": {
                 "remote": "onnx/model_int8.onnx",
@@ -47,10 +49,23 @@ EVIDENCE_MODELS: dict[str, EvidenceModelSpec] = {
         "model_id": "dewdev/mdeberta-v3-base-squad2-onnx",
         "revision": "0eb5eecea371d8b499379ca7f5488693c15e1d35",
         "directory": "mdeberta-v3-base-squad2",
+        "task": "extractive-qa",
         "variants": {
             "int8": {
                 "remote": "onnx/model_int8.onnx",
                 "local": "model_int8.onnx",
+            },
+        },
+    },
+    "nli-minilm": {
+        "model_id": "MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli",
+        "revision": "0a71e92a985b6e1ad1828cf67ce9c459639c1dca",
+        "directory": "multilingual-minilm-l6-nli",
+        "task": "nli",
+        "variants": {
+            "fp32": {
+                "remote": "onnx/model.onnx",
+                "local": "model_fp32.onnx",
             },
         },
     },
@@ -226,6 +241,69 @@ class OnnxExtractiveQaEvidenceVerifier:
         return _sigmoid(best_span_score - null_score)
 
 
+class OnnxNliEvidenceVerifier:
+    """Mede se a passagem implica uma afirmação usando NLI multilíngue."""
+
+    def __init__(
+        self,
+        model_dir: Path,
+        *,
+        model: str = "nli-minilm",
+        variant: str = "fp32",
+        max_length: int = 512,
+    ) -> None:
+        if max_length <= 0:
+            raise ValueError("max_length deve ser maior que zero")
+        if model not in EVIDENCE_MODELS or EVIDENCE_MODELS[model]["task"] != "nli":
+            raise ValueError("modelo deve declarar task nli")
+        try:
+            import onnxruntime as ort
+            from tokenizers import Tokenizer
+        except ImportError as exc:  # pragma: no cover - depende do extra opcional
+            raise RuntimeError(
+                "Dependências de evidência ausentes. Instale: pip install -e '.[evidence]'"
+            ) from exc
+
+        model_path = model_dir / evidence_model_filename(variant, model=model)
+        tokenizer_path = model_dir / "tokenizer.json"
+        if not model_path.exists() or not tokenizer_path.exists():
+            raise RuntimeError(
+                "Modelo NLI local inexistente. Execute: "
+                f"orelhao knowledge evidence-provision --model {model} --variant {variant}"
+            )
+
+        self._tokenizer = Tokenizer.from_file(str(tokenizer_path))
+        self._tokenizer.enable_truncation(max_length=max_length, strategy="only_first")
+        self._session = ort.InferenceSession(
+            str(model_path),
+            providers=["CPUExecutionProvider"],
+        )
+        self._input_names = {item.name for item in self._session.get_inputs()}
+        self.variant = variant
+        self.model = model
+        self.model_path = model_path
+
+    def support_score(self, query: str, passage: str) -> float:
+        """Interpreta query como afirmação e passage como premissa."""
+        if not query.strip() or not passage.strip():
+            return 0.0
+        encoding = self._tokenizer.encode(passage, query)
+        feeds: dict[str, np.ndarray] = {
+            "input_ids": np.asarray([encoding.ids], dtype=np.int64),
+            "attention_mask": np.asarray([encoding.attention_mask], dtype=np.int64),
+        }
+        if "token_type_ids" in self._input_names:
+            feeds["token_type_ids"] = np.asarray([encoding.type_ids], dtype=np.int64)
+        raw = self._session.run(None, feeds)
+        if not raw:
+            raise RuntimeError("Modelo NLI não produziu logits")
+        logits = np.asarray(raw[0], dtype=np.float32)
+        if logits.shape != (1, 3):
+            raise RuntimeError("Modelo NLI deve produzir três logits")
+        probabilities = _softmax(logits[0])
+        return float(probabilities[0])
+
+
 class EvidenceFilteredRetriever:
     def __init__(
         self,
@@ -265,6 +343,12 @@ def _sigmoid(value: float) -> float:
         return 1.0 / (1.0 + math.exp(-value))
     exponential = math.exp(value)
     return exponential / (1.0 + exponential)
+
+
+def _softmax(values: np.ndarray) -> np.ndarray:
+    shifted = values - np.max(values)
+    exponential = np.exp(shifted)
+    return np.asarray(exponential / np.sum(exponential), dtype=np.float32)
 
 
 def _sha256(path: Path) -> str:

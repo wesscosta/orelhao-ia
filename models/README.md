@@ -37,6 +37,19 @@ orelhao knowledge evidence-provision --model mdeberta-v3
 orelhao knowledge evidence-evaluate --model mdeberta-v3 --json
 ```
 
+O candidato NLI da alpha.9 verifica afirmações contra passagens e também fica isolado:
+
+```bash
+orelhao knowledge evidence-provision --model nli-minilm --variant fp32
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/grounding-v1.json \
+  --model nli-minilm \
+  --model-variant fp32 \
+  --diagnostics --json
+```
+
+O artefato ONNX não deve ser commitado. O manifesto registra revisão, tamanho e checksum.
+
 O candidato mDeBERTa-v3 usa somente INT8 nesta etapa. XLM-RoBERTa INT8 permanece padrão até uma comparação completa favorável.
 
 Compare verificadores locais pelo benchmark separado, sem promover automaticamente o modelo:

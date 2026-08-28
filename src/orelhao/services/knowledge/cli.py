@@ -12,7 +12,9 @@ from .evidence import (
     EVIDENCE_DEFAULT_MODEL,
     EVIDENCE_MODELS,
     EvidenceFilteredRetriever,
+    EvidenceVerifier,
     OnnxExtractiveQaEvidenceVerifier,
+    OnnxNliEvidenceVerifier,
     evidence_model_directory,
     evidence_model_filename,
     provision_evidence_model,
@@ -211,11 +213,20 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     model_dir = args.model_dir or resolve_project_path(
         f"models/evidence/{evidence_model_directory(args.model)}"
     )
-    verifier = OnnxExtractiveQaEvidenceVerifier(
-        model_dir,
-        model=args.model,
-        variant=args.model_variant,
-    )
+    model_spec = EVIDENCE_MODELS[args.model]
+    verifier: EvidenceVerifier
+    if model_spec["task"] == "nli":
+        verifier = OnnxNliEvidenceVerifier(
+            model_dir,
+            model=args.model,
+            variant=args.model_variant,
+        )
+    else:
+        verifier = OnnxExtractiveQaEvidenceVerifier(
+            model_dir,
+            model=args.model,
+            variant=args.model_variant,
+        )
     policy = args.threshold_policy or "initial"
     threshold = (
         args.threshold
@@ -233,6 +244,7 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     payload["threshold_policy"] = None if args.threshold is not None else policy
     payload["dataset"] = str(args.dataset)
     payload["model"] = args.model
+    payload["task"] = model_spec["task"]
     payload["model_dir"] = str(model_dir)
     payload["model_variant"] = args.model_variant
     model_path = model_dir / evidence_model_filename(args.model_variant, model=args.model)

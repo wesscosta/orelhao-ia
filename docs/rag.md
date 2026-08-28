@@ -211,3 +211,21 @@ orelhao knowledge evidence-evaluate \
 ```
 
 Cada modelo possui diretório, revisão e manifesto próprios. `--model xlm-roberta` continua sendo o padrão. O candidato somente avança ao holdout depois de comparação no conjunto de calibração e congelamento explícito de thresholds.
+
+Na calibração, mDeBERTa-v3 INT8 obteve ROC AUC `0.875`, contra `0.943` do XLM-RoBERTa INT8, e levou `263.21 ms`, contra `125.23 ms`, na mesma rodada. Também reduziu especificidade de `1.000` para `0.800` no threshold inicial. O candidato foi rejeitado sem consultar o holdout.
+
+## Grounding factual por NLI da v0.6.0-alpha.9
+
+Answerability e grounding não são equivalentes. A alpha.9 cria um benchmark separado no qual cada entrada é uma afirmação factual e um chunk. O modelo NLI recebe o chunk como premissa e a afirmação como hipótese, retornando a probabilidade de `entailment`.
+
+```bash
+orelhao knowledge evidence-provision --model nli-minilm --variant fp32
+orelhao knowledge evidence-evaluate \
+  knowledge/evaluation/grounding-v1.json \
+  --model nli-minilm \
+  --model-variant fp32 \
+  --threshold 0.5 \
+  --diagnostics --json
+```
+
+O candidato inicial é o `multilingual-MiniLMv2-L6-mnli-xnli` ONNX, revisão imutável. O dataset de calibração contém 20 afirmações suportadas e 20 não suportadas, incluindo contradição, temporalidade, entidade e informação específica ausente. O score deve ser analisado por ROC AUC e categoria antes de selecionar threshold. O holdout de answerability permanece intocado e não valida NLI; a confirmação exigirá um holdout próprio criado somente após o congelamento do protocolo.
