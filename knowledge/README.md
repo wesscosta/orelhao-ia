@@ -14,6 +14,10 @@ A alpha.8 reutiliza os datasets sem alterações para comparar XLM-RoBERTa INT8 
 
 O holdout de evidência não é aplicável ao novo benchmark de grounding. Um conjunto confirmatório próprio só deve ser criado depois que modelo e threshold NLI forem congelados em `grounding-v1.json`.
 
+- `evaluation/grounding-v2-holdout.json`: confirmação independente da alpha.10, com 20 afirmações suportadas e 20 não suportadas. Os thresholds `nli-balanced=0.1250362694` e `nli-conservative=0.7557643056` foram congelados antes de sua execução.
+
+Não ajuste thresholds, afirmações ou categorias depois de observar resultados do holdout.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.

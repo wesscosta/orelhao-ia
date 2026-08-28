@@ -14,6 +14,8 @@ EVIDENCE_THRESHOLD_POLICIES = {
     "initial": 0.5,
     "conservative": 0.69740408,
     "balanced": 0.00016509,
+    "nli-balanced": 0.1250362694,
+    "nli-conservative": 0.7557643056,
 }
 
 
@@ -80,6 +82,13 @@ class EvidenceEvaluationMetrics:
             "roc_auc": self.roc_auc,
             "mean_latency_ms": self.mean_latency_ms,
         }
+
+    def applicable_metric(self) -> tuple[str, float]:
+        if self.answerable_cases and not self.unanswerable_cases:
+            return "recall", self.recall
+        if self.unanswerable_cases and not self.answerable_cases:
+            return "specificity", self.specificity
+        return "balanced_accuracy", self.balanced_accuracy
 
 
 @dataclass(frozen=True, slots=True)

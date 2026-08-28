@@ -50,6 +50,19 @@ orelhao knowledge evidence-evaluate \
 
 O artefato ONNX não deve ser commitado. O manifesto registra revisão, tamanho e checksum.
 
+Após calibrar somente em `grounding-v1.json`, execute o holdout próprio uma vez por política:
+
+```bash
+for policy in nli-balanced nli-conservative; do
+  orelhao knowledge evidence-evaluate \
+    knowledge/evaluation/grounding-v2-holdout.json \
+    --model nli-minilm \
+    --model-variant fp32 \
+    --threshold-policy "$policy" \
+    --diagnostics --json
+done
+```
+
 O candidato mDeBERTa-v3 usa somente INT8 nesta etapa. XLM-RoBERTa INT8 permanece padrão até uma comparação completa favorável.
 
 Compare verificadores locais pelo benchmark separado, sem promover automaticamente o modelo:

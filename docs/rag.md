@@ -229,3 +229,22 @@ orelhao knowledge evidence-evaluate \
 ```
 
 O candidato inicial é o `multilingual-MiniLMv2-L6-mnli-xnli` ONNX, revisão imutável. O dataset de calibração contém 20 afirmações suportadas e 20 não suportadas, incluindo contradição, temporalidade, entidade e informação específica ausente. O score deve ser analisado por ROC AUC e categoria antes de selecionar threshold. O holdout de answerability permanece intocado e não valida NLI; a confirmação exigirá um holdout próprio criado somente após o congelamento do protocolo.
+
+Na calibração, o candidato atingiu ROC AUC `0.973`. A política balanced foi congelada em `0.1250362694`, com recall e especificidade de `0.950`; a conservative foi congelada em `0.7557643056`, com recall `0.650` e especificidade `1.000`. A latência média foi `9.14 ms`, o pico de memória aproximadamente `1.139 MiB` e o artefato `408.3 MiB`.
+
+## Holdout próprio da v0.6.0-alpha.10
+
+`grounding-v2-holdout.json` possui 20 afirmações suportadas e 20 não suportadas sem repetir afirmações da calibração. Contradição, entidade, informação específica e temporalidade possuem cinco negativos cada. As duas políticas congeladas são executadas uma única vez:
+
+```bash
+for policy in nli-balanced nli-conservative; do
+  orelhao knowledge evidence-evaluate \
+    knowledge/evaluation/grounding-v2-holdout.json \
+    --model nli-minilm \
+    --model-variant fp32 \
+    --threshold-policy "$policy" \
+    --diagnostics --json
+done
+```
+
+Para categorias de classe única, o relatório usa recall nas positivas e especificidade nas negativas. `balanced_accuracy` permanece disponível por compatibilidade, mas não deve ser interpretada isoladamente nessas categorias. Nenhum threshold será escolhido após observar o holdout.

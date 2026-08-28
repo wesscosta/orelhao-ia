@@ -190,6 +190,22 @@ def test_evidence_evaluate_command_accepts_frozen_threshold_policy() -> None:
     assert args.threshold_policy == "conservative"
 
 
+def test_evidence_evaluate_command_accepts_frozen_nli_policies() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_knowledge_parser(subparsers)
+
+    balanced = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--threshold-policy", "nli-balanced"]
+    )
+    conservative = parser.parse_args(
+        ["knowledge", "evidence-evaluate", "--threshold-policy", "nli-conservative"]
+    )
+
+    assert balanced.threshold_policy == "nli-balanced"
+    assert conservative.threshold_policy == "nli-conservative"
+
+
 def test_evidence_commands_accept_fp32_variant() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)

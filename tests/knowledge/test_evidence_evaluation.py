@@ -105,6 +105,50 @@ def test_evidence_evaluation_measures_classifier_and_auc(tmp_path: Path) -> None
     assert len(report.results) == 2
 
 
+def test_category_metric_uses_the_metric_defined_for_its_class(tmp_path: Path) -> None:
+    index = _index(tmp_path)
+    passage = "A resposta correta é azul."
+    cases = [
+        EvidenceEvaluationCase("Afirmação suportada", "base.md:0", True, "supported"),
+        EvidenceEvaluationCase("Afirmação ausente", "base.md:0", False, "unsupported"),
+    ]
+    verifier = StaticVerifier(
+        {
+            ("Afirmação suportada", passage): 0.9,
+            ("Afirmação ausente", passage): 0.1,
+        }
+    )
+
+    report = evaluate_evidence_verifier(verifier, cases, index, threshold=0.5)
+
+    assert report.category_metrics["supported"].applicable_metric() == ("recall", 1.0)
+    assert report.category_metrics["unsupported"].applicable_metric() == (
+        "specificity",
+        1.0,
+    )
+
+
+def test_grounding_holdout_is_balanced_and_has_no_calibration_claims() -> None:
+    calibration = load_evidence_evaluation_cases(
+        Path("knowledge/evaluation/grounding-v1.json")
+    )
+    holdout = load_evidence_evaluation_cases(
+        Path("knowledge/evaluation/grounding-v2-holdout.json")
+    )
+
+    assert len(holdout) == 40
+    assert sum(case.answerable for case in holdout) == 20
+    assert {case.query for case in calibration}.isdisjoint(case.query for case in holdout)
+    assert {
+        case.category for case in holdout if not case.answerable
+    } == {
+        "unsupported_contradiction",
+        "unsupported_entity",
+        "unsupported_specific",
+        "unsupported_temporal",
+    }
+
+
 def test_evidence_evaluation_rejects_missing_chunk(tmp_path: Path) -> None:
     index = _index(tmp_path)
     cases = [EvidenceEvaluationCase("Pergunta", "ausente.md:0", True)]

@@ -1,3 +1,13 @@
+## 0.6.0-alpha.10
+
+- congela as políticas NLI `nli-balanced=0.1250362694` e `nli-conservative=0.7557643056` antes do holdout;
+- adiciona `grounding-v2-holdout.json` com 40 afirmações inéditas e balanceadas;
+- distribui os negativos igualmente entre contradição, entidade, informação específica e temporalidade;
+- informa `applicable_metric` e `applicable_score` por categoria para evitar balanced accuracy enganosa em categorias de classe única;
+- preserva modelo, corpus, `grounding-v1.json`, benchmarks de answerability, retrieval e caminho crítico.
+
+O holdout é estritamente confirmatório. As duas políticas devem ser executadas uma única vez e seus resultados não podem originar outro threshold.
+
 ## 0.6.0-alpha.9
 
 - registra a rejeição do mDeBERTa-v3 INT8 na calibração da alpha.8, sem executar o holdout;

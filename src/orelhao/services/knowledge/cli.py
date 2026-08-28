@@ -251,10 +251,14 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     payload["model_size_bytes"] = model_path.stat().st_size
     if args.diagnostics:
         payload["results"] = [result.as_dict() for result in report.results]
-    payload["category_metrics"] = {
-        category: metrics.as_dict()
-        for category, metrics in report.category_metrics.items()
-    }
+    category_metrics: dict[str, object] = {}
+    for category, category_result in report.category_metrics.items():
+        applicable_metric, applicable_score = category_result.applicable_metric()
+        category_payload: dict[str, object] = dict(category_result.as_dict())
+        category_payload["applicable_metric"] = applicable_metric
+        category_payload["applicable_score"] = applicable_score
+        category_metrics[category] = category_payload
+    payload["category_metrics"] = category_metrics
     if args.as_json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
@@ -275,10 +279,10 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     print(f"Latência média: {metrics.mean_latency_ms:.2f}ms")
     print("\nMétricas por categoria:")
     for category, category_result in report.category_metrics.items():
+        applicable_metric, applicable_score = category_result.applicable_metric()
         print(
             f"- {category}: casos={category_result.cases} | "
-            f"recall={category_result.recall:.3f} | "
-            f"especificidade={category_result.specificity:.3f}"
+            f"{applicable_metric}={applicable_score:.3f}"
         )
 
 

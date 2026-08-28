@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.9 em desenvolvimento
+## Estado atual — v0.6.0-alpha.10 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mede grounding factual por NLI em benchmark próprio, sem alterar o caminho crítico.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirma a generalização em holdout próprio, sem alterar o caminho crítico.
 
 Pipeline de voz já validado:
 
@@ -302,6 +302,26 @@ orelhao knowledge evidence-evaluate \
 ```
 
 `grounding-v1.json` possui 20 afirmações suportadas e 20 não suportadas. Ele é somente de desenvolvimento e calibração. `evidence-v2-holdout.json` não será usado porque mede outra tarefa. Nenhum gate será integrado antes de congelar threshold, confirmar em holdout próprio e medir custo.
+
+Na calibração, o NLI obteve ROC AUC `0.973`, latência média `9.14 ms`, pico de memória de aproximadamente `1.139 MiB` e artefato de `408.3 MiB`. As políticas foram congeladas como `nli-balanced=0.1250362694` e `nli-conservative=0.7557643056`.
+
+## Holdout NLI da v0.6.0-alpha.10
+
+`grounding-v2-holdout.json` contém 40 afirmações inéditas: 20 suportadas e 20 não suportadas. Os negativos são divididos igualmente entre contradição, incompatibilidade de entidade, informação específica ausente e temporalidade.
+
+```bash
+for policy in nli-balanced nli-conservative; do
+  orelhao knowledge evidence-evaluate \
+    knowledge/evaluation/grounding-v2-holdout.json \
+    --model nli-minilm \
+    --model-variant fp32 \
+    --threshold-policy "$policy" \
+    --diagnostics --json \
+    > "/tmp/orelhao-grounding-holdout-${policy}.json"
+done
+```
+
+Cada categoria agora expõe `applicable_metric` e `applicable_score`: recall para categorias positivas, especificidade para categorias negativas e acurácia balanceada somente quando a categoria contém ambas as classes. O holdout não será usado para calibrar um terceiro threshold.
 
 Fluxo futuro preservado:
 
