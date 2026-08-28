@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.11 em desenvolvimento
+## Estado atual — v0.6.0-alpha.12 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirmou a generalização em holdout próprio. A alpha.11 formaliza a decisão em três estados, ainda isolada do caminho crítico.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirmou a generalização em holdout próprio. A alpha.11 formalizou a decisão em três estados. A alpha.12 integra essa decisão à bancada administrativa em modo observação, sem bloquear respostas.
 
 Pipeline de voz já validado:
 
@@ -44,7 +44,7 @@ A aplicação permanece um **monólito modular**, com contratos entre Core, Serv
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e '.[dev,audio,stt,tts,vad,semantic,evidence]'
+pip install -e '.[dev,admin,audio,stt,tts,vad,semantic,evidence]'
 ```
 
 ## Diagnóstico de áudio

@@ -264,3 +264,23 @@ demais scores           -> uncertain
 ```
 
 `GroundingDecision.allows_response` é verdadeiro apenas para `supported`. Os estados `unsupported` e `uncertain` são fail-closed. O relatório NLI expõe os limites, a contagem por estado e a decisão de cada caso nos diagnósticos. O contrato permanece isolado: ainda não filtra retrieval nem controla geração ou voz.
+
+## Bancada em modo observação da v0.6.0-alpha.12
+
+A rota `/workbench` do Admin executa o primeiro fluxo integrado experimental:
+
+```text
+pergunta -> retrieval persistente -> resposta candidata -> NLI -> GroundingDecision -> log
+```
+
+`presented_answer` permanece igual a `answer` em todos os três estados. Isso é deliberado: a alpha.12 mede o comportamento real antes de permitir que `unsupported` ou `uncertain` bloqueiem uma interação. O JSONL local registra as latências de retrieval, geração e grounding, todos os chunks recuperados com scores e avaliações humanas append-only.
+
+Como ainda não existe um backend LLM local de produção no projeto, o gerador padrão da bancada usa o primeiro chunk recuperado como resposta extrativa. O contrato `AnswerGenerator` permite injetar a futura LLM sem acoplar o Admin ao backend. A captura do navegador é convertida para WAV PCM16 mono de 16 kHz antes do STT; a resposta pode ser sintetizada pelo Piper configurado.
+
+Para executar:
+
+```bash
+orelhao admin
+```
+
+Abra `http://127.0.0.1:8765/workbench`. O índice, o modelo NLI, o STT e o TTS precisam estar provisionados localmente. O modo observação não deve ser interpretado como autorização para ativar o gate fail-closed.

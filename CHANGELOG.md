@@ -1,3 +1,13 @@
+## 0.6.0-alpha.12
+
+- integra retrieval, resposta candidata e NLI em uma bancada administrativa local;
+- mantém a resposta apresentada independente de `GroundingDecision`, em modo `observe`;
+- registra pergunta, resposta, chunks, scores, decisão, latências e resposta apresentada em JSONL append-only;
+- adiciona avaliação humana `correct`, `partial` ou `incorrect` sem sobrescrever observações;
+- adiciona captura de microfone no navegador, transcrição pelo STT local e reprodução pelo TTS local;
+- usa resposta extrativa determinística como fallback explícito enquanto não existe backend LLM local de produção;
+- não altera thresholds, datasets, retrieval padrão nem ativa o gate fail-closed.
+
 ## 0.6.0-alpha.11
 
 - registra a confirmação do NLI no holdout, com ROC AUC `0.965`;

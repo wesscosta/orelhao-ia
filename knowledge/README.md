@@ -20,6 +20,8 @@ Não ajuste thresholds, afirmações ou categorias depois de observar resultados
 
 A alpha.11 não altera os datasets. Ela adiciona um contrato de decisão sobre scores NLI: `supported`, `unsupported` e `uncertain`. Apenas `supported` libera resposta; os demais estados são fail-closed.
 
+A alpha.12 grava interações experimentais em `knowledge/observations/grounding.jsonl`. O arquivo é local, append-only e ignorado pelo Git. Eventos `observation` preservam pergunta, resposta, evidências, scores e latências; eventos `human_rating` acrescentam a revisão humana sem modificar o registro original.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.
