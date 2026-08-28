@@ -60,7 +60,7 @@ class FasterWhisperSTTService:
             return self._model
 
         try:
-            from faster_whisper import WhisperModel  # type: ignore[import-not-found]
+            from faster_whisper import WhisperModel  # type: ignore
         except ImportError as exc:
             raise RuntimeError(
                 "Backend STT não instalado. Execute: pip install -e '.[audio,stt]'"
