@@ -1,3 +1,14 @@
+## 0.6.0-alpha.11
+
+- registra a confirmação do NLI no holdout, com ROC AUC `0.965`;
+- introduz `GroundingDecision`, `GroundingStatus` e `GroundingPolicy` como contrato isolado;
+- classifica scores em `supported`, `unsupported` e `uncertain` usando somente os thresholds já congelados;
+- trata `unsupported` e `uncertain` como fail-closed, liberando resposta apenas em `supported`;
+- adiciona resumo dos três estados e decisão estruturada por caso aos diagnósticos NLI;
+- não integra o contrato ao retrieval, à LLM, ao TTS ou ao caminho crítico.
+
+Os limites permanecem `unsupported < 0.1250362694`, `supported >= 0.7557643056` e `uncertain` no intervalo. Nenhum novo threshold foi calibrado após o holdout.
+
 ## 0.6.0-alpha.10
 
 - congela as políticas NLI `nli-balanced=0.1250362694` e `nli-conservative=0.7557643056` antes do holdout;

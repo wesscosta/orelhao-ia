@@ -63,6 +63,8 @@ for policy in nli-balanced nli-conservative; do
 done
 ```
 
+A alpha.11 mantém os mesmos pesos e thresholds. O novo `GroundingPolicy` apenas converte o score em `supported`, `unsupported` ou `uncertain`; não há novo provisionamento.
+
 O candidato mDeBERTa-v3 usa somente INT8 nesta etapa. XLM-RoBERTa INT8 permanece padrão até uma comparação completa favorável.
 
 Compare verificadores locais pelo benchmark separado, sem promover automaticamente o modelo:

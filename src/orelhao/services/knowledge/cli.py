@@ -25,6 +25,7 @@ from .evidence_evaluation import (
     load_evidence_evaluation_cases,
 )
 from .fusion import RRF_RANK_CONSTANT, ReciprocalRankFusionRetriever
+from .grounding_decision import GroundingPolicy, summarize_grounding_scores
 from .index import build_index
 from .paths import default_knowledge_paths
 from .retriever import Retriever
@@ -249,8 +250,23 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     payload["model_variant"] = args.model_variant
     model_path = model_dir / evidence_model_filename(args.model_variant, model=args.model)
     payload["model_size_bytes"] = model_path.stat().st_size
+    grounding_policy: GroundingPolicy | None = None
+    if model_spec["task"] == "nli":
+        grounding_policy = GroundingPolicy()
+        payload["grounding_policy"] = grounding_policy.as_dict()
+        payload["grounding_summary"] = summarize_grounding_scores(
+            result.support for result in report.results
+        )
     if args.diagnostics:
-        payload["results"] = [result.as_dict() for result in report.results]
+        diagnostic_results = []
+        for result in report.results:
+            result_payload = result.as_dict()
+            if grounding_policy is not None:
+                result_payload["grounding_decision"] = grounding_policy.decide(
+                    result.support
+                ).as_dict()
+            diagnostic_results.append(result_payload)
+        payload["results"] = diagnostic_results
     category_metrics: dict[str, object] = {}
     for category, category_result in report.category_metrics.items():
         applicable_metric, applicable_score = category_result.applicable_metric()
@@ -277,6 +293,14 @@ def _evidence_evaluate(args: argparse.Namespace) -> None:
     print(f"F1: {metrics.f1:.3f}")
     print(f"ROC AUC: {metrics.roc_auc:.3f}")
     print(f"Latência média: {metrics.mean_latency_ms:.2f}ms")
+    if model_spec["task"] == "nli":
+        summary = summarize_grounding_scores(result.support for result in report.results)
+        print(
+            "Grounding: "
+            f"supported={summary['supported']} | "
+            f"unsupported={summary['unsupported']} | "
+            f"uncertain={summary['uncertain']}"
+        )
     print("\nMétricas por categoria:")
     for category, category_result in report.category_metrics.items():
         applicable_metric, applicable_score = category_result.applicable_metric()

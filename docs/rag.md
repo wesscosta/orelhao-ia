@@ -248,3 +248,19 @@ done
 ```
 
 Para categorias de classe única, o relatório usa recall nas positivas e especificidade nas negativas. `balanced_accuracy` permanece disponível por compatibilidade, mas não deve ser interpretada isoladamente nessas categorias. Nenhum threshold será escolhido após observar o holdout.
+
+### Resultado do holdout
+
+O NLI manteve ROC AUC `0.965`, contra `0.973` na calibração. A política balanced obteve acurácia balanceada `0.900`, recall `0.850` e especificidade `0.950`; a conservative obteve `0.775`, recall `0.550` e especificidade `1.000`. A única regressão categórica da balanced foi entidade, com especificidade `0.800`. Os casos e thresholds permanecem congelados.
+
+## Contrato de três estados da v0.6.0-alpha.11
+
+`GroundingPolicy` transforma o score NLI em uma decisão explícita:
+
+```text
+score >= 0.7557643056  -> supported
+score <  0.1250362694  -> unsupported
+demais scores           -> uncertain
+```
+
+`GroundingDecision.allows_response` é verdadeiro apenas para `supported`. Os estados `unsupported` e `uncertain` são fail-closed. O relatório NLI expõe os limites, a contagem por estado e a decisão de cada caso nos diagnósticos. O contrato permanece isolado: ainda não filtra retrieval nem controla geração ou voz.

@@ -4,9 +4,9 @@ Terminal conversacional de voz **offline-first**, projetado para responder pergu
 
 O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
 
-## Estado atual — v0.6.0-alpha.10 em desenvolvimento
+## Estado atual — v0.6.0-alpha.11 em desenvolvimento
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirma a generalização em holdout próprio, sem alterar o caminho crítico.
+A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirmou a generalização em holdout próprio. A alpha.11 formaliza a decisão em três estados, ainda isolada do caminho crítico.
 
 Pipeline de voz já validado:
 
@@ -322,6 +322,18 @@ done
 ```
 
 Cada categoria agora expõe `applicable_metric` e `applicable_score`: recall para categorias positivas, especificidade para categorias negativas e acurácia balanceada somente quando a categoria contém ambas as classes. O holdout não será usado para calibrar um terceiro threshold.
+
+No holdout, a ROC AUC foi `0.965`. A política balanced obteve acurácia balanceada `0.900`, recall `0.850` e especificidade `0.950`; a conservative obteve `0.775`, recall `0.550` e especificidade `1.000`. Contradição, informação específica e temporalidade mantiveram especificidade `1.000`; entidade ficou em `0.800` na balanced e `1.000` na conservative.
+
+## GroundingDecision da v0.6.0-alpha.11
+
+O contrato de decisão usa os dois limites congelados sem criar um terceiro threshold:
+
+- score `>= 0.7557643056`: `supported`;
+- score `< 0.1250362694`: `unsupported`;
+- intervalo intermediário: `uncertain`.
+
+Somente `supported` permite resposta. `unsupported` e `uncertain` exigem abstenção no MVP. Em avaliações NLI, o JSON inclui `grounding_policy`, `grounding_summary` e `grounding_decision` por caso quando `--diagnostics` está ativo. Esta etapa não conecta o contrato ao retrieval ou à LLM.
 
 Fluxo futuro preservado:
 

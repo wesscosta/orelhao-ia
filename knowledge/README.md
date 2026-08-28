@@ -18,6 +18,8 @@ O holdout de evidência não é aplicável ao novo benchmark de grounding. Um co
 
 Não ajuste thresholds, afirmações ou categorias depois de observar resultados do holdout.
 
+A alpha.11 não altera os datasets. Ela adiciona um contrato de decisão sobre scores NLI: `supported`, `unsupported` e `uncertain`. Apenas `supported` libera resposta; os demais estados são fail-closed.
+
 Os dois datasets medem tarefas diferentes e não devem ser combinados. O primeiro avalia recuperação e ranking; o segundo avalia se um trecho fornecido contém resposta.
 
 Não edite manualmente o conteúdo de `index/`. A aplicação deve continuar funcionando conceitualmente com `sources/` como única fonte autoritativa.
