@@ -59,3 +59,12 @@ tts:
   length_scale: 1.0
   noise_scale: 0.667
   noise_w: 0.8
+
+llm:
+  backend: local-http
+  base_url: http://127.0.0.1:8080/v1
+  model: local-model
+  timeout_seconds: 45
+  temperature: 0.1
+  max_tokens: 180
+  max_context_chars: 6000

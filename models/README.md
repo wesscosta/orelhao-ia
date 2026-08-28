@@ -4,6 +4,8 @@ Não versionar pesos de modelos neste repositório.
 
 Nesta pasta devem ficar apenas manifestos, checksums e instruções de provisionamento.
 
+Os pesos GGUF da LLM também permanecem locais e ignorados pelo Git. A alpha.13 não escolhe nem baixa um modelo automaticamente; ela consome um servidor local compatível com OpenAI. Consulte `docs/llm.md` e mantenha o arquivo em um caminho de implantação como `models/llm/modelo-instruct.gguf`.
+
 O modelo de embeddings da v0.6 é provisionado com:
 
 ```bash

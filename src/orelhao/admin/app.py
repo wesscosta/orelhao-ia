@@ -16,10 +16,12 @@ from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.knowledge.index import build_index
 from orelhao.services.knowledge.loader import load_documents
 from orelhao.services.knowledge.observation import (
+    LocalLLMAnswerGenerator,
     ObservationWorkbench,
     build_default_observation_workbench,
 )
 from orelhao.services.knowledge.paths import KnowledgePaths, default_knowledge_paths
+from orelhao.services.llm.service import LLMService, LocalOpenAICompatibleLLMService
 from orelhao.services.stt.service import FasterWhisperSTTService, STTService
 from orelhao.services.tts.service import PiperTTSService, TTSService
 
@@ -133,6 +135,7 @@ def create_admin_app(
     workbench: ObservationWorkbench | None = None,
     stt: STTService | None = None,
     tts: TTSService | None = None,
+    llm: LLMService | None = None,
 ):
     _require_web()
     resolved = paths or default_knowledge_paths()
@@ -140,6 +143,7 @@ def create_admin_app(
     active_workbench = workbench
     active_stt = stt
     active_tts = tts
+    active_llm = llm
     stt_preparation_lock = threading.Lock()
     app.state.stt_preparation = {"status": "idle", "elapsed_ms": None, "error": None}
 
@@ -150,8 +154,17 @@ def create_admin_app(
     def get_workbench() -> ObservationWorkbench:
         nonlocal active_workbench
         if active_workbench is None:
-            active_workbench = build_default_observation_workbench(resolved.index)
+            active_workbench = build_default_observation_workbench(
+                resolved.index,
+                answer_generator=LocalLLMAnswerGenerator(get_llm()),
+            )
         return active_workbench
+
+    def get_llm() -> LLMService:
+        nonlocal active_llm
+        if active_llm is None:
+            active_llm = LocalOpenAICompatibleLLMService(app_config().llm)
+        return active_llm
 
     def get_stt() -> STTService:
         nonlocal active_stt
@@ -371,11 +384,12 @@ def create_admin_app(
         body = """
 <section class="card">
 <h2>Bancada de observação</h2>
-<p>Executa retrieval, resposta candidata e NLI. Nesta fase, o grounding <strong>não bloqueia</strong> a resposta apresentada.</p>
+<p>Executa retrieval, LLM local e NLI. Nesta fase, o grounding <strong>não bloqueia</strong> a resposta apresentada.</p>
+<p id="llm-status" class="muted">Verificando LLM local...</p>
 <form method="post" action="/workbench/run">
 <label>Pergunta</label>
 <textarea id="question" name="question" style="min-height:110px" required></textarea>
-<button type="submit">Executar teste</button>
+<button type="submit" id="run" disabled>Executar teste</button>
 <button type="button" id="record" disabled>Preparando STT...</button>
 </form>
 <p id="voice-status" class="muted">O microfone envia WAV PCM16 para o STT local.</p>
@@ -383,7 +397,21 @@ def create_admin_app(
 <script>
 const recordButton = document.getElementById('record');
 const statusBox = document.getElementById('voice-status');
+const runButton = document.getElementById('run');
+const llmStatusBox = document.getElementById('llm-status');
 let audioContext, processor, source, stream, samples = [], stopTimer;
+async function updateLlmStatus() {
+  const response = await fetch('/workbench/llm-status');
+  const payload = await response.json();
+  if (payload.available) {
+    runButton.disabled = false;
+    llmStatusBox.textContent = `LLM pronta: ${payload.detail}`;
+    return;
+  }
+  llmStatusBox.textContent = `LLM indisponível: ${payload.detail}`;
+  setTimeout(updateLlmStatus, 2000);
+}
+updateLlmStatus();
 async function updateSttStatus() {
   const response = await fetch('/workbench/stt-status');
   const payload = await response.json();
@@ -478,6 +506,21 @@ function encodeWav(input, sampleRate) {
     async def stt_status():
         return JSONResponse(app.state.stt_preparation)
 
+    @app.get("/workbench/llm-status", response_class=JSONResponse)
+    async def llm_status():
+        if active_workbench is not None and active_llm is None:
+            return JSONResponse(
+                {"available": True, "detail": "gerador injetado para teste"}
+            )
+        service = get_llm()
+        checker = getattr(service, "health", None)
+        if not callable(checker):
+            return JSONResponse({"available": True, "detail": "serviço injetado"})
+        health = checker()
+        return JSONResponse(
+            {"available": health.available, "detail": health.detail}
+        )
+
     @app.post("/workbench/run", response_class=HTMLResponse)
     async def run_workbench(question: str = Form(...)):
         try:
@@ -498,6 +541,7 @@ function encodeWav(input, sampleRate) {
 <p><strong>Pergunta:</strong> {html.escape(observation.question)}</p>
 <p><strong>Grounding:</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
 <span class="pill">NLI {decision.score:.6f}</span></p>
+<p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
 <p class="warn"><strong>Modo observação:</strong> a resposta abaixo foi apresentada mesmo quando a política recomenda abstenção.</p>
 <h3>Resposta apresentada</h3>
 <p>{html.escape(observation.presented_answer)}</p>

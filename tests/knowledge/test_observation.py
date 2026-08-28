@@ -3,10 +3,14 @@ from pathlib import Path
 
 from orelhao.services.knowledge.models import Chunk, SearchResult
 from orelhao.services.knowledge.observation import (
+    GENERATION_ABSTENTION_MESSAGE,
     ExtractivePreviewAnswerGenerator,
+    LocalLLMAnswerGenerator,
     ObservationLog,
     ObservationWorkbench,
 )
+from orelhao.services.llm.service import INSUFFICIENT_CONTEXT
+from orelhao.services.rag.retriever import RetrievedContext
 
 
 class StubRetriever:
@@ -90,3 +94,15 @@ def test_extractive_preview_is_short_plain_text_and_prefers_location() -> None:
     assert "Teresina, Parnaíba e Picos" in answer
     assert "#" not in answer
     assert len(answer) <= 360
+
+
+class InsufficientLLM:
+    def generate(self, query: str, context: list[RetrievedContext]) -> str:
+        del query, context
+        return INSUFFICIENT_CONTEXT
+
+
+def test_local_llm_generator_translates_insufficient_context() -> None:
+    generator = LocalLLMAnswerGenerator(InsufficientLLM())
+
+    assert generator.generate("Pergunta", []) == GENERATION_ABSTENTION_MESSAGE

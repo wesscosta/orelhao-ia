@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orelhao-ia"
-version = "0.6.0a12.post1"
+version = "0.6.0a13"
 description = "Plataforma conversacional offline-first com IA local e base de conhecimento configurável"
 readme = "README.md"
 requires-python = ">=3.12"

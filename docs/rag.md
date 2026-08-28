@@ -290,3 +290,11 @@ Abra `http://127.0.0.1:8765/workbench`. O índice, o modelo NLI, o STT e o TTS p
 Ao abrir a bancada, o modelo STT passa a ser preparado em segundo plano; o botão de gravação só é habilitado quando estiver pronto. A captura para automaticamente em 12 segundos, é convertida para WAV mono de 16 kHz, tem o silêncio das bordas removido e recebe timeout explícito de 90 segundos.
 
 A resposta extrativa deixa de enviar um chunk Markdown inteiro ao TTS. O fallback seleciona no máximo duas frases relevantes, remove marcação e limita o texto a 360 caracteres. O NLI compara essa resposta separadamente contra cada chunk recuperado e utiliza o maior suporte, preservando a semântica do benchmark de pares afirmação/premissa.
+
+## LLM local em observação na v0.6.0-alpha.13
+
+A bancada substitui o fallback extrativo padrão por `LocalLLMAnswerGenerator`. Os `SearchResult` são convertidos em evidências identificadas e enviados a um servidor estritamente local compatível com `POST /v1/chat/completions`.
+
+O prompt proíbe conhecimento externo e estabelece `INSUFFICIENT_CONTEXT` como saída única quando os chunks não respondem diretamente à pergunta. O sentinel é convertido em mensagem segura, registrado como `generation_abstained=true` e não passa pelo NLI como se fosse uma afirmação factual.
+
+A ausência do servidor ou divergência entre `llm.model` e `/v1/models` aparece na bancada e desabilita a execução. Não há fallback silencioso. A resposta gerada ainda é avaliada como unidade; decomposição e gate por afirmação pertencem à alpha.14.

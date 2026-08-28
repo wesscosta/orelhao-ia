@@ -70,6 +70,16 @@ class TTSConfig(BaseModel):
     noise_w: float = 0.8
 
 
+class LLMConfig(BaseModel):
+    backend: str = "local-http"
+    base_url: str = "http://127.0.0.1:8080/v1"
+    model: str = "local-model"
+    timeout_seconds: float = 45.0
+    temperature: float = 0.1
+    max_tokens: int = 180
+    max_context_chars: int = 6_000
+
+
 class AppConfig(BaseModel):
     name: str = "Orelhão IA"
     environment: str = "development"
@@ -78,6 +88,7 @@ class AppConfig(BaseModel):
     audio: AudioConfig = Field(default_factory=AudioConfig)
     stt: STTConfig = Field(default_factory=STTConfig)
     tts: TTSConfig = Field(default_factory=TTSConfig)
+    llm: LLMConfig = Field(default_factory=LLMConfig)
 
 
 def load_config(path: str | Path) -> AppConfig:

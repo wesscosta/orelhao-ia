@@ -89,6 +89,8 @@ def test_admin_prepares_stt_before_recording(tmp_path: Path) -> None:
         if payload["status"] == "ready":
             break
     assert payload["status"] == "ready"
+    llm_status = client.get("/workbench/llm-status").json()
+    assert llm_status["available"]
 
 
 def test_admin_transcribes_wav_and_synthesizes_answer(tmp_path: Path) -> None:

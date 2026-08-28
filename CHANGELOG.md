@@ -1,3 +1,15 @@
+## 0.6.0-alpha.13
+
+- adiciona configuração própria para uma LLM local, com temperatura, limite de tokens, contexto e timeout;
+- implementa cliente HTTP compatível com `llama-server` e restringe o endpoint a loopback sem TLS externo;
+- valida disponibilidade e identidade do modelo pelo endpoint `/v1/models`;
+- conecta `SearchResult` ao contrato `LLMService` por `LocalLLMAnswerGenerator`;
+- instrui a LLM a usar apenas evidências explícitas e retornar `INSUFFICIENT_CONTEXT` quando necessário;
+- converte a abstenção da geração em mensagem segura ao usuário e score de grounding zero;
+- registra gerador e abstenção da geração no JSONL e no diagnóstico do Admin;
+- não faz fallback silencioso para o extrator quando a LLM estiver indisponível;
+- preserva thresholds NLI, datasets e o modo de observação; grounding por afirmação fica para a alpha.14.
+
 ## 0.6.0-alpha.12.1
 
 - prepara o modelo STT em segundo plano ao abrir a bancada e expõe seu estado antes de habilitar o microfone;

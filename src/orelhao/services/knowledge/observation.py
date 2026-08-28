@@ -12,6 +12,8 @@ from time import perf_counter
 from typing import ClassVar, Protocol
 
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
+from orelhao.services.rag.retriever import RetrievedContext
 
 from .evidence import (
     EvidenceVerifier,
@@ -66,6 +68,29 @@ class ExtractivePreviewAnswerGenerator:
         return " ".join(selected)
 
 
+GENERATION_ABSTENTION_MESSAGE = (
+    "Não encontrei evidências suficientes na base de conhecimento para responder com segurança."
+)
+
+
+class LocalLLMAnswerGenerator:
+    def __init__(self, service: LLMService) -> None:
+        self._service = service
+
+    def generate(self, question: str, evidence: list[SearchResult]) -> str:
+        context = [
+            RetrievedContext(text=result.chunk.text, source=result.chunk.source)
+            for result in evidence
+        ]
+        answer = self._service.generate(question, context).strip()
+        if answer == INSUFFICIENT_CONTEXT:
+            return GENERATION_ABSTENTION_MESSAGE
+        clean = _plain_text(answer)
+        if not clean:
+            raise RuntimeError("LLM local produziu resposta vazia após normalização")
+        return clean[:600].rstrip()
+
+
 @dataclass(frozen=True, slots=True)
 class ObservedEvidence:
     chunk_id: str
@@ -93,6 +118,8 @@ class GroundingObservation:
     evidence: tuple[ObservedEvidence, ...]
     grounding: GroundingDecision
     latency: ObservationLatency
+    generator: str
+    generation_abstained: bool
     mode: str = "observe"
 
     def as_dict(self) -> dict[str, object]:
@@ -178,10 +205,15 @@ class ObservationWorkbench:
         if not answer:
             raise RuntimeError("gerador produziu resposta vazia")
 
+        generation_abstained = answer == GENERATION_ABSTENTION_MESSAGE
         started = perf_counter()
-        support = max(
-            (self._verifier.support_score(answer, result.chunk.text) for result in results),
-            default=0.0,
+        support = (
+            0.0
+            if generation_abstained
+            else max(
+                (self._verifier.support_score(answer, result.chunk.text) for result in results),
+                default=0.0,
+            )
         )
         grounding_ms = _elapsed_ms(started)
         decision = self._policy.decide(support)
@@ -209,6 +241,8 @@ class ObservationWorkbench:
                 grounding_ms=grounding_ms,
                 total_ms=_elapsed_ms(total_started),
             ),
+            generator=type(self._answer_generator).__name__,
+            generation_abstained=generation_abstained,
         )
         self.log.append_observation(observation)
         return observation
@@ -218,13 +252,14 @@ def build_default_observation_workbench(
     index_dir: Path,
     *,
     log_path: Path | None = None,
+    answer_generator: AnswerGenerator | None = None,
 ) -> ObservationWorkbench:
     model_dir = resolve_project_path(
         f"models/evidence/{evidence_model_directory('nli-minilm')}"
     )
     return ObservationWorkbench(
         PersistentVectorRetriever(index_dir),
-        ExtractivePreviewAnswerGenerator(),
+        answer_generator or ExtractivePreviewAnswerGenerator(),
         OnnxNliEvidenceVerifier(model_dir),
         ObservationLog(log_path or index_dir.parent / "observations" / "grounding.jsonl"),
     )
