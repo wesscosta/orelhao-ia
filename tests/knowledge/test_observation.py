@@ -3,6 +3,7 @@ from pathlib import Path
 
 from orelhao.services.knowledge.models import Chunk, SearchResult
 from orelhao.services.knowledge.observation import (
+    ExtractivePreviewAnswerGenerator,
     ObservationLog,
     ObservationWorkbench,
 )
@@ -65,3 +66,27 @@ def test_observation_log_appends_human_rating(tmp_path: Path) -> None:
     assert payload["rating"] == "partial"
     assert diagnostic == "possible_false_positive"
     assert payload["diagnostic"] == "possible_false_positive"
+
+
+def test_extractive_preview_is_short_plain_text_and_prefers_location() -> None:
+    generator = ExtractivePreviewAnswerGenerator()
+    evidence = [
+        SearchResult(
+            Chunk(
+                "about:0", "about", "# História\n\nO Senac promove educação profissional no Piauí.", "about.md", 0
+            ),
+            0.8,
+        ),
+        SearchResult(
+            Chunk(
+                "units:0", "units", "# Unidades\n\nHá unidades em Teresina, Parnaíba e Picos.", "units.md", 0
+            ),
+            0.7,
+        ),
+    ]
+
+    answer = generator.generate("Onde tem unidade do Senac no Piauí?", evidence)
+
+    assert "Teresina, Parnaíba e Picos" in answer
+    assert "#" not in answer
+    assert len(answer) <= 360

@@ -3,12 +3,15 @@ from __future__ import annotations
 import html
 import json
 import os
+import threading
 from pathlib import Path
+from time import perf_counter
 from typing import Annotated
 from urllib.parse import quote
 
 from orelhao.config import AppConfig, load_config
 from orelhao.interfaces.voice.audio import PCM16Audio
+from orelhao.interfaces.voice.resample import resample_pcm16, trim_silence_pcm16
 from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.knowledge.index import build_index
 from orelhao.services.knowledge.loader import load_documents
@@ -137,6 +140,8 @@ def create_admin_app(
     active_workbench = workbench
     active_stt = stt
     active_tts = tts
+    stt_preparation_lock = threading.Lock()
+    app.state.stt_preparation = {"status": "idle", "elapsed_ms": None, "error": None}
 
     def app_config() -> AppConfig:
         path = os.getenv("ORELHAO_CONFIG", "config/development.yaml")
@@ -159,6 +164,38 @@ def create_admin_app(
         if active_tts is None:
             active_tts = PiperTTSService(app_config().tts)
         return active_tts
+
+    def prepare_stt() -> None:
+        with stt_preparation_lock:
+            if app.state.stt_preparation["status"] != "idle":
+                return
+            app.state.stt_preparation = {
+                "status": "loading",
+                "elapsed_ms": None,
+                "error": None,
+            }
+
+        def load() -> None:
+            started = perf_counter()
+            try:
+                service = get_stt()
+                preparer = getattr(service, "prepare", None)
+                if callable(preparer):
+                    preparer()
+            except RuntimeError as exc:
+                app.state.stt_preparation = {
+                    "status": "error",
+                    "elapsed_ms": (perf_counter() - started) * 1000.0,
+                    "error": str(exc),
+                }
+                return
+            app.state.stt_preparation = {
+                "status": "ready",
+                "elapsed_ms": (perf_counter() - started) * 1000.0,
+                "error": None,
+            }
+
+        threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
 
     @app.get("/", response_class=HTMLResponse)
     async def home():
@@ -330,6 +367,7 @@ def create_admin_app(
 
     @app.get("/workbench", response_class=HTMLResponse)
     async def workbench_home():
+        prepare_stt()
         body = """
 <section class="card">
 <h2>Bancada de observação</h2>
@@ -338,31 +376,60 @@ def create_admin_app(
 <label>Pergunta</label>
 <textarea id="question" name="question" style="min-height:110px" required></textarea>
 <button type="submit">Executar teste</button>
-<button type="button" id="record">Gravar pergunta</button>
+<button type="button" id="record" disabled>Preparando STT...</button>
 </form>
 <p id="voice-status" class="muted">O microfone envia WAV PCM16 para o STT local.</p>
 </section>
 <script>
 const recordButton = document.getElementById('record');
 const statusBox = document.getElementById('voice-status');
-let audioContext, processor, source, stream, samples = [];
-recordButton.addEventListener('click', async () => {
-  if (processor) {
-    processor.disconnect(); source.disconnect();
-    stream.getTracks().forEach(track => track.stop());
-    const inputRate = audioContext.sampleRate;
-    await audioContext.close();
-    processor = null;
+let audioContext, processor, source, stream, samples = [], stopTimer;
+async function updateSttStatus() {
+  const response = await fetch('/workbench/stt-status');
+  const payload = await response.json();
+  if (payload.status === 'ready') {
+    recordButton.disabled = false;
     recordButton.textContent = 'Gravar pergunta';
-    statusBox.textContent = 'Transcrevendo...';
-    const wav = encodeWav(resample(samples.flat(), inputRate, 16000), 16000);
-    const form = new FormData();
-    form.append('file', wav, 'question.wav');
-    const response = await fetch('/workbench/transcribe', {method: 'POST', body: form});
+    statusBox.textContent = `STT pronto; modelo carregado em ${payload.elapsed_ms.toFixed(1)} ms.`;
+    return;
+  }
+  if (payload.status === 'error') {
+    statusBox.textContent = `Falha ao carregar STT: ${payload.error}`;
+    return;
+  }
+  setTimeout(updateSttStatus, 1000);
+}
+updateSttStatus();
+async function stopRecording() {
+  if (!processor) return;
+  clearTimeout(stopTimer);
+  processor.disconnect(); source.disconnect();
+  stream.getTracks().forEach(track => track.stop());
+  const inputRate = audioContext.sampleRate;
+  await audioContext.close();
+  processor = null;
+  recordButton.textContent = 'Gravar pergunta';
+  statusBox.textContent = 'Transcrevendo; o primeiro uso também carrega o modelo STT...';
+  const wav = encodeWav(resample(concatenate(samples), inputRate, 16000), 16000);
+  const form = new FormData();
+  form.append('file', wav, 'question.wav');
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 90000);
+  try {
+    const response = await fetch('/workbench/transcribe', {method: 'POST', body: form, signal: controller.signal});
     const payload = await response.json();
     if (!response.ok) { statusBox.textContent = payload.detail || 'Falha no STT'; return; }
     document.getElementById('question').value = payload.text;
-    statusBox.textContent = `Transcrição concluída em ${payload.elapsed_ms.toFixed(1)} ms.`;
+    statusBox.textContent = `Transcrição concluída em ${payload.total_ms.toFixed(1)} ms.`;
+  } catch (error) {
+    statusBox.textContent = error.name === 'AbortError'
+      ? 'O STT excedeu 90 segundos. Aguarde o carregamento do modelo e tente novamente.'
+      : `Falha ao enviar áudio: ${error.message}`;
+  } finally { clearTimeout(timeout); }
+}
+recordButton.addEventListener('click', async () => {
+  if (processor) {
+    await stopRecording();
     return;
   }
   stream = await navigator.mediaDevices.getUserMedia({audio: true});
@@ -372,9 +439,17 @@ recordButton.addEventListener('click', async () => {
   samples = [];
   processor.onaudioprocess = event => samples.push(Array.from(event.inputBuffer.getChannelData(0)));
   source.connect(processor); processor.connect(audioContext.destination);
+  stopTimer = setTimeout(stopRecording, 12000);
   recordButton.textContent = 'Parar gravação';
-  statusBox.textContent = 'Gravando...';
+  statusBox.textContent = 'Gravando... parada automática em 12 segundos.';
 });
+function concatenate(blocks) {
+  const length = blocks.reduce((total, block) => total + block.length, 0);
+  const output = new Float32Array(length);
+  let offset = 0;
+  blocks.forEach(block => { output.set(block, offset); offset += block.length; });
+  return output;
+}
 function resample(input, fromRate, toRate) {
   if (fromRate === toRate) return input;
   const ratio = fromRate / toRate, output = new Array(Math.round(input.length / ratio));
@@ -398,6 +473,10 @@ function encodeWav(input, sampleRate) {
 </script>
 """
         return HTMLResponse(_layout("Bancada de observação", body))
+
+    @app.get("/workbench/stt-status", response_class=JSONResponse)
+    async def stt_status():
+        return JSONResponse(app.state.stt_preparation)
 
     @app.post("/workbench/run", response_class=HTMLResponse)
     async def run_workbench(question: str = Form(...)):
@@ -472,8 +551,19 @@ function encodeWav(input, sampleRate) {
         if len(raw) > 20 * 1024 * 1024:
             raise HTTPException(status_code=413, detail="Áudio excede 20 MiB")
         try:
+            started = perf_counter()
             audio = PCM16Audio.from_wav_bytes(raw)
+            if audio.channels != 1:
+                raise ValueError("Áudio deve ser mono")
+            if audio.duration_seconds > 15.0:
+                raise ValueError("Gravação deve ter no máximo 15 segundos")
+            audio = resample_pcm16(audio, 16_000)
+            audio = trim_silence_pcm16(audio)
+            if audio.duration_seconds < 0.25:
+                raise ValueError("Nenhuma fala foi detectada")
             transcription = get_stt().transcribe(audio)
+            if not transcription.text.strip():
+                raise ValueError("O STT não reconheceu fala na gravação")
         except (RuntimeError, ValueError, EOFError) as exc:
             raise HTTPException(
                 status_code=422,
@@ -483,6 +573,7 @@ function encodeWav(input, sampleRate) {
             {
                 "text": transcription.text,
                 "elapsed_ms": transcription.elapsed_seconds * 1000.0,
+                "total_ms": (perf_counter() - started) * 1000.0,
                 "audio_seconds": transcription.audio_seconds,
             }
         )

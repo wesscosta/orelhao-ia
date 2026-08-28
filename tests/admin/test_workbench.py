@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 fastapi = pytest.importorskip("fastapi")
@@ -40,6 +41,9 @@ class StubVerifier:
 
 
 class StubSTT:
+    def prepare(self) -> float:
+        return 0.0
+
     def transcribe(self, audio: PCM16Audio) -> TranscriptionResult:
         assert audio.sample_rate == 16_000
         return TranscriptionResult("Qual é o horário?", audio.duration_seconds, 0.01)
@@ -75,9 +79,23 @@ def test_admin_runs_observation_and_keeps_uncertain_answer(tmp_path: Path) -> No
     assert payload["grounding"]["status"] == "uncertain"
 
 
+def test_admin_prepares_stt_before_recording(tmp_path: Path) -> None:
+    client, _ = _client(tmp_path)
+
+    response = client.get("/workbench")
+    assert response.status_code == 200
+    for _ in range(20):
+        payload = client.get("/workbench/stt-status").json()
+        if payload["status"] == "ready":
+            break
+    assert payload["status"] == "ready"
+
+
 def test_admin_transcribes_wav_and_synthesizes_answer(tmp_path: Path) -> None:
     client, _ = _client(tmp_path)
-    wav = PCM16Audio(b"\x00\x00" * 160).to_wav_bytes()
+    silence = np.zeros(3_200, dtype=np.int16)
+    speech = np.full(8_000, 4_000, dtype=np.int16)
+    wav = PCM16Audio(np.concatenate((silence, speech, silence)).tobytes()).to_wav_bytes()
 
     response = client.post(
         "/workbench/transcribe",

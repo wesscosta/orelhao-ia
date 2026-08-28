@@ -1,3 +1,14 @@
+## 0.6.0-alpha.12.1
+
+- prepara o modelo STT em segundo plano ao abrir a bancada e expõe seu estado antes de habilitar o microfone;
+- limita gravações do navegador a 12 segundos e requisições STT a 90 segundos;
+- troca a concatenação custosa de arrays JavaScript por buffers tipados;
+- normaliza WAV mono para 16 kHz e remove silêncio nas bordas antes da transcrição;
+- rejeita gravações sem fala, vazias ou longas com diagnóstico explícito;
+- substitui a leitura integral do primeiro chunk por até duas frases limpas e relevantes, limitadas a 360 caracteres;
+- calcula grounding por chunk e usa o maior suporte, evitando truncar a evidência que originou a resposta;
+- preserva thresholds, datasets e o modo de observação da alpha.12.
+
 ## 0.6.0-alpha.12
 
 - integra retrieval, resposta candidata e NLI em uma bancada administrativa local;

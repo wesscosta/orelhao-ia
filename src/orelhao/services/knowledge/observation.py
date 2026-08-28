@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
+import unicodedata
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -30,10 +32,38 @@ class ExtractivePreviewAnswerGenerator:
     """Fallback determinístico até existir um backend LLM local de produção."""
 
     def generate(self, question: str, evidence: list[SearchResult]) -> str:
-        del question
         if not evidence:
             return "Não encontrei evidência suficiente na base local para responder."
-        return evidence[0].chunk.text.strip()
+        candidates: list[tuple[float, int, str]] = []
+        question_terms = _meaningful_terms(question)
+        location_intent = bool(question_terms & {"onde", "endereco", "localizacao", "fica"})
+        for result_index, result in enumerate(evidence):
+            clean = _plain_text(result.chunk.text)
+            for sentence in _sentences(clean):
+                sentence_terms = _meaningful_terms(sentence)
+                overlap = len(question_terms & sentence_terms)
+                coverage = overlap / max(1, len(question_terms))
+                location_signal = bool(
+                    sentence_terms
+                    & {"endereco", "localizacao", "unidade", "cidade", "municipio", "funcionamento"}
+                )
+                score = coverage + result.score * 0.25
+                if location_intent and location_signal:
+                    score += 0.35
+                candidates.append((score, -result_index, sentence))
+        if not candidates:
+            return "Não encontrei evidência suficiente na base local para responder."
+        candidates.sort(reverse=True)
+        selected: list[str] = []
+        total = 0
+        for _, _, sentence in candidates:
+            if sentence in selected or total + len(sentence) > 360:
+                continue
+            selected.append(sentence)
+            total += len(sentence)
+            if len(selected) == 2:
+                break
+        return " ".join(selected)
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,7 +160,7 @@ class ObservationWorkbench:
         self.log = log
         self._policy = policy or GroundingPolicy()
 
-    def observe(self, question: str, *, limit: int = 4) -> GroundingObservation:
+    def observe(self, question: str, *, limit: int = 8) -> GroundingObservation:
         clean_question = question.strip()
         if not clean_question:
             raise ValueError("pergunta não pode ser vazia")
@@ -148,9 +178,11 @@ class ObservationWorkbench:
         if not answer:
             raise RuntimeError("gerador produziu resposta vazia")
 
-        passage = "\n\n".join(result.chunk.text for result in results)
         started = perf_counter()
-        support = self._verifier.support_score(answer, passage) if passage else 0.0
+        support = max(
+            (self._verifier.support_score(answer, result.chunk.text) for result in results),
+            default=0.0,
+        )
         grounding_ms = _elapsed_ms(started)
         decision = self._policy.decide(support)
 
@@ -212,3 +244,27 @@ def _rating_diagnostic(rating: str, grounding_status: str | None) -> str | None:
     if rating != "correct" and grounding_status == "supported":
         return "possible_false_positive"
     return "aligned"
+
+
+def _plain_text(value: str) -> str:
+    text = re.sub(r"```.*?```", " ", value, flags=re.DOTALL)
+    text = re.sub(r"^\s*#{1,6}\s+", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\[([^]]+)]\([^)]+\)", r"\1", text)
+    text = re.sub(r"[*_`>|]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _sentences(value: str) -> list[str]:
+    return [part.strip() for part in re.split(r"(?<=[.!?])\s+", value) if part.strip()]
+
+
+def _meaningful_terms(value: str) -> set[str]:
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    plain = "".join(char for char in normalized if not unicodedata.combining(char))
+    stopwords = {
+        "a", "as", "de", "do", "dos", "e", "em", "no", "nos", "o", "os", "para", "por",
+        "qual", "que", "tem", "um", "uma",
+    }
+    return {
+        term for term in re.findall(r"[a-z0-9]+", plain) if len(term) >= 2 and term not in stopwords
+    }

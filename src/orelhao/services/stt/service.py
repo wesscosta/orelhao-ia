@@ -60,7 +60,7 @@ class FasterWhisperSTTService:
             return self._model
 
         try:
-            from faster_whisper import WhisperModel
+            from faster_whisper import WhisperModel  # type: ignore[import-not-found]
         except ImportError as exc:
             raise RuntimeError(
                 "Backend STT não instalado. Execute: pip install -e '.[audio,stt]'"
@@ -77,6 +77,12 @@ class FasterWhisperSTTService:
 
         self._model = WhisperModel(self.config.model, **kwargs)
         return self._model
+
+    def prepare(self) -> float:
+        """Carrega o modelo antes da primeira interação e retorna o tempo gasto."""
+        started = perf_counter()
+        self._load_model()
+        return perf_counter() - started
 
     @staticmethod
     def _pcm16_to_float32(audio: PCM16Audio) -> Any:

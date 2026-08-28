@@ -284,3 +284,9 @@ orelhao admin
 ```
 
 Abra `http://127.0.0.1:8765/workbench`. O índice, o modelo NLI, o STT e o TTS precisam estar provisionados localmente. O modo observação não deve ser interpretado como autorização para ativar o gate fail-closed.
+
+### Correções da alpha.12.1
+
+Ao abrir a bancada, o modelo STT passa a ser preparado em segundo plano; o botão de gravação só é habilitado quando estiver pronto. A captura para automaticamente em 12 segundos, é convertida para WAV mono de 16 kHz, tem o silêncio das bordas removido e recebe timeout explícito de 90 segundos.
+
+A resposta extrativa deixa de enviar um chunk Markdown inteiro ao TTS. O fallback seleciona no máximo duas frases relevantes, remove marcação e limita o texto a 360 caracteres. O NLI compara essa resposta separadamente contra cada chunk recuperado e utiliza o maior suporte, preservando a semântica do benchmark de pares afirmação/premissa.
