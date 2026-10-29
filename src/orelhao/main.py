@@ -17,6 +17,7 @@ from orelhao.interfaces.voice.capture import (
 )
 from orelhao.interfaces.voice.devices import inspect_device
 from orelhao.interfaces.voice.playback import MockAudioPlayback, SoundDeviceAudioPlayback
+from orelhao.services.llm.cli import add_llm_parser
 from orelhao.services.llm.service import MockLLMService
 from orelhao.services.knowledge import Document, KnowledgeService
 from orelhao.services.knowledge.cli import add_knowledge_parser
@@ -272,6 +273,7 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command")
     add_knowledge_parser(subparsers)
     add_admin_parser(subparsers)
+    add_llm_parser(subparsers)
     parser.add_argument("--audio-loopback", action="store_true", help="testa captura + VAD + playback")
     parser.add_argument("--list-audio-devices", action="store_true", help="lista interfaces de áudio")
     parser.add_argument("--audio-diagnose", action="store_true", help="valida input/output configurados")

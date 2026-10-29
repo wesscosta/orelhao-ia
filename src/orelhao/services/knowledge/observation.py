@@ -15,6 +15,7 @@ from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .claim_grounding import ClaimAssessment, assess_answer
 from .evidence import (
     EvidenceVerifier,
     OnnxNliEvidenceVerifier,
@@ -117,6 +118,7 @@ class GroundingObservation:
     presented_answer: str
     evidence: tuple[ObservedEvidence, ...]
     grounding: GroundingDecision
+    claims: tuple[ClaimAssessment, ...]
     latency: ObservationLatency
     generator: str
     generation_abstained: bool
@@ -180,7 +182,11 @@ class ObservationWorkbench:
         log: ObservationLog,
         *,
         policy: GroundingPolicy | None = None,
+        mode: str = "observe",
     ) -> None:
+        if mode not in {"observe", "enforce"}:
+            raise ValueError("mode deve ser observe ou enforce")
+        self._mode = mode
         self._retriever = retriever
         self._answer_generator = answer_generator
         self._verifier = verifier
@@ -207,23 +213,26 @@ class ObservationWorkbench:
 
         generation_abstained = answer == GENERATION_ABSTENTION_MESSAGE
         started = perf_counter()
-        support = (
-            0.0
+        assessment = (
+            assess_answer("", results, self._verifier, self._policy)
             if generation_abstained
-            else max(
-                (self._verifier.support_score(answer, result.chunk.text) for result in results),
-                default=0.0,
-            )
+            else assess_answer(answer, results, self._verifier, self._policy)
         )
         grounding_ms = _elapsed_ms(started)
-        decision = self._policy.decide(support)
+        decision = assessment.decision
+        presented = (
+            GENERATION_ABSTENTION_MESSAGE
+            if self._mode == "enforce" and decision.should_abstain
+            else answer
+        )
 
         observation = GroundingObservation(
             observation_id=uuid.uuid4().hex,
             created_at=datetime.now(UTC).isoformat(),
             question=clean_question,
             answer=answer,
-            presented_answer=answer,
+            presented_answer=presented,
+            claims=assessment.claims,
             evidence=tuple(
                 ObservedEvidence(
                     chunk_id=result.chunk.id,
@@ -243,6 +252,7 @@ class ObservationWorkbench:
             ),
             generator=type(self._answer_generator).__name__,
             generation_abstained=generation_abstained,
+            mode=self._mode,
         )
         self.log.append_observation(observation)
         return observation
@@ -253,6 +263,7 @@ def build_default_observation_workbench(
     *,
     log_path: Path | None = None,
     answer_generator: AnswerGenerator | None = None,
+    mode: str = "observe",
 ) -> ObservationWorkbench:
     model_dir = resolve_project_path(
         f"models/evidence/{evidence_model_directory('nli-minilm')}"
@@ -262,6 +273,7 @@ def build_default_observation_workbench(
         answer_generator or ExtractivePreviewAnswerGenerator(),
         OnnxNliEvidenceVerifier(model_dir),
         ObservationLog(log_path or index_dir.parent / "observations" / "grounding.jsonl"),
+        mode=mode,
     )
 
 

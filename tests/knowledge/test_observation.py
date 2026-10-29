@@ -106,3 +106,42 @@ def test_local_llm_generator_translates_insufficient_context() -> None:
     generator = LocalLLMAnswerGenerator(InsufficientLLM())
 
     assert generator.generate("Pergunta", []) == GENERATION_ABSTENTION_MESSAGE
+
+
+class TwoClaimGenerator:
+    def generate(self, question: str, evidence: list[SearchResult]) -> str:
+        del question, evidence
+        return "O atendimento funciona de segunda a sexta. Inscrições encerram amanhã."
+
+
+class SelectiveVerifier:
+    def support_score(self, query: str, passage: str) -> float:
+        del passage
+        return 0.9 if query.startswith("O atendimento") else 0.01
+
+
+def test_workbench_enforce_blocks_unverified_second_claim(tmp_path: Path) -> None:
+    log = ObservationLog(tmp_path / "strict.jsonl")
+    workbench = ObservationWorkbench(
+        StubRetriever(), TwoClaimGenerator(), SelectiveVerifier(), log, mode="enforce"
+    )
+    observed = workbench.observe("Qual é o atendimento e a data?")
+    assert len(observed.claims) == 2
+    assert observed.answer.endswith("amanhã.")
+    assert observed.grounding.should_abstain
+    assert observed.presented_answer == GENERATION_ABSTENTION_MESSAGE
+    assert observed.mode == "enforce"
+    payload = json.loads(log.path.read_text(encoding="utf-8"))
+    assert len(payload["claims"]) == 2
+    assert payload["presented_answer"] == GENERATION_ABSTENTION_MESSAGE
+    assert payload["answer"] != payload["presented_answer"]
+
+
+def test_workbench_rejects_unknown_mode(tmp_path: Path) -> None:
+    import pytest
+
+    with pytest.raises(ValueError, match="mode"):
+        ObservationWorkbench(
+            StubRetriever(), StubGenerator(), StubVerifier(0.8),
+            ObservationLog(tmp_path / "test.jsonl"), mode="unsafe"
+        )

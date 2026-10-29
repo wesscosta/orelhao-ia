@@ -378,3 +378,15 @@ orelhao admin
 A interface abre por padrão em `http://127.0.0.1:8765` e manipula apenas
 `knowledge/sources/`. O índice é derivado e pode ser reconstruído pela própria
 interface ou com `orelhao knowledge index`.
+
+
+## Experimentos de otimização para Dell OptiPlex 7050 — branch de trabalho
+
+O hardware definitivo do primeiro Orelhão é Dell OptiPlex 7050 Micro
+(i5-7500T, 8 GiB RAM, sem upgrade). A branch experimental
+`feat/orelhao-grounding-benchmark-optiplex-20261028` introduz avaliação
+por frase factual com modo `enforce` opt-in e um benchmark serial da LLM local
+(`orelhao llm-benchmark`). A bancada permanece por padrão em observação.
+Isso **não** significa que a alpha.14 ou o terminal físico estejam homologados.
+
+Consulte [plano de benchmark e gates](docs/benchmark-optiplex-7050.md).

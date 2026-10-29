@@ -33,3 +33,20 @@ A LLM recebe somente os chunks recuperados, com fonte e texto, limitada a 6.000 
 Se as evidências não responderem diretamente à pergunta, a LLM deve retornar exatamente `INSUFFICIENT_CONTEXT`. O adaptador converte esse sentinel em uma mensagem segura e o grounding recebe score zero. A indisponibilidade da LLM produz erro explícito; não há fallback silencioso para o gerador extrativo.
 
 Esta etapa permanece em modo de observação. A alpha.14 deverá decompor respostas em afirmações e exigir suporte para todas antes de ativar o gate fail-closed.
+
+
+## Desenvolvimento experimental posterior à alpha.13 (branch, não release)
+
+A alpha.14 experimental inclui `assess_answer`, que divide uma resposta
+em frases e verifica cada uma com NLI contra os chunks recuperados. O menor
+score determina `GroundingDecision`; em `ObservationWorkbench(mode="enforce")`,
+`UNSUPPORTED` ou `UNCERTAIN` substituem a saída exibida por abstenção.
+O modo `observe` permanece padrão e registra decisões por frase e fonte.
+Este verificador é conservador, mas a decomposição por frases não garante
+atomicidade semântica quando há várias proposições na mesma frase.
+
+O comando `orelhao llm-benchmark` prepara comparações seriais de candidatos
+leves e exige servidor previamente configurado em loopback. Sem pesos
+provisionados e sem benchmark no Dell, não há modelo vencedor.
+
+Consulte [plano de avaliação do OptiPlex](benchmark-optiplex-7050.md).

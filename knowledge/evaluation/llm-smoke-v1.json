@@ -1,0 +1,25 @@
+{
+  "description": "Casos sintéticos de infraestrutura; não validam qualidade institucional.",
+  "cases": [
+    {
+      "id": "smoke-supported",
+      "question": "Quando ocorre o atendimento de teste?",
+      "evidence": [{"source": "exemplo.md", "text": "O atendimento de teste ocorre de segunda a sexta."}],
+      "expected_abstain": false,
+      "must_include": ["segunda", "sexta"],
+      "must_not_include": ["sábado", "domingo"]
+    },
+    {
+      "id": "smoke-absent",
+      "question": "Qual é o preço do curso de teste?",
+      "evidence": [{"source": "exemplo.md", "text": "O atendimento de teste ocorre de segunda a sexta."}],
+      "expected_abstain": true
+    },
+    {
+      "id": "smoke-empty",
+      "question": "Qual é o endereço da unidade inexistente?",
+      "evidence": [],
+      "expected_abstain": true
+    }
+  ]
+}

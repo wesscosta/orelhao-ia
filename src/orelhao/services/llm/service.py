@@ -35,6 +35,14 @@ class LLMHealth:
     detail: str
 
 
+@dataclass(frozen=True, slots=True)
+class LLMCompletion:
+    text: str
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    tokens_per_second: float | None = None
+
+
 class LocalOpenAICompatibleLLMService:
     """Cliente para servidor de inferência estritamente local compatível com OpenAI."""
 
@@ -73,11 +81,14 @@ class LocalOpenAICompatibleLLMService:
         return LLMHealth(True, f"modelo {self.config.model!r} disponível")
 
     def generate(self, query: str, context: list[RetrievedContext]) -> str:
+        return self.generate_completion(query, context).text
+
+    def generate_completion(self, query: str, context: list[RetrievedContext]) -> LLMCompletion:
         clean_query = query.strip()
         if not clean_query:
             raise ValueError("pergunta para LLM não pode ser vazia")
         if not context:
-            return INSUFFICIENT_CONTEXT
+            return LLMCompletion(INSUFFICIENT_CONTEXT)
         evidence = self._format_context(context)
         payload = self._request(
             "POST",
@@ -104,7 +115,18 @@ class LocalOpenAICompatibleLLMService:
         content = message.get("content")
         if not isinstance(content, str) or not content.strip():
             raise RuntimeError("LLM local produziu resposta vazia")
-        return content.strip()
+        usage = payload.get("usage")
+        timings = payload.get("timings")
+        def integer_metric(key: str) -> int | None:
+            value = usage.get(key) if isinstance(usage, dict) else None
+            return value if isinstance(value, int) and not isinstance(value, bool) else None
+        speed = timings.get("predicted_per_second") if isinstance(timings, dict) else None
+        return LLMCompletion(
+            content.strip(),
+            prompt_tokens=integer_metric("prompt_tokens"),
+            completion_tokens=integer_metric("completion_tokens"),
+            tokens_per_second=float(speed) if isinstance(speed, (float, int)) and not isinstance(speed, bool) else None,
+        )
 
     def _format_context(self, context: list[RetrievedContext]) -> str:
         sections: list[str] = []
@@ -129,7 +151,10 @@ class LocalOpenAICompatibleLLMService:
     ) -> dict[str, object]:
         body = None if payload is None else json.dumps(payload).encode("utf-8")
         request = Request(
-            f"{self.base_url}{path}",
+            (
+                f"{self.base_url.removesuffix('/v1')}/health"
+                if path == "/health" else f"{self.base_url}{path}"
+            ),
             data=body,
             method=method,
             headers={"Content-Type": "application/json"},

@@ -72,3 +72,38 @@ def test_local_llm_health_reports_models(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert health.available
     assert "local-model" in health.detail
+
+
+def test_llm_health_uses_root_health_route(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+
+    def fake_urlopen(request: Any, timeout: float) -> FakeResponse:
+        del timeout
+        calls.append(request.full_url)
+        if request.full_url.endswith("/health"):
+            return FakeResponse({"status": "ok"})
+        return FakeResponse({"data": [{"id": "local-model"}]})
+
+    monkeypatch.setattr(service_module, "urlopen", fake_urlopen)
+    health = LocalOpenAICompatibleLLMService(LLMConfig()).health()
+    assert health.available
+    assert calls == ["http://127.0.0.1:8080/health", "http://127.0.0.1:8080/v1/models"]
+
+
+def test_completion_preserves_server_usage(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_urlopen(request: Any, timeout: float) -> FakeResponse:
+        del request, timeout
+        return FakeResponse({
+            "choices": [{"message": {"content": "O curso é gratuito."}}],
+            "usage": {"prompt_tokens": 33, "completion_tokens": 7},
+            "timings": {"predicted_per_second": 4.5},
+        })
+
+    monkeypatch.setattr(service_module, "urlopen", fake_urlopen)
+    service = LocalOpenAICompatibleLLMService(LLMConfig())
+    completion = service.generate_completion(
+        "Qual é o valor?", [RetrievedContext("O curso é gratuito.", "curso.md")]
+    )
+    assert completion.prompt_tokens == 33
+    assert completion.completion_tokens == 7
+    assert completion.tokens_per_second == 4.5
