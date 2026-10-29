@@ -145,3 +145,24 @@ def test_workbench_rejects_unknown_mode(tmp_path: Path) -> None:
             StubRetriever(), StubGenerator(), StubVerifier(0.8),
             ObservationLog(tmp_path / "test.jsonl"), mode="unsafe"
         )
+
+
+class LongAnswerLLM:
+    def generate(self, query: str, context: list[RetrievedContext]) -> str:
+        del query, context
+        return (
+            "O balcão atende de segunda a sexta. "
+            "O documento deve ter fotografia. "
+            + "Informação muito extensa " * 26
+            + "e ainda pode continuar"
+        )
+
+
+def test_llm_generator_does_not_cut_incomplete_sentence() -> None:
+    generator = LocalLLMAnswerGenerator(LongAnswerLLM())
+    answer = generator.generate(
+        "Pergunta",
+        [SearchResult(Chunk("id", "title", "Fonte.", "faq.md", 0), 0.9)],
+    )
+    assert answer == "O balcão atende de segunda a sexta. O documento deve ter fotografia."
+    assert len(answer) <= 360

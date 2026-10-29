@@ -94,3 +94,13 @@ orelhao llm-benchmark knowledge/evaluation/llm-ptbr-v1.json \
 - **Etapa 6 — Appliance:** systemd real, watchdog, offline, recuperação, atualização segura da base, privacidade e homologação.
 
 Não fazer release/merge automático enquanto os gates de qualidade e hardware não forem cumpridos.
+
+## Smoke test real adicional — 29/10/2026
+
+O Admin foi iniciado com `ORELHAO_CONFIG=config/benchmark-tucano2-15b-ptbr.yaml`; `GET /workbench/llm-status` confirmou `tucano-ptbr` disponível e a rota `POST /workbench/run` foi testada no modo `enforce`.
+
+Foi encontrada uma falha do gerador que truncava o texto após 600 caracteres **no meio de uma oração**, deixando evidências incompletas. A correção substitui o recorte arbitrário por até três frases completas, até 360 caracteres, com abstenção se nenhuma frase couber. Há teste de regressão.
+
+Com a pergunta "Qual é o PSG?", o Tucano2 produziu duas frases completas, porém o verificador NLI classificou a resposta como `UNSUPPORTED` (score mínimo aproximado 0.041) e o modo seguro exibiu abstenção. O bloqueio funcionou; resta analisar possível **falso negativo** do NLI contra a fonte correta. Não alterar thresholds para esta pergunta sem nova calibração em holdout independente.
+
+O modo `enforce` ainda é experimental e não está habilitado automaticamente no terminal físico. O administrador da bancada permanece restrito a loopback; não expor a rede sem autenticação.

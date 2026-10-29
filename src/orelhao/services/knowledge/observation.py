@@ -89,7 +89,17 @@ class LocalLLMAnswerGenerator:
         clean = _plain_text(answer)
         if not clean:
             raise RuntimeError("LLM local produziu resposta vazia após normalização")
-        return clean[:600].rstrip()
+        sentences = _sentences(clean)
+        if len(sentences) > 1 and not sentences[-1].endswith((".", "!", "?")):
+            # A saída pode ter sido interrompida pelo limite de tokens.
+            sentences.pop()
+        selected: list[str] = []
+        for sentence in sentences[:3]:
+            proposed = " ".join([*selected, sentence])
+            if len(proposed) > 360:
+                break
+            selected.append(sentence)
+        return " ".join(selected) if selected else GENERATION_ABSTENTION_MESSAGE
 
 
 @dataclass(frozen=True, slots=True)
