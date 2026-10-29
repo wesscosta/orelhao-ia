@@ -59,6 +59,10 @@ ruff check src/orelhao/services/knowledge src/orelhao/admin tests/knowledge test
 mypy src/orelhao/services/knowledge
 ```
 
+## Smoke test integrado com modelo local
+
+Após reinicializar o Admin experimental (`http://127.0.0.1:8765/workbench`), foi executada a pergunta **“Qual é a carga horária do curso Excel?”** em modo `observe`. O Tucano2 apresentou **30 horas**, NLI `SUPPORTED`, e o Fact Validator registrou `value_match` no JSONL; a interface exibiu a nova tabela sem falhas. Os endpoints locais de saúde retornaram Tucano2 e Piper disponíveis. Esse caso é uma verificação de integração, **não valida taxa de acurácia nem a reprodução acústica**.
+
 ## Próximos gates
 
 **PR-04:** orquestrador de decisão V3 com regras de precedência, falha segura e distinção entre fato **comprovadamente inconsistente** e fato **insuficientemente verificado**; medir impacto em falsos bloqueios, recuperação e falsas permissões sem afrouxar thresholds NLI. **PR-05/06:** revisão humana independente e holdout cego. Depois, validação no Dell i5-7500T de 8 GiB e fluxo de voz completo.
