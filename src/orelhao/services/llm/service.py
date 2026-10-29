@@ -10,6 +10,7 @@ from urllib.request import Request, urlopen
 from orelhao.config import LLMConfig
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .abstention import normalize_abstention
 from .prompts import SYSTEM_PROMPT
 
 INSUFFICIENT_CONTEXT = "INSUFFICIENT_CONTEXT"
@@ -41,6 +42,7 @@ class LLMCompletion:
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     tokens_per_second: float | None = None
+    raw_text: str | None = None
 
 
 class LocalOpenAICompatibleLLMService:
@@ -122,10 +124,11 @@ class LocalOpenAICompatibleLLMService:
             return value if isinstance(value, int) and not isinstance(value, bool) else None
         speed = timings.get("predicted_per_second") if isinstance(timings, dict) else None
         return LLMCompletion(
-            content.strip(),
+            normalize_abstention(content),
             prompt_tokens=integer_metric("prompt_tokens"),
             completion_tokens=integer_metric("completion_tokens"),
             tokens_per_second=float(speed) if isinstance(speed, (float, int)) and not isinstance(speed, bool) else None,
+            raw_text=content.strip(),
         )
 
     def _format_context(self, context: list[RetrievedContext]) -> str:

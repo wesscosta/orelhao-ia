@@ -50,3 +50,7 @@ leves e exige servidor previamente configurado em loopback. Sem pesos
 provisionados e sem benchmark no Dell, não há modelo vencedor.
 
 Consulte [plano de avaliação do OptiPlex](benchmark-optiplex-7050.md).
+
+## Etapa 1 pt-BR — 29/10/2026
+
+A branch de pesquisa `feat/ptbr-grounding-eval-stage1` implementa normalização conservadora de saída, seleção entre observação e bloqueio na bancada, e benchmark serial de Qwen3.5 0.8B e Tucano2-qwen-1.5B-Instruct com 20 casos sintéticos. **Nenhum modelo está homologado**. Persistem falhas diante de fontes conflitantes e lacunas temporais; não promover sem holdout e benchmark no Dell de 8 GB. [Relatório e execução](ptbr-grounding-stage1.md).

@@ -36,7 +36,17 @@ def split_factual_claims(answer: str, *, max_claims: int = MAX_CLAIMS) -> tuple[
     """Divide frases e cláusulas separadas por ponto-e-vírgula; excesso falha fechado."""
     if max_claims <= 0:
         raise ValueError("max_claims deve ser positivo")
-    pieces = re.split(r"(?<=[.!?;])\s+|\n+", answer.strip())
+    # Divide também contraposições e conjunções que introduzem uma nova
+    # oração com sujeito e verbo. Não divide enumerações simples.
+    patterns = (
+        r"(?<=[.!?;])\s+|(?<=;)(?=\S)|\n+"
+        r"|,\s*(?=(?:mas|porém|contudo|entretanto)\b)"
+        r"|\s+(?=(?:mas|porém|contudo|entretanto)\b)"
+        r"|\s+e\s+(?=(?:o|a|os|as)\s+\w+(?:\s+\w+){0,3}\s+"
+        r"(?:é|são|tem|têm|termina|terminam|começa|começam|funciona|"
+        r"funcionam|fica|ficam|será|serão|encerra|encerram|custa|custam)\b)"
+    )
+    pieces = re.split("".join(patterns), answer.strip(), flags=re.IGNORECASE)
     claims = tuple(piece.strip() for piece in pieces if piece.strip())
     return claims if len(claims) <= max_claims else ()
 

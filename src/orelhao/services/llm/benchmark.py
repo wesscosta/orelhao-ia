@@ -109,7 +109,8 @@ def evaluate(
                 checks.append(False)
             passed = all(checks) if checks else None
             rows.append({
-                "id": case.case_id, "response": result, "abstained": abstained,
+                "id": case.case_id, "response": result, "raw_response": completion.raw_text,
+                "abstained": abstained,
                 "passed_mechanical_checks": passed, "latency_ms": round(elapsed_ms, 2),
                 "prompt_tokens": completion.prompt_tokens,
                 "completion_tokens": completion.completion_tokens,
@@ -118,7 +119,8 @@ def evaluate(
             })
         except (RuntimeError, ValueError, OSError) as exc:
             rows.append({
-                "id": case.case_id, "response": None, "abstained": None,
+                "id": case.case_id, "response": None, "raw_response": None,
+                "abstained": None,
                 "passed_mechanical_checks": False,
                 "latency_ms": round((perf_counter() - start) * 1000.0, 2),
                 "prompt_tokens": None, "completion_tokens": None,

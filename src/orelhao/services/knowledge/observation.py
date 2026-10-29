@@ -193,7 +193,12 @@ class ObservationWorkbench:
         self.log = log
         self._policy = policy or GroundingPolicy()
 
-    def observe(self, question: str, *, limit: int = 8) -> GroundingObservation:
+    def observe(
+        self, question: str, *, limit: int = 8, mode: str | None = None
+    ) -> GroundingObservation:
+        effective_mode = mode or self._mode
+        if effective_mode not in {"observe", "enforce"}:
+            raise ValueError("mode deve ser observe ou enforce")
         clean_question = question.strip()
         if not clean_question:
             raise ValueError("pergunta não pode ser vazia")
@@ -222,7 +227,7 @@ class ObservationWorkbench:
         decision = assessment.decision
         presented = (
             GENERATION_ABSTENTION_MESSAGE
-            if self._mode == "enforce" and decision.should_abstain
+            if effective_mode == "enforce" and decision.should_abstain
             else answer
         )
 
@@ -252,7 +257,7 @@ class ObservationWorkbench:
             ),
             generator=type(self._answer_generator).__name__,
             generation_abstained=generation_abstained,
-            mode=self._mode,
+            mode=effective_mode,
         )
         self.log.append_observation(observation)
         return observation

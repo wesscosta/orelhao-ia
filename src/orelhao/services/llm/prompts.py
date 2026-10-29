@@ -8,6 +8,9 @@ datas, endereços, contatos, disponibilidade ou relações entre entidades.
 Se as evidências não responderem diretamente à pergunta, responda somente:
 INSUFFICIENT_CONTEXT
 
+Não explique que o dado está ausente e não redija variações desse marcador;
+retorne apenas o marcador acima, inclusive para preço, datas ou endereço ausentes.
+
 Quando houver suporte suficiente, produza no máximo três frases curtas em português brasileiro,
 sem Markdown, listas, títulos ou referências genéricas como "o contexto diz".
 """.strip()

@@ -383,12 +383,18 @@ def create_admin_app(
         prepare_stt()
         body = """
 <section class="card">
-<h2>Bancada de observação</h2>
-<p>Executa retrieval, LLM local e NLI. Nesta fase, o grounding <strong>não bloqueia</strong> a resposta apresentada.</p>
+<h2>Bancada de testes: RAG, LLM e grounding</h2>
+<p>Compare a resposta gerada e a decisão factual. O modo seguro bloqueia
+a resposta quando qualquer afirmação não for suportada.</p>
 <p id="llm-status" class="muted">Verificando LLM local...</p>
 <form method="post" action="/workbench/run">
 <label>Pergunta</label>
 <textarea id="question" name="question" style="min-height:110px" required></textarea>
+<label>Política da bancada</label>
+<select name="mode">
+<option value="observe">Observação: exibir a saída mesmo se não for suportada</option>
+<option value="enforce">Seguro: bloquear respostas sem suporte</option>
+</select>
 <button type="submit" id="run" disabled>Executar teste</button>
 <button type="button" id="record" disabled>Preparando STT...</button>
 </form>
@@ -522,9 +528,9 @@ function encodeWav(input, sampleRate) {
         )
 
     @app.post("/workbench/run", response_class=HTMLResponse)
-    async def run_workbench(question: str = Form(...)):
+    async def run_workbench(question: str = Form(...), mode: str = Form("observe")):
         try:
-            observation = get_workbench().observe(question)
+            observation = get_workbench().observe(question, mode=mode)
         except (RuntimeError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         decision = observation.grounding
@@ -535,6 +541,18 @@ function encodeWav(input, sampleRate) {
             f"<pre class='evidence'>{html.escape(item.text)}</pre></article>"
             for item in observation.evidence
         ) or "<p class='muted'>Nenhum chunk recuperado.</p>"
+        claim_rows = "".join(
+            f"<tr><td>{html.escape(item.claim)}</td>"
+            f"<td>{html.escape(item.decision.status.value.upper())}</td>"
+            f"<td>{item.decision.score:.4f}</td>"
+            f"<td>{html.escape(item.source or '—')}</td></tr>"
+            for item in observation.claims
+        )
+        policy_note = (
+            "Modo seguro: saída bloqueada quando grounding não permite resposta."
+            if observation.mode == "enforce"
+            else "Modo observação: saída mostrada para diagnóstico, mesmo se não suportada."
+        )
         body = f"""
 <section class="card">
 <h2>Resultado</h2>
@@ -542,11 +560,16 @@ function encodeWav(input, sampleRate) {
 <p><strong>Grounding:</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
 <span class="pill">NLI {decision.score:.6f}</span></p>
 <p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
-<p class="warn"><strong>Modo observação:</strong> a resposta abaixo foi apresentada mesmo quando a política recomenda abstenção.</p>
+<p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
 <h3>Resposta apresentada</h3>
 <p>{html.escape(observation.presented_answer)}</p>
 <audio controls src="/workbench/speech/{observation.observation_id}?text={quote(observation.presented_answer)}"></audio>
 <p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
+</section>
+<section class="card">
+<h2>Verificação por afirmação</h2>
+<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th></tr></thead>
+<tbody>{claim_rows or '<tr><td colspan="4">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
 </section>
 <section class="card">
 <h2>Avaliação humana</h2>

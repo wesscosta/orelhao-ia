@@ -127,3 +127,27 @@ def test_admin_records_human_rating(tmp_path: Path) -> None:
     payload = json.loads(log.path.read_text(encoding="utf-8"))
     assert payload["event"] == "human_rating"
     assert payload["diagnostic"] == "possible_false_positive"
+
+
+def test_admin_safe_policy_blocks_unsupported_answer(tmp_path: Path) -> None:
+    client, log = _client(tmp_path)
+    response = client.post(
+        "/workbench/run",
+        data={"question": "Qual é o horário?", "mode": "enforce"},
+    )
+    assert response.status_code == 200
+    assert "Modo seguro" in response.text
+    assert "Verificação por afirmação" in response.text
+    assert "Não encontrei evidências suficientes" in response.text
+    logged = json.loads(log.path.read_text(encoding="utf-8"))
+    assert logged["mode"] == "enforce"
+    assert logged["presented_answer"] != logged["answer"]
+
+
+def test_admin_rejects_invalid_policy(tmp_path: Path) -> None:
+    client, _ = _client(tmp_path)
+    response = client.post(
+        "/workbench/run",
+        data={"question": "Qual é o horário?", "mode": "invalid"},
+    )
+    assert response.status_code == 422

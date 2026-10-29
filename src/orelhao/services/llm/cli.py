@@ -17,6 +17,7 @@ def add_llm_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParse
     parser = subparsers.add_parser("llm-benchmark", help="avalia LLM local em casos versionados")
     parser.add_argument("dataset", type=Path)
     parser.add_argument("--model", help="alias do modelo já servido em localhost")
+    parser.add_argument("--base-url", help="URL da API local (loopback), por exemplo http://127.0.0.1:8081/v1")
     parser.add_argument("--max-tokens", type=int, default=96)
     parser.add_argument("--max-context-chars", type=int, default=1800)
     parser.add_argument("--server-pid", type=int, help="PID opcional do servidor no Linux")
@@ -29,6 +30,7 @@ def _run(args: argparse.Namespace) -> None:
     config = load_config(resolve_project_path(config_path)).llm
     config = config.model_copy(update={
         "model": args.model or config.model,
+        "base_url": args.base_url or config.base_url,
         "max_tokens": args.max_tokens,
         "max_context_chars": args.max_context_chars,
     })

@@ -390,3 +390,7 @@ por frase factual com modo `enforce` opt-in e um benchmark serial da LLM local
 Isso **não** significa que a alpha.14 ou o terminal físico estejam homologados.
 
 Consulte [plano de benchmark e gates](docs/benchmark-optiplex-7050.md).
+
+### Etapa experimental pt-BR e grounding (29/10/2026)
+
+A branch `feat/ptbr-grounding-eval-stage1` adiciona normalização de abstenção, modo seguro opt-in na bancada, dataset sintético de 20 casos e integração comparativa de Tucano2-qwen-1.5B-Instruct GGUF (pt-BR), sem promover modelos à produção. Veja [resultados, riscos e próximos gates](docs/ptbr-grounding-stage1.md).

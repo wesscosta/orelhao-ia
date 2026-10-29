@@ -107,3 +107,19 @@ def test_completion_preserves_server_usage(monkeypatch: pytest.MonkeyPatch) -> N
     assert completion.prompt_tokens == 33
     assert completion.completion_tokens == 7
     assert completion.tokens_per_second == 4.5
+
+
+def test_normalizes_llm_refusal_and_retains_original(monkeypatch: pytest.MonkeyPatch) -> None:
+    raw = "O valor não é especificado nas evidências fornecidas."
+
+    def fake_urlopen(request: Any, timeout: float) -> FakeResponse:
+        del request, timeout
+        return FakeResponse({"choices": [{"message": {"content": raw}}]})
+
+    monkeypatch.setattr(service_module, "urlopen", fake_urlopen)
+    service = LocalOpenAICompatibleLLMService(LLMConfig())
+    completion = service.generate_completion(
+        "Qual é o preço?", [RetrievedContext("O curso tem quatro meses.", "curso.md")]
+    )
+    assert completion.text == "INSUFFICIENT_CONTEXT"
+    assert completion.raw_text == raw

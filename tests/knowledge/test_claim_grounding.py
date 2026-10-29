@@ -51,3 +51,26 @@ def test_empty_or_excessive_answer_fails_closed() -> None:
 def test_no_evidence_fails_closed() -> None:
     result = assess_answer("O curso é gratuito.", [], FakeVerifier(), GroundingPolicy())
     assert result.decision.should_abstain
+
+
+def test_adversarial_joined_clauses_require_individual_support() -> None:
+    for answer in (
+        "O curso é gratuito, mas a inscrição encerra amanhã.",
+        "O curso é gratuito e as inscrições encerram amanhã.",
+        "O curso é gratuito;as inscrições encerram amanhã.",
+    ):
+        result = assess_answer(
+            answer,
+            [evidence("O curso é gratuito.", "curso.md")],
+            FakeVerifier(),
+            GroundingPolicy(),
+        )
+        assert len(result.claims) == 2
+        assert result.decision.should_abstain
+
+
+def test_does_not_split_simple_lists_or_prices() -> None:
+    assert split_factual_claims("Há unidades em Teresina e Parnaíba.") == (
+        "Há unidades em Teresina e Parnaíba.",
+    )
+    assert split_factual_claims("O valor é R$ 30,00.") == ("O valor é R$ 30,00.",)
