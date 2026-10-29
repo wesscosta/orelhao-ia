@@ -166,3 +166,55 @@ def test_llm_generator_does_not_cut_incomplete_sentence() -> None:
     )
     assert answer == "O balcão atende de segunda a sexta. O documento deve ter fotografia."
     assert len(answer) <= 360
+
+
+
+class CountingGenerator:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate(self, question: str, evidence: list[SearchResult]) -> str:
+        self.calls += 1
+        return "Há vagas hoje."
+
+
+def test_enforce_precheck_skips_llm_for_temporal_question(tmp_path: Path) -> None:
+    from orelhao.services.knowledge.answerability import EvidenceAdjudicator
+
+    generator = CountingGenerator()
+    log = ObservationLog(tmp_path / "grounding.jsonl")
+    bench = ObservationWorkbench(
+        StubRetriever(), generator, StubVerifier(0.9), log,
+        mode="enforce", adjudicator=EvidenceAdjudicator(),
+    )
+    observation = bench.observe("Há vagas hoje?")
+    assert observation.generation_skipped
+    assert generator.calls == 0
+    assert observation.answerability is not None
+    assert not observation.answerability.decision.answerable
+    assert observation.presented_answer == observation.answer
+    data = json.loads(log.path.read_text())
+    assert data["answerability"]["reason"] == "temporal_evidence_unavailable"
+    assert data["generation_skipped"]
+
+
+def test_observe_precheck_preserves_diagnostic_llm_generation(tmp_path: Path) -> None:
+    from orelhao.services.knowledge.answerability import EvidenceAdjudicator
+
+    generator = CountingGenerator()
+
+    class PermissiveVerifier:
+        def support_score(self, query: str, passage: str) -> float:
+            return 0.1
+
+    bench = ObservationWorkbench(
+        StubRetriever(), generator, PermissiveVerifier(),
+        ObservationLog(tmp_path / "log.jsonl"),
+        adjudicator=EvidenceAdjudicator(),
+    )
+    observation = bench.observe("Há vagas hoje?")
+    assert generator.calls == 1
+    assert not observation.generation_skipped
+    assert observation.answerability is not None
+    assert not observation.answerability.decision.answerable
+    assert observation.presented_answer == "Há vagas hoje."

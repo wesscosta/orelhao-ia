@@ -552,6 +552,21 @@ function encodeWav(input, sampleRate) {
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         decision = observation.grounding
         status_class = "ok" if decision.allows_response else "warn"
+        precheck = observation.answerability
+        if precheck is None:
+            precheck_html = "<p>Gate de answerability não habilitado nesta bancada.</p>"
+        else:
+            pre_status = "SEM IMPEDIMENTO DETECTADO" if precheck.decision.answerable else "ABSTENÇÃO"
+            pre_reason = precheck.decision.reason.value if precheck.decision.reason else "—"
+            precheck_html = (
+                f"<p><strong>Answerability pré-geração:</strong> "
+                f"{html.escape(pre_status)} "
+                f"<span class='pill'>{html.escape(pre_reason)}</span></p>"
+                f"<p>Fontes admitidas: {len(precheck.admissible_chunk_ids)}"
+                f" · conflitos: {len(precheck.conflicting_chunk_ids)}"
+                f" · verificação específica: {str(precheck.verified_specific_answer).lower()}"
+                f" · geração ignorada: {str(observation.generation_skipped).lower()}</p>"
+            )
         evidence = "".join(
             f"<article class='card'><strong>{html.escape(item.source)}</strong> "
             f"<span class='pill'>retrieval {item.score:.4f}</span>"
@@ -562,7 +577,8 @@ function encodeWav(input, sampleRate) {
             f"<tr><td>{html.escape(item.claim)}</td>"
             f"<td>{html.escape(item.decision.status.value.upper())}</td>"
             f"<td>{item.decision.score:.4f}</td>"
-            f"<td>{html.escape(item.source or '—')}</td></tr>"
+            f"<td>{html.escape(item.source or '—')}</td>"
+            f"<td>{html.escape(item.chunk_id or '—')}</td></tr>"
             for item in observation.claims
         )
         policy_note = (
@@ -615,6 +631,7 @@ function encodeWav(input, sampleRate) {
 <section class="card">
 <h2>Resultado</h2>
 <p><strong>Pergunta:</strong> {html.escape(observation.question)}</p>
+{precheck_html}
 <p><strong>Grounding:</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
 <span class="pill">NLI {decision.score:.6f}</span></p>
 <p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
@@ -622,12 +639,12 @@ function encodeWav(input, sampleRate) {
 <h3>Resposta apresentada</h3>
 <p>{html.escape(observation.presented_answer)}</p>
 {speech_controls}
-<p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
+<p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · adjudicação={observation.latency.adjudication_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
 </section>
 <section class="card">
 <h2>Verificação por afirmação</h2>
-<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th></tr></thead>
-<tbody>{claim_rows or '<tr><td colspan="4">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
+<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th></tr></thead>
+<tbody>{claim_rows or '<tr><td colspan="5">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
 </section>
 <section class="card">
 <h2>Avaliação humana</h2>

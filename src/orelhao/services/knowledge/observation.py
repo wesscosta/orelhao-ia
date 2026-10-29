@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import unicodedata
@@ -10,11 +11,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 from typing import ClassVar, Protocol
+from zoneinfo import ZoneInfo
 
 from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .answerability import EvidenceAdjudicator, EvidenceAssessment
 from .claim_grounding import ClaimAssessment, assess_answer
 from .evidence import (
     EvidenceVerifier,
@@ -117,6 +120,7 @@ class ObservationLatency:
     generation_ms: float
     grounding_ms: float
     total_ms: float
+    adjudication_ms: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,10 +137,14 @@ class GroundingObservation:
     generator: str
     generation_abstained: bool
     mode: str = "observe"
+    answerability: EvidenceAssessment | None = None
+    generation_skipped: bool = False
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
         payload["grounding"] = self.grounding.as_dict()
+        if self.answerability is not None:
+            payload["answerability"] = self.answerability.as_dict()
         return payload
 
 
@@ -214,6 +222,7 @@ class ObservationWorkbench:
         *,
         policy: GroundingPolicy | None = None,
         mode: str = "observe",
+        adjudicator: EvidenceAdjudicator | None = None,
     ) -> None:
         if mode not in {"observe", "enforce"}:
             raise ValueError("mode deve ser observe ou enforce")
@@ -223,6 +232,7 @@ class ObservationWorkbench:
         self._verifier = verifier
         self.log = log
         self._policy = policy or GroundingPolicy()
+        self._adjudicator = adjudicator
 
     def observe(
         self, question: str, *, limit: int = 8, mode: str | None = None
@@ -242,23 +252,53 @@ class ObservationWorkbench:
         retrieval_ms = _elapsed_ms(started)
 
         started = perf_counter()
-        answer = self._answer_generator.generate(clean_question, results).strip()
+        precheck = (
+            self._adjudicator.assess(clean_question, results, as_of=datetime.now(
+                ZoneInfo(os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza"))
+            ).date())
+            if self._adjudicator is not None else None
+        )
+        adjudication_ms = _elapsed_ms(started)
+        blocked_before_generation = bool(
+            precheck is not None and not precheck.decision.answerable
+            and effective_mode == "enforce"
+        )
+
+        started = perf_counter()
+        if blocked_before_generation:
+            assert precheck is not None
+            answer = precheck.decision.message_pt_br() or GENERATION_ABSTENTION_MESSAGE
+        else:
+            eligible = (
+                [r for r in results if r.chunk.id in precheck.admissible_chunk_ids]
+                if precheck is not None and precheck.decision.answerable
+                and effective_mode == "enforce" else results
+            )
+            answer = self._answer_generator.generate(clean_question, eligible).strip()
         generation_ms = _elapsed_ms(started)
         if not answer:
             raise RuntimeError("gerador produziu resposta vazia")
 
-        generation_abstained = answer == GENERATION_ABSTENTION_MESSAGE
+        generation_abstained = blocked_before_generation or answer == GENERATION_ABSTENTION_MESSAGE
         started = perf_counter()
+        eligible_evidence = (
+            [r for r in results if r.chunk.id in precheck.admissible_chunk_ids]
+            if precheck is not None and precheck.decision.answerable else results
+        )
         assessment = (
-            assess_answer("", results, self._verifier, self._policy)
+            assess_answer("", eligible_evidence, self._verifier, self._policy)
             if generation_abstained
-            else assess_answer(answer, results, self._verifier, self._policy)
+            else assess_answer(answer, eligible_evidence, self._verifier, self._policy)
         )
         grounding_ms = _elapsed_ms(started)
         decision = assessment.decision
         presented = (
             GENERATION_ABSTENTION_MESSAGE
-            if effective_mode == "enforce" and decision.should_abstain
+            if effective_mode == "enforce" and (
+                decision.should_abstain or (
+                    precheck is not None and not precheck.decision.answerable
+                )
+            ) and not blocked_before_generation
             else answer
         )
 
@@ -285,10 +325,13 @@ class ObservationWorkbench:
                 generation_ms=generation_ms,
                 grounding_ms=grounding_ms,
                 total_ms=_elapsed_ms(total_started),
+                adjudication_ms=adjudication_ms,
             ),
             generator=type(self._answer_generator).__name__,
             generation_abstained=generation_abstained,
             mode=effective_mode,
+            answerability=precheck,
+            generation_skipped=blocked_before_generation,
         )
         self.log.append_observation(observation)
         return observation
@@ -310,6 +353,7 @@ def build_default_observation_workbench(
         OnnxNliEvidenceVerifier(model_dir),
         ObservationLog(log_path or index_dir.parent / "observations" / "grounding.jsonl"),
         mode=mode,
+        adjudicator=EvidenceAdjudicator(),
     )
 
 

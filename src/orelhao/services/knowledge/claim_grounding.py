@@ -24,6 +24,7 @@ class ClaimAssessment:
     claim: str
     decision: GroundingDecision
     source: str | None
+    chunk_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,12 +65,16 @@ def assess_answer(
     for claim in claims:
         best_score = 0.0
         source: str | None = None
+        chunk_id: str | None = None
         for result in evidence:
             score = verifier.support_score(claim, result.chunk.text)
             if score > best_score:
                 best_score = score
                 source = result.chunk.source
-        evaluations.append(ClaimAssessment(claim, policy.decide(best_score), source))
+                chunk_id = result.chunk.id
+        evaluations.append(
+            ClaimAssessment(claim, policy.decide(best_score), source, chunk_id)
+        )
     # O elo mais fraco determina a decisão. Uma frase não sustentada bloqueia o todo.
     return AnswerAssessment(
         policy.decide(min(item.decision.score for item in evaluations)),

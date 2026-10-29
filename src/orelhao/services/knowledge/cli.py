@@ -6,6 +6,7 @@ from pathlib import Path
 
 from orelhao.runtime_paths import resolve_project_path
 
+from .answerability_evaluation import evaluate_answerability, load_answerability_cases
 from .context import ContextBuilder
 from .evaluation import evaluate_retriever, evaluate_retriever_detailed, load_evaluation_cases
 from .evidence import (
@@ -118,6 +119,17 @@ def add_knowledge_parser(
     evidence_evaluate.add_argument("--json", action="store_true", dest="as_json")
     evidence_evaluate.set_defaults(handler=_evidence_evaluate)
 
+    answerability_evaluate = actions.add_parser(
+        "answerability-evaluate",
+        help="avalia bloqueio pré-geração em evidências sintéticas anotadas",
+    )
+    answerability_evaluate.add_argument(
+        "dataset", type=Path, help="dataset JSON com perguntas, fontes e rótulos"
+    )
+    answerability_evaluate.add_argument("--json", action="store_true", dest="as_json")
+    answerability_evaluate.add_argument("--diagnostics", action="store_true")
+    answerability_evaluate.set_defaults(handler=_answerability_evaluate)
+
     search = actions.add_parser("search", help="consulta o índice local")
     search.add_argument("query", help="pergunta/consulta")
     search.add_argument("--limit", type=int, default=4)
@@ -148,6 +160,31 @@ def add_knowledge_parser(
         help="expõe o resultado de cada caso para diagnóstico de divergências",
     )
     evaluate.set_defaults(handler=_evaluate)
+
+
+def _answerability_evaluate(args: argparse.Namespace) -> None:
+    import json
+
+    cases = load_answerability_cases(args.dataset)
+    report = evaluate_answerability(cases)
+    if args.as_json:
+        payload = report if args.diagnostics else {
+            "summary": report["summary"], "categories": report["categories"],
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    summary = report["summary"]
+    assert isinstance(summary, dict)
+    for metric in ("cases", "tp", "tn", "fp", "fn", "precision", "recall",
+                   "specificity", "false_allow_rate", "false_block_rate",
+                   "latency_p50_ms", "latency_p95_ms"):
+        print(f"{metric}: {summary[metric]}")
+    if args.diagnostics:
+        results = report["results"]
+        assert isinstance(results, list)
+        for item in results:
+            assert isinstance(item, dict)
+            print(f"{item['id']}: {item['correct']} | {item['reason']}")
 
 
 def _index(args: argparse.Namespace) -> None:

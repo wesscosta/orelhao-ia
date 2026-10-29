@@ -184,3 +184,38 @@ def test_workbench_speech_uses_presented_answer_in_safe_mode(tmp_path: Path) -> 
     assert log.presented_answer_for(observation["observation_id"]) == observation["presented_answer"]
     response = client.get(f"/workbench/speech/{observation['observation_id']}")
     assert response.status_code == 200
+
+
+
+def test_admin_precheck_enforce_blocks_llm_and_tts_reads_only_safe_answer(
+    tmp_path: Path,
+) -> None:
+    from orelhao.services.knowledge.answerability import EvidenceAdjudicator
+
+    class NeverGenerator:
+        def generate(self, question: str, evidence: list[SearchResult]) -> str:
+            raise AssertionError("LLM não deve ser chamada sem evidência atual")
+
+    log = ObservationLog(tmp_path / "observations.jsonl")
+    workbench = ObservationWorkbench(
+        StubRetriever(), NeverGenerator(), StubVerifier(), log,
+        adjudicator=EvidenceAdjudicator(),
+    )
+    paths = KnowledgePaths(tmp_path / "sources", tmp_path / "index")
+    client = TestClient(create_admin_app(
+        paths, workbench=workbench, stt=StubSTT(), tts=StubTTS()
+    ))
+    response = client.post(
+        "/workbench/run",
+        data={"question": "Há vagas disponíveis hoje?", "mode": "enforce"},
+    )
+    assert response.status_code == 200
+    assert "Answerability pré-geração" in response.text
+    assert "temporal_evidence_unavailable" in response.text
+    assert "geração ignorada: true" in response.text
+    row = json.loads(log.path.read_text(encoding="utf-8"))
+    assert row["generation_skipped"]
+    assert row["answerability"]["reason"] == "temporal_evidence_unavailable"
+    assert client.get(
+        f"/workbench/speech/{row['observation_id']}"
+    ).status_code == 200

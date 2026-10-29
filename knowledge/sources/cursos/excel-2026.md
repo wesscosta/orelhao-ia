@@ -1,6 +1,7 @@
 ---
 title: "Excel — catálogo e unidades consultadas em outubro de 2026"
 category: cursos
+entity_id: curso:excel
 authority: primary
 temporal: true
 retrieved_at: "2026-10-29"

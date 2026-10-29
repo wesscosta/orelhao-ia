@@ -74,3 +74,13 @@ def test_does_not_split_simple_lists_or_prices() -> None:
         "Há unidades em Teresina e Parnaíba.",
     )
     assert split_factual_claims("O valor é R$ 30,00.") == ("O valor é R$ 30,00.",)
+
+
+
+def test_each_claim_records_supporting_chunk() -> None:
+    result = assess_answer(
+        "O curso é gratuito.", [evidence("O curso é gratuito.", "curso.md")],
+        FakeVerifier(), GroundingPolicy(),
+    )
+    assert result.decision.allows_response
+    assert result.claims[0].chunk_id == "curso.md"

@@ -413,3 +413,12 @@ com unidades, contatos centrais, catálogo de Informática Básica/Excel/Excel A
 e editais PSG. A revisão tem proveniência e data de consulta nas fontes; **não**
 comprova vagas ou matrículas abertas em tempo real. O benchmark congelado não
 foi alterado. [Relatório da atualização e resultados de avaliação](docs/knowledge-refresh-senac-pi-2026-10-29.md).
+
+### Etapa 2 experimental — gate de answerability antes da geração (29/10/2026)
+
+Na branch `feat/answerability-grounding-stage2-20261029`, o RAG passou a
+identificar restrições explícitas de entidade, tempo e escopo e a registrar
+motivos de abstenção antes da LLM. O modo `enforce` evita geração quando há
+impedimento verificável; o modo `observe` preserva diagnóstico. Há avaliação
+por CLI com 120 casos **sintéticos** (não homologação).
+[Relatório de implementação, métricas e limitações](docs/implementation-answerability-stage2-2026-10-29.md).
