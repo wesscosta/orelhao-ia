@@ -2,7 +2,7 @@
 
 **Terminal conversacional de voz offline-first**, modular e reutilizável para atendimento a diferentes instituições e domínios de conhecimento. A implantação piloto utiliza documentos oficiais do Senac Piauí; o core não depende dessa instituição.
 
-> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`feat/live-grounding-gate-20261029`](https://github.com/wesscosta/orelhao-ia/tree/feat/live-grounding-gate-20261029), commit `2c0495a`. **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
+> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`feat/grounding-v3-fact-validator-20261029`](https://github.com/wesscosta/orelhao-ia/tree/feat/grounding-v3-fact-validator-20261029). **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
 
 ## Funcionalidades implementadas e limites
 
@@ -17,7 +17,7 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Arch Linux, Python 3.14) | **216 testes aprovados** e 1 aviso de depreciação |
+| Pytest (Arch Linux, Python 3.14) | **250 testes aprovados** e 1 aviso de depreciação |
 | Ruff / Mypy | Sem erros no escopo analisado |
 | Corpus Senac Piauí | **18 documentos informativos, 36 chunks** |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
@@ -72,6 +72,10 @@ O primeiro incremento da nova etapa adiciona **auditoria triclasse do NLI** e cl
 ### PR-02 — Evidence Span Extraction (29/10/2026)
 
 A linha experimental do Grounding V3 passou a registrar **trechos literais do chunk com offsets verificáveis** em cada avaliação de afirmação e na bancada. Uma auditoria com o NLI ONNX comparou chunks inteiros com passagens curtas: 48 pares, 23 scores maiores, 24 menores e 1 estável. **Sem alteração da política factual ou promoção de modelo.** Consulte [PR-02 e diagnóstico](docs/grounding-v3-pr02-evidence-spans-2026-10-29.md).
+
+### PR-03 — Fact Validator (29/10/2026)
+
+O Grounding V3 passou a registrar comparações **diagnósticas** de valores, horas, idade mínima, prazos, vagas, telefones e datas, sob escopo de entidade/unidade/vigência. Sem alteração de thresholds nem do comportamento de aprovação. A auditoria retrospectiva encontrou 14 correspondências tipadas em 48 claims arquivadas; isso **não** é medida de acurácia. Consulte [relatório PR-03](docs/grounding-v3-pr03-fact-validator-2026-10-29.md).
 
 ## Alvo de hardware e próximos gates
 

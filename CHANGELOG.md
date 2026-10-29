@@ -2,6 +2,10 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Grounding V3 — PR-03 experimental (29/10/2026; não é release)
+
+Nova extração e verificação factual tipada de números, prazos e entidades, com diagnóstico na bancada, regressão preservada e sem alteração de gates de autorização. 250 testes aprovados no Arch. Ver [relatório PR-03](docs/grounding-v3-pr03-fact-validator-2026-10-29.md).
+
 ## Unreleased — branch experimental 29/10/2026 (NÃO é v0.6.0-alpha.14 lançada)
 
 - `2c0495a`: 40 perguntas naturalísticas, Tucano2 × Qwen3.5 com resultados rastreáveis; filtro de entidades sobrepostas, proteção contra mistura Excel/Excel Avançado e revisão factual de ofertas de Informática Básica; **NO-GO** para operação física, com 216 testes Pytest aprovados.

@@ -598,6 +598,16 @@ function encodeWav(input, sampleRate) {
             f"<td>{_render_evidence_span(item.span_selection)}</td></tr>"
             for item in observation.claims
         )
+        fact_rows = "".join(
+            f"<tr><td>{html.escape(item.fact.literal)}</td>"
+            f"<td>{html.escape(item.fact.kind.value)}</td>"
+            f"<td>{html.escape(item.status.value)}</td>"
+            f"<td>{html.escape(item.source or '—')} "
+            f"<small>{'[' + str(item.source_start) + ':' + str(item.source_end) + ']' if item.source_start is not None else ''}</small></td>"
+            f"<td>{html.escape(item.explanation)}</td></tr>"
+            for assessment in observation.fact_validations
+            for item in assessment.checks
+        )
         policy_note = (
             "Modo seguro: saída bloqueada quando grounding não permite resposta."
             if observation.mode == "enforce"
@@ -664,6 +674,14 @@ function encodeWav(input, sampleRate) {
 semântica nem alteram a decisão do NLI.</p>
 <table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th><th>Trecho candidato</th></tr></thead>
 <tbody>{claim_rows or '<tr><td colspan="6">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
+</section>
+<section class="card">
+<h2>Fact Validator V3 — diagnóstico</h2>
+<p class="muted">Compara atributos explícitos e escopos de fontes primárias; não
+comprova a afirmação inteira e não altera a autorização de respostas.</p>
+<table><thead><tr><th>Valor mencionado</th><th>Atributo</th><th>Resultado</th>
+<th>Fonte</th><th>Justificativa</th></tr></thead>
+<tbody>{fact_rows or '<tr><td colspan="5">Nenhum atributo tipado identificado.</td></tr>'}</tbody></table>
 </section>
 <section class="card">
 <h2>Avaliação humana</h2>

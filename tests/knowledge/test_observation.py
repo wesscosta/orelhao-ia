@@ -53,7 +53,9 @@ def test_workbench_observes_without_blocking_answer(tmp_path: Path) -> None:
     assert result.presented_answer == result.answer
     assert result.mode == "observe"
     assert result.latency.total_ms >= 0
+    assert result.fact_validations[0].status.value == "not_applicable"
     payload = json.loads(log.path.read_text(encoding="utf-8"))
+    assert payload["fact_validations"][0]["enforced"] is False
     assert payload["event"] == "observation"
     assert payload["presented_answer"] == result.answer
 
@@ -267,3 +269,46 @@ def test_enforce_does_not_trust_nli_for_wrong_named_entity(tmp_path: Path) -> No
     assert result.presented_answer == GENERATION_ABSTENTION_MESSAGE
     assert result.answerability is not None
     assert result.answerability.constraints.entity_id == "curso:excel"
+
+
+
+def test_fact_validator_reports_wrong_duration_without_overriding_nli(
+    tmp_path: Path,
+) -> None:
+    class CourseRetriever:
+        def search(self, query: str, *, limit: int = 8) -> list[SearchResult]:
+            del query, limit
+            return [SearchResult(
+                Chunk(
+                    "excel:0", "excel", "O curso Excel tem 30 horas.",
+                    "excel.md", 0, {
+                        "entity_id": "curso:excel",
+                        "authority": "primary",
+                        "source_url": "https://example.org/cursos/excel",
+                    },
+                ), 0.95,
+            )]
+
+    class WrongDurationGenerator:
+        def generate(self, question: str, evidence: list[SearchResult]) -> str:
+            del question, evidence
+            return "O curso Excel tem 60 horas."
+
+    class MisleadingNLI:
+        def support_score(self, query: str, passage: str) -> float:
+            del query, passage
+            return 0.99
+
+    workbench = ObservationWorkbench(
+        CourseRetriever(), WrongDurationGenerator(), MisleadingNLI(),
+        ObservationLog(tmp_path / "facts.jsonl"), mode="enforce",
+    )
+    result = workbench.observe("Quantas horas tem Excel?", mode="enforce")
+    assert result.grounding.allows_response
+    assert result.fact_validations[0].status.value == "value_mismatch"
+    assert result.fact_validations[0].checks[0].supporting_literal == "30 horas"
+    # O PR-03 é estritamente diagnóstico. O PR-04 fará a decisão combinada.
+    assert result.presented_answer == "O curso Excel tem 60 horas."
+    row = json.loads((tmp_path / "facts.jsonl").read_text())
+    assert row["fact_validations"][0]["enforced"] is False
+    assert row["fact_validations"][0]["full_claim_verified"] is False

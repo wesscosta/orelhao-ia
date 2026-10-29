@@ -24,6 +24,7 @@ from .evidence import (
     OnnxNliEvidenceVerifier,
     evidence_model_directory,
 )
+from .fact_validation import FactValidation, validate_claim_facts
 from .grounding_decision import GroundingDecision, GroundingPolicy
 from .models import SearchResult
 from .query_constraints import explicitly_named_entities
@@ -141,10 +142,14 @@ class GroundingObservation:
     answerability: EvidenceAssessment | None = None
     generation_skipped: bool = False
     answer_entity_mismatch: bool = False
+    fact_validations: tuple[FactValidation, ...] = ()
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
         payload["grounding"] = self.grounding.as_dict()
+        payload["fact_validations"] = [
+            result.as_dict() for result in self.fact_validations
+        ]
         payload["claims"] = [
             {
                 **asdict(claim),
@@ -259,15 +264,16 @@ class ObservationWorkbench:
             raise ValueError("limit deve ser maior que zero")
 
         total_started = perf_counter()
+        as_of = datetime.now(
+            ZoneInfo(os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza"))
+        ).date()
         started = perf_counter()
         results = self._retriever.search(clean_question, limit=limit)
         retrieval_ms = _elapsed_ms(started)
 
         started = perf_counter()
         precheck = (
-            self._adjudicator.assess(clean_question, results, as_of=datetime.now(
-                ZoneInfo(os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza"))
-            ).date())
+            self._adjudicator.assess(clean_question, results, as_of=as_of)
             if self._adjudicator is not None else None
         )
         adjudication_ms = _elapsed_ms(started)
@@ -301,6 +307,17 @@ class ObservationWorkbench:
             assess_answer("", eligible_evidence, self._verifier, self._policy)
             if generation_abstained
             else assess_answer(answer, eligible_evidence, self._verifier, self._policy)
+        )
+        fact_validations = tuple(
+            validate_claim_facts(
+                item.claim, eligible_evidence, as_of=as_of,
+                entity_id=precheck.constraints.entity_id if precheck else None,
+                unit_id=precheck.constraints.unit_id if precheck else None,
+                requires_current_state=(
+                    precheck.constraints.requires_current_state if precheck else False
+                ),
+            )
+            for item in assessment.claims
         )
         grounding_ms = _elapsed_ms(started)
         decision = assessment.decision
@@ -359,6 +376,7 @@ class ObservationWorkbench:
             answerability=precheck,
             generation_skipped=blocked_before_generation,
             answer_entity_mismatch=answer_entity_mismatch,
+            fact_validations=fact_validations,
         )
         self.log.append_observation(observation)
         return observation

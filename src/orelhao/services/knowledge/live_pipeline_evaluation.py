@@ -107,6 +107,7 @@ def assess_live_case(case: LiveCase, obs: GroundingObservation) -> dict[str, Any
         "grounding_status": obs.grounding.status.value,
         "grounding_score": obs.grounding.score,
         "generation_skipped": obs.generation_skipped,
+        "fact_validations": [fact.as_dict() for fact in obs.fact_validations],
         "answer": obs.answer,
         "presented_answer": obs.presented_answer,
         "evidence_sources": [e.source for e in obs.evidence],

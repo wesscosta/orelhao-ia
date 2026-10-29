@@ -60,7 +60,7 @@ def explicitly_named_entities(question: str, known_entities: Iterable[str]) -> t
         label = normalize(label)
         if not label:
             continue
-        for match in re.finditer(r"(?<!\\w)" + re.escape(label) + r"(?!\\w)", normalized):
+        for match in re.finditer(r"(?<!\w)" + re.escape(label) + r"(?!\w)", normalized):
             candidates.append((match.start(), match.end(), identity))
     occupied: list[tuple[int, int]] = []
     selected: set[str] = set()

@@ -1,6 +1,6 @@
 # Estado técnico vigente — Orelhão IA
 
-**Revisado em:** 29/10/2026. **Fonte:** código, configuração, testes e benchmark da branch `feat/live-grounding-gate-20261029`, commit `2c0495a`. Este arquivo consolida o estado verificável da linha experimental, **não constitui homologação ou nova release**.
+**Revisado em:** 29/10/2026. **Fonte:** código, configuração e testes da branch `feat/grounding-v3-fact-validator-20261029` (desenvolvimento experimental cumulativo, PR-01 a PR-03). Este arquivo consolida o estado verificável da linha experimental, **não constitui homologação ou nova release**.
 
 ## Identificação e promoção
 
@@ -8,10 +8,10 @@
 |---|---|
 | Última tag Git de release encontrada | `v0.3.10` (baseline histórica de voz) |
 | Base da `main` | `351aacd` — linha v0.6.0-alpha.13 (verificar antes de promover) |
-| Branch experimental mais recente | `feat/live-grounding-gate-20261029` |
-| Commit experimental | `2c0495a` |
-| Suíte de testes, Arch Python 3.14 | **216 aprovados**, 1 aviso de depreciação de Starlette |
-| Lint e tipagem | Ruff aprovado; Mypy aprovado em 37 arquivos, conforme gate da branch |
+| Branch experimental mais recente | `feat/grounding-v3-fact-validator-20261029` |
+| Commit experimental | HEAD da branch acima (ver histórico Git) |
+| Suíte de testes, Arch Python 3.14 | **250 aprovados**, 1 aviso de depreciação de Starlette |
+| Lint e tipagem | Ruff aprovado; Mypy aprovado em 35 arquivos da camada Knowledge |
 | Conhecimento Senac PI indexado | **18 documentos, 36 chunks** (após revisão de Informática Básica) |
 | Resultado operacional | **NO-GO** para uso público e terminal físico; teste Dell 8 GB e revisão humana faltantes |
 
@@ -26,6 +26,10 @@ Os indicadores da tabela abaixo continuam sendo o **baseline anterior à impleme
 ### Grounding V3 — PR-02 (29/10/2026)
 
 A branch experimental `feat/grounding-v3-evidence-spans-20261029` implementou **Evidence Span Extraction** (offsets Unicode dentro de `Chunk.text`), seleção lexical independente do score NLI, observabilidade do trecho por claim e script comparativo do NLI do chunk versus passagem. **235 testes** passaram nesta branch; 48 pares auditados (23 scores aumentaram, 24 diminuíram, 1 estável). As decisões de ALLOW/ABSTAIN e os thresholds permanecem inalterados. Consulte [relatório do PR-02](grounding-v3-pr02-evidence-spans-2026-10-29.md). As métricas anteriores de falsos bloqueios continuam sendo o baseline histórico, não um resultado novo de homologação.
+
+### Grounding V3 — PR-03 (29/10/2026)
+
+O **Fact Validator** em `fact_extraction.py` e `fact_validation.py` identifica fatos numéricos explícitos e registra coincidência, divergência, ambiguidade e insuficiência de fonte, com escopo de entidade, unidade, data e proveniência. **250 testes** aprovados, Ruff/Mypy sem erros. Em avaliação retrospectiva de 48 claims: 14 coincidências tipadas, 33 afirmações sem padrão tipado e uma sem fonte admissível. Isso não constitui validação semântica ou revisão humana; o novo resultado **não participa da decisão ALLOW/ABSTAIN** até PR-04. Consulte [relatório PR-03](grounding-v3-pr03-fact-validator-2026-10-29.md).
 
 ## O que realmente existe
 

@@ -2,6 +2,10 @@
 
 **Atualização: 29/10/2026.** A versão inicial da interface foi entregue na v0.4; a bancada incorporou posteriormente a LLM local, o NLI, o gate de answerability e a reprodução por Piper. Consulte [Estado vigente](current-state.md).
 
+## Diagnósticos Grounding V3 (PR-03)
+
+A bancada exibe comparações de valores explícitos entre a resposta e as fontes primárias recuperadas, com resultado por atributo, proveniência e offsets. Os estados de valor **não modificam** a decisão do NLI nem a fala apresentada. Consulte [Fact Validator PR-03](grounding-v3-pr03-fact-validator-2026-10-29.md).
+
 ## Requisitos e execução
 
 ```bash
