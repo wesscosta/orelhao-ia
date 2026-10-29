@@ -17,6 +17,12 @@
 
 **Importante:** `v0.6.0-alpha.14` aparece em planos e experimentos como rótulo de trabalho, mas **não foi criada tag, release ou aprovação da alpha.14**. A branch não foi mesclada na `main`. Não igualar último commit experimental a versão publicada.
 
+## Desenvolvimento em andamento — Grounding V3 (29/10/2026)
+
+A branch experimental `feat/grounding-v3-diagnostics-20261029` iniciou o **PR-01**, a auditoria diagnóstica do NLI. Foram expostas as três probabilidades (`entailment`, `neutral`, `contradiction`) respeitando os IDs da revisão pinada. O script `scripts/audit_grounding_v3.py` reproduziu 48 avaliações de claims dos relatórios de Tucano2 e Qwen sem alterar a decisão de suporte ou thresholds. **Não é release nem homologação**. Consulte o [relatório do PR-01](grounding-v3-pr01-nli-diagnostics-2026-10-29.md).
+
+Os indicadores da tabela abaixo continuam sendo o **baseline anterior à implementação V3**, e não métricas de progresso de acurácia ou aprovação do novo gate.
+
 ## O que realmente existe
 
 - **Áudio:** captura PipeWire, VAD, STT local faster-whisper pt-BR e Piper TTS, com comandos de diagnóstico e `--voice-test`. O teste de voz histórico `STT → TTS` não demonstra fluxo `STT → RAG → LLM → TTS` autônomo.

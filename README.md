@@ -65,6 +65,10 @@ python scripts/run_live_grounding_gate.py \
   --output /tmp/orelhao-grounding-report.json
 ```
 
+## Grounding V3 — implementação iniciada
+
+O primeiro incremento da nova etapa adiciona **auditoria triclasse do NLI** e classificação reproduzível de falhas de retrieval, pré-gate e pós-gate. Não modifica thresholds nem promove modelos. Consulte [PR-01 e resultados do NLI](docs/grounding-v3-pr01-nli-diagnostics-2026-10-29.md) e [estado técnico](docs/current-state.md). O quadro de qualidade acima continua sendo o baseline anterior à V3.
+
 ## Alvo de hardware e próximos gates
 
 O piloto está restrito ao **Dell OptiPlex 7050 Micro**, i5-7500T (4 núcleos/4 threads), **8 GiB RAM fixos**, SSD ~256 GB, Ubuntu Server 24.04 LTS minimal e inferência CPU. Desempenho da máquina Arch Linux **não substitui benchmark no Dell**. Ainda faltam validação humana independente, redução de falsos bloqueios, integração autônoma de voz e integração eletrônica do monofone, teclado e gancho.

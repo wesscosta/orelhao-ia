@@ -156,6 +156,11 @@ def test_nli_verifier_uses_passage_as_premise_and_entailment_logit(
 
     assert encoded_pairs == [("passagem", "afirmação")]
     assert score == pytest.approx(0.8438, abs=0.0001)
+    probabilities = verifier.classify("afirmação", "passagem")
+    assert probabilities.entailment == pytest.approx(score)
+    assert probabilities.neutral == pytest.approx(0.1142, abs=0.0002)
+    assert probabilities.contradiction == pytest.approx(0.042, abs=0.0002)
+    assert len(encoded_pairs) == 2
 
 
 def test_provision_evidence_model_keeps_variants_side_by_side(

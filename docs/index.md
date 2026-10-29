@@ -28,6 +28,7 @@ Revisão editorial: **29/10/2026**. Este é o ponto de entrada para documentaç�
 | [Etapa pt-BR inicial](ptbr-grounding-stage1.md) | 20 casos sintéticos | comparação exploratória |
 | [Plano Etapa 2](plan-grounding-answerability-stage2.md) | proposta aprovada anteriormente | requisitos e gates originais |
 | [Implementação Etapa 2](implementation-answerability-stage2-2026-10-29.md) | 210 testes naquela etapa | pré-gate de evidência |
+| [Grounding V3 — PR-01: auditoria NLI](grounding-v3-pr01-nli-diagnostics-2026-10-29.md) | 29/10/2026, diagnóstico triclasse sem mudança de decisão | primeira entrega da próxima etapa, **não homologada** |
 | [Gate adversarial mais recente](benchmark-grounding-real-2026-10-29.md) | 216 testes, 18/36, NO-GO | avaliação Tucano2 × Qwen |
 | [Fila de revisão](review-grounding-real-2026-10-29.md) | 15 casos sinalizados | trabalho humano pendente |
 | [README anterior à consolidação](history/README-before-consolidation-2026-10-29.md) | narrativa antiga integral | rastreabilidade, **não vigente** |
