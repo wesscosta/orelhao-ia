@@ -1,5 +1,7 @@
 # Hardware
 
+> **VERIFICAÇÃO — 29/10/2026.** As restrições do Dell de 8 GiB continuam válidas. Não foram realizados ensaios físicos de monofone, gancho, teclado ou boot autônomo até o último commit experimental. Ver [Estado vigente](current-state.md) e [plano de operação](operations.md).
+
 ## Decisão vigente — 28/10/2026
 
 A primeira instalação e o piloto do Orelhão IA utilizarão **somente**

@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Checkpoint DEPOIS da ingestão de cursos, ANTES da correção de Informática Básica: 18 documentos e 35 chunks. O índice posterior registra 18/36. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Atualização da base de conhecimento — Senac Piauí (29/10/2026)
 
 ## Escopo e proveniência

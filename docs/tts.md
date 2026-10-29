@@ -1,40 +1,26 @@
-# TTS local — v0.3.0
+# TTS local com Piper — síntese em pt-BR
 
-## Objetivo
-Fechar o ciclo local `fala → STT → texto → TTS → áudio`, sem LLM/RAG nesta etapa.
+**Atualizado em 29/10/2026.** O backend Piper já funciona na bancada administrativa. A integração física com o monofone e a operação autônoma continuam pendentes. Veja [estado vigente](current-state.md).
 
-## Backend
-A implementação usa Piper por processo local, atrás de `TTSService`. O binário e o modelo devem ser provisionados previamente na appliance. Não há dependência de rede durante a síntese.
+## Backend e provisionamento
 
-## Testes manuais
-```bash
-orelhao --tts-test "Olá, eu sou o assistente virtual do Senac."
-orelhao --voice-test
-```
-
-## Critério de aceite
-- síntese em português com modelo local provisionado;
-- reprodução pelo Audio Engine;
-- métricas de tempo de síntese e RTF;
-- `voice-test` executa captura → STT → TTS → playback;
-- nenhuma API externa no caminho crítico.
-
-## Observação de áudio
-A v0.3 aumenta `silence_ms` para 1600 ms, reduzindo cortes em pausas naturais observados na validação da v0.2.2. A homologação final do VAD será feita com o transdutor do monofone.
-
-
-## Provisionamento da voz PT-BR
-
-A referência atual é `pt_BR-cadu-medium`, uma voz Piper de qualidade medium. Os pesos não são versionados no Git.
+`TTSService` usa processo local Piper, preferencialmente a voz `pt_BR-cadu-medium`. O provisionamento antecede a operação offline; os arquivos `.onnx`, `.onnx.json` e `MODEL_CARD` não devem ser commitados.
 
 ```bash
 pip install -e '.[tts]'
 orelhao --tts-provision
-orelhao --tts-test "Olá, eu sou o assistente virtual do Senac."
+orelhao --tts-test "Olá, este é um teste de voz do Orelhão IA."
+orelhao --voice-test
 ```
 
-O provisionamento baixa o `.onnx`, o `.onnx.json` e o `MODEL_CARD`. Em produção, esse passo ocorre antes da instalação; a síntese não depende de internet.
+## Correção da bancada em outubro de 2026
 
-## Dispositivos de áudio
+O serviço resolve o executável Piper instalado junto ao interpretador do `venv`, mesmo quando o comando `.venv/bin/orelhao admin` é executado sem ativar explicitamente o PATH. Na bancada, `/workbench/tts-status` informa disponibilidade e o botão **Ouvir resposta** inicia síntese. O endpoint `/workbench/speech/{observation_id}` utiliza a resposta apresentada de uma observação registrada, **não o texto de uma query string**.
 
-Índices PortAudio podem mudar após reboot/hotplug. Para a appliance, configure entrada/saída por nome estável. Use `orelhao --list-audio-devices` e copie o nome do dispositivo desejado para `input_device`/`output_device`.
+O teste real no Arch confirmou WAV mono a 22.050 Hz com sinal não silencioso. Essa observação não comprova inteligibilidade, alto-falante físico ou latência no Dell. Detalhes: [correção da voz](workbench-voice-fix-2026-10-29.md).
+
+## Dispositivos e limites
+
+Os índices PortAudio mudam entre reinicializações: preferir nomes estáveis e conferir com `orelhao --list-audio-devices`. É necessário validar interface USB, pinagem, impedância do monofone, aterramento, latência e reprodução após retirada do gancho.
+
+O comando `--voice-test` cobre o fluxo histórico de STT → TTS, não o pipeline de RAG/LLM completo. O navegador pode impedir autoplay sem clique. Operação física autônoma é meta de MVP ainda aberta.

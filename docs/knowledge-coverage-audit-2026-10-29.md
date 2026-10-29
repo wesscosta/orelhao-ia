@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Checkpoint ANTES da atualização do corpus: 14 documentos e 23 chunks. Atualmente, a linha experimental contém 18 documentos e 36 chunks. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Auditoria de cobertura da base Senac Piauí — 29/10/2026
 
 **Natureza:** diagnóstico baseado no corpus local, não uma atualização de fatos institucionais. Este arquivo deve permanecer **fora** de `knowledge/sources`, para não ser indexado como evidência.

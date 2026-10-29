@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Último benchmark documental disponível; seus rótulos continuam assistidos por IA e não houve homologação humana. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Gate factual adversarial — execução com modelos reais (29/10/2026)
 
 **Situação: IMPLEMENTAÇÃO E MEDIÇÃO CONCLUÍDAS; HOMOLOGAÇÃO REPROVADA (NO-GO).**

@@ -1,56 +1,59 @@
-# LLM local — v0.6.0-alpha.13
+# LLM local e grounding — operação experimental
 
-A bancada usa um servidor de inferência local compatível com a rota OpenAI `POST /v1/chat/completions`. O cliente rejeita hosts externos e aceita apenas `127.0.0.1`, `localhost` ou `::1` por HTTP.
+**Atualizado em 29/10/2026.** A evolução da alpha.13 passou por implementação do pré-gate e pelo benchmark adversarial, mas **não existe release alpha.14 homologada**. Estado, modelos e erros conhecidos: [Estado vigente](current-state.md), [gate adversarial](benchmark-grounding-real-2026-10-29.md).
 
-## Contrato operacional
+## Runtime
 
-O servidor e o modelo são dependências da implantação. A aplicação não baixa pesos durante o atendimento e não inicia processos externos silenciosamente. O exemplo abaixo pressupõe um GGUF já provisionado:
-
-```bash
-llama-server \
-  --model /caminho/absoluto/modelo-instruct.gguf \
-  --alias local-model \
-  --host 127.0.0.1 \
-  --port 8080 \
-  --ctx-size 4096 \
-  --n-gpu-layers auto
-```
-
-O `llama.cpp` documenta `llama-server` como servidor com Chat Completions compatível com OpenAI. Por padrão, ele usa `127.0.0.1:8080`; `--alias` define o identificador exposto por `/v1/models` e usado pela aplicação.
-
-Confirme antes de abrir o Admin:
+O Orelhão IA utiliza cliente HTTP compatível com `POST /v1/chat/completions`, restrito a `127.0.0.1`, `localhost` ou `::1`. O `llama-server` é um serviço **externo ao processo Python** e precisa estar iniciado antes da bancada. Exemplo CPU conservador:
 
 ```bash
-curl -s http://127.0.0.1:8080/v1/models | python -m json.tool
+llama-server --model /caminho/absoluto/modelo.gguf \
+  --alias tucano-ptbr --host 127.0.0.1 --port 8081 \
+  --ctx-size 2048 --threads 3 --n-gpu-layers 0
+curl -s http://127.0.0.1:8081/v1/models | python -m json.tool
+
+ORELHAO_CONFIG=config/benchmark-tucano2-15b-ptbr.yaml orelhao admin
 ```
 
-O ID retornado deve coincidir com `llm.model` em `config/development.yaml` ou `config/production.yaml`.
+A configuração de benchmark utiliza `llm.model: tucano-ptbr`, `base_url: http://127.0.0.1:8081/v1`, `max_tokens: 96`, `max_context_chars: 1800`, `temperature: 0.1` e timeout de 45 segundos. Configurações distintas são possíveis; sempre confira o alias de `/v1/models`. Modelos não são baixados automaticamente pelo atendimento.
 
-## Política de geração
+## Geração e verificação
 
-A LLM recebe somente os chunks recuperados, com fonte e texto, limitada a 6.000 caracteres. A configuração padrão usa temperatura `0.1`, até 180 tokens e timeout de 45 segundos. A saída deve ter no máximo três frases sem Markdown.
+```text
+Pergunta → Retrieval → EvidenceAdjudicator → LLM → claims/NLI → GroundingPolicy → presented_answer
+```
 
-Se as evidências não responderem diretamente à pergunta, a LLM deve retornar exatamente `INSUFFICIENT_CONTEXT`. O adaptador converte esse sentinel em uma mensagem segura e o grounding recebe score zero. A indisponibilidade da LLM produz erro explícito; não há fallback silencioso para o gerador extrativo.
+- **Pré-gate:** verifica ausência de fontes, entidade/unidade, temporalidade de estado atual e conflitos nos metadados estruturados. Em `enforce`, pode **não chamar a LLM**.
+- **LLM:** recebe somente contexto admissível no modo seguro. Gera resposta curta fundamentada no corpus e usa `INSUFFICIENT_CONTEXT` quando não encontra resposta; o sentinel é convertido em abstenção local.
+- **Pós-gate:** separação determinística de afirmações, maior score de suporte por chunk, mínimo entre claims e decisão de três estados. `UNCERTAIN` e `UNSUPPORTED` bloqueiam a resposta no modo seguro; a voz só sintetiza `presented_answer`.
+- **Entidade:** IDs documentais reduzem mistura entre nomes sobrepostos; resposta mencionando outra entidade conhecida pode ser bloqueada mesmo com score alto de NLI.
+- **Limitações:** não se garante atomicidade de proposições compostas nem identificação universal de entidades/contradições em prosa. `SUPPORTED` não é certificação de fato verdadeiro.
 
-Esta etapa permanece em modo de observação. A alpha.14 deverá decompor respostas em afirmações e exigir suporte para todas antes de ativar o gate fail-closed.
+Os thresholds NLI continuam **congelados**, `unsupported < 0.1250362694` e `supported >= 0.7557643056`. Não retocar com base nos casos de desenvolvimento.
 
+## Modelos observados
 
-## Desenvolvimento experimental posterior à alpha.13 (branch, não release)
+| Modelo | Status na máquina Arch de desenvolvimento |
+|---|---|
+| Tucano2-qwen-1.5B-Instruct Q4_K_M | candidato pt-BR preferido para próximas avaliações; 8/20 bloqueios indevidos em dataset naturalístico |
+| Qwen3.5-0.8B Q4_K_M | mais rápido no Arch, porém 10/20 bloqueios indevidos e duas respostas NLI-supported sem âncoras esperadas |
 
-A alpha.14 experimental inclui `assess_answer`, que divide uma resposta
-em frases e verifica cada uma com NLI contra os chunks recuperados. O menor
-score determina `GroundingDecision`; em `ObservationWorkbench(mode="enforce")`,
-`UNSUPPORTED` ou `UNCERTAIN` substituem a saída exibida por abstenção.
-O modo `observe` permanece padrão e registra decisões por frase e fonte.
-Este verificador é conservador, mas a decomposição por frases não garante
-atomicidade semântica quando há várias proposições na mesma frase.
+Nenhum possui aprovação de produção, e não foi realizado benchmark completo no Dell 8GB. Os 20 casos iniciais de LLM eram sintéticos. O dataset novo de 40 perguntas foi curado por IA e usado para corrigir o projeto, **não é holdout cego**.
 
-O comando `orelhao llm-benchmark` prepara comparações seriais de candidatos
-leves e exige servidor previamente configurado em loopback. Sem pesos
-provisionados e sem benchmark no Dell, não há modelo vencedor.
+## Execução de avaliação
 
-Consulte [plano de avaliação do OptiPlex](benchmark-optiplex-7050.md).
+```bash
+orelhao llm-benchmark knowledge/evaluation/llm-ptbr-v1.json \
+  --base-url http://127.0.0.1:8081/v1 --model tucano-ptbr \
+  --max-tokens 96 --max-context-chars 1800 \
+  --output /tmp/llm-ptbr.json
 
-## Etapa 1 pt-BR — 29/10/2026
+python scripts/run_live_grounding_gate.py \
+  --config config/benchmark-tucano2-15b-ptbr.yaml \
+  --dataset knowledge/evaluation/grounding-real-senac-pi-v1.json \
+  --output /tmp/grounding-tucano.json
+```
 
-A branch de pesquisa `feat/ptbr-grounding-eval-stage1` implementa normalização conservadora de saída, seleção entre observação e bloqueio na bancada, e benchmark serial de Qwen3.5 0.8B e Tucano2-qwen-1.5B-Instruct com 20 casos sintéticos. **Nenhum modelo está homologado**. Persistem falhas diante de fontes conflitantes e lacunas temporais; não promover sem holdout e benchmark no Dell de 8 GB. [Relatório e execução](ptbr-grounding-stage1.md).
+**Atenção:** `llm-benchmark` testa respostas da LLM com contextos fornecidos; o segundo script testa retrieval → pré-gate → LLM → NLI, mas não integra STT/TTS do monofone.
+
+Relatórios: [etapa pt-BR inicial](ptbr-grounding-stage1.md), [implementação do pré-gate](implementation-answerability-stage2-2026-10-29.md), [comparação realística](benchmark-grounding-real-2026-10-29.md), [plano do Dell](benchmark-optiplex-7050.md).

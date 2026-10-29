@@ -1,3 +1,18 @@
+# Conhecimento — estado experimental em 29/10/2026
+
+> O índice de desenvolvimento atual contém **18 fontes documentais indexáveis e 36 chunks**. As métricas históricas listadas abaixo pertencem a checkpoints anteriores, e o arquivo `knowledge/index/` é derivado e ignorado pelo Git. A base do Senac PI é um domínio de demonstração; não há integração automática para oferta de vagas em tempo real. Consulte [Estado vigente](../docs/current-state.md) e [Benchmark de grounding](../docs/benchmark-grounding-real-2026-10-29.md).
+
+## Datasets adicionais e limitações
+
+- `evaluation/retrieval-refresh-2026-10.json`: 17 consultas de retrieval após atualização do corpus, com abstenção de 0,20 nesse conjunto.
+- `evaluation/answerability-stage2-{dev,holdout}.json`: 60+60 casos sintéticos gerados por templates; não são holdout humano independente.
+- `evaluation/grounding-real-senac-pi-v1.json`: 40 perguntas naturalísticas curadas com apoio de IA para comparar pipeline realístico.
+- `evaluation/results/grounding-{tucano2,qwen35}-2026-10-29.json`: respostas completas, fontes e decisões por caso, sem dados de visitantes reais. Não tratar métricas automáticas como homologação.
+- `observations/`: perguntas potencialmente sensíveis ficam locais, fora do controle de versão.
+- `sources/`: informar URL e vigência quando aplicável. `retrieved_at` isolado nunca comprova vaga disponível.
+
+## Convenções históricas da camada Knowledge
+
 # Base de conhecimento
 
 - `sources/`: fonte da verdade editável da implantação. Markdown (`.md`) é o formato preferencial; `.txt` também é aceito nesta etapa.

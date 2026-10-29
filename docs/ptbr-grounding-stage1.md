@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Etapa experimental anterior ao gate de 40 perguntas. Os benchmarks de 20 casos não descrevem o estado final do sistema. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Etapa 1 — LLM pt-BR, abstenção e bancada de grounding (29/10/2026)
 
 **Status:** implementação experimental concluída na branch `feat/ptbr-grounding-eval-stage1`; não homologada nem promovida à main.

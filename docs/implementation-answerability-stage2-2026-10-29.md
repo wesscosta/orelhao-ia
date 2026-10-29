@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Relatório de implementação da etapa anterior (210 testes naquele checkpoint). O benchmark subsequente identificou 8/20 falsos bloqueios no Tucano2. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Implementação experimental — Etapa 2: Answerability e Grounding Adversarial
 
 **Data:** 29/10/2026

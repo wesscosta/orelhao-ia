@@ -1,3 +1,11 @@
+# Modelos locais — política atual de provisionamento
+
+**Atualizado em 29/10/2026.** O atendimento experimental consome LLM servida separadamente por `llama-server` em loopback. Foram comparados **Tucano2-qwen-1.5B-Instruct GGUF** e **Qwen3.5-0.8B GGUF**, ambos em CPU na máquina Arch de desenvolvimento e sem homologação no Dell de 8 GiB. O NLI `multilingual-MiniLMv2-L6-mnli-xnli` ONNX e o Piper `pt_BR-cadu-medium` continuam locais. Peso de modelo, checksum de artefato e origem devem ser conferidos no deploy; nenhum peso deve ser versionado.
+
+Veja [LLM e gates](../docs/llm.md), [estado vigente](../docs/current-state.md) e [benchmarks](../docs/benchmark-grounding-real-2026-10-29.md).
+
+## Instruções históricas e modelos candidatos
+
 # Modelos locais
 
 Não versionar pesos de modelos neste repositório.

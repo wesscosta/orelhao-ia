@@ -1,5 +1,7 @@
 # RAG / Knowledge — baseline v0.5.0 e experimento v0.6
 
+> **ATUALIZAÇÃO OPERACIONAL — 29/10/2026.** As seções históricas v0.5/v0.6-alpha.1–13 abaixo descrevem o que existia em cada checkpoint, não o funcionamento vigente. O corpus experimental atual tem **18 documentos e 36 chunks**. O pré-gate de answerability e o filtro por entidade foram implementados posteriormente, e o benchmark factual de 40 perguntas decidiu **NO-GO**. Consultar [Estado vigente](current-state.md), [Implementação de answerability](implementation-answerability-stage2-2026-10-29.md) e [Benchmark realístico](benchmark-grounding-real-2026-10-29.md).
+
 A camada de conhecimento é independente do domínio da implantação e opera localmente no caminho crítico.
 
 ## Implementação consolidada
@@ -265,7 +267,7 @@ demais scores           -> uncertain
 
 `GroundingDecision.allows_response` é verdadeiro apenas para `supported`. Os estados `unsupported` e `uncertain` são fail-closed. O relatório NLI expõe os limites, a contagem por estado e a decisão de cada caso nos diagnósticos. O contrato permanece isolado: ainda não filtra retrieval nem controla geração ou voz.
 
-## Bancada em modo observação da v0.6.0-alpha.12
+## Bancada em modo observação da v0.6.0-alpha.12 — HISTÓRICO
 
 A rota `/workbench` do Admin executa o primeiro fluxo integrado experimental:
 
@@ -291,7 +293,7 @@ Ao abrir a bancada, o modelo STT passa a ser preparado em segundo plano; o botã
 
 A resposta extrativa deixa de enviar um chunk Markdown inteiro ao TTS. O fallback seleciona no máximo duas frases relevantes, remove marcação e limita o texto a 360 caracteres. O NLI compara essa resposta separadamente contra cada chunk recuperado e utiliza o maior suporte, preservando a semântica do benchmark de pares afirmação/premissa.
 
-## LLM local em observação na v0.6.0-alpha.13
+## LLM local em observação na v0.6.0-alpha.13 — HISTÓRICO
 
 A bancada substitui o fallback extrativo padrão por `LocalLLMAnswerGenerator`. Os `SearchResult` são convertidos em evidências identificadas e enviados a um servidor estritamente local compatível com `POST /v1/chat/completions`.
 

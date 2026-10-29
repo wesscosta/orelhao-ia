@@ -1,5 +1,7 @@
 # Audio Engine — v0.1
 
+> **ATUALIZAÇÃO OPERACIONAL — 29/10/2026.** Os trechos marcados v0.1/v0.2/v0.3 são HISTÓRICOS. Hoje o backend de captura usado no benchmark é PipeWire/`pw-record`, com VAD `webrtc`, 16 kHz mono no pipeline e configuração de silêncio em `1800ms`. `RMS` permanece como fallback/diagnóstico. A homologação no monofone físico e a sessão de voz completa com RAG/LLM continuam pendentes. Consulte [Entrada de voz](voice-input.md) e [Estado vigente](current-state.md).
+
 ## Objetivo
 Validar o caminho físico de voz antes de adicionar STT, LLM ou RAG reais.
 

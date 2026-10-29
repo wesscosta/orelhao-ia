@@ -1,3 +1,18 @@
+# Histórico de alterações — releases e desenvolvimento experimental
+
+> **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
+
+## Unreleased — branch experimental 29/10/2026 (NÃO é v0.6.0-alpha.14 lançada)
+
+- `2c0495a`: 40 perguntas naturalísticas, Tucano2 × Qwen3.5 com resultados rastreáveis; filtro de entidades sobrepostas, proteção contra mistura Excel/Excel Avançado e revisão factual de ofertas de Informática Básica; **NO-GO** para operação física, com 216 testes Pytest aprovados.
+- `f98e6d2`: answerability pré-geração, conflito de fatos estruturados, restrições temporais e 120 casos sintéticos de contrato; experimental.
+- `547a936`: ampliação da base Senac PI, 18 documentos e 35 chunks naquele checkpoint; depois 18/36 com correção factual.
+- `28a36f2`: saída Piper restaurada na bancada, com controle explícito de voz.
+- `3867df6` e `a8396d2`: comparação inicial pt-BR, abstenção e respostas completas.
+- A `main` não foi alterada por essa sequência de branches. Falta revisão humana independente, teste de ponta a ponta com áudio real e medição no Dell.
+
+## Histórico das alphas anteriores — preservado abaixo
+
 ## 0.6.0-alpha.13
 
 - adiciona configuração própria para uma LLM local, com temperatura, limite de tokens, contexto e timeout;

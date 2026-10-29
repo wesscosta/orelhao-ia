@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Registro de correção de áudio na bancada. O teste real verificou WAV, mas não o monofone físico. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Correção de áudio da bancada — 29/10/2026
 
 **Status:** implementada e verificada no Arch Linux, branch `fix/workbench-voice-output`. Não é homologação do Orelhão físico.

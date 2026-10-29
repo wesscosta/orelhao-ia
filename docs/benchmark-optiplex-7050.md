@@ -1,5 +1,7 @@
 # Plano de avaliação de LLMs — Dell OptiPlex 7050 Micro (2026-10-28)
 
+> **STATUS ATUALIZADO — 29/10/2026.** O benchmark deste documento é um PLANO para o Dell 7050 i5-7500T/8 GiB; ainda não foi executado nesse hardware. No Arch Linux, Tucano2 e Qwen foram comparados com 40 perguntas factuais, com **8/20 e 10/20 falsos bloqueios** respectivamente. Ambos permanecem **não homologados**. Não confundir a lista de candidatos planejados com modelos provisionados ou aprovados. Ver [Estado vigente](current-state.md) e [Relatório do gate](benchmark-grounding-real-2026-10-29.md).
+
 ## Restrição fixa
 
 - Dell OptiPlex 7050 Micro, Intel Core i5-7500T (4 núcleos/4 threads), 8 GiB de RAM instalada e armazenamento da classe 256 GB.

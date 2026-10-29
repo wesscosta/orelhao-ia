@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Plano proposto ANTES da implementação. Itens T0–T5 foram parcialmente implementados; validação humana independente e gate Dell seguem pendentes. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Plano técnico — Etapa 2: Answerability e Grounding Adversarial
 
 **Projeto:** Orelhão IA | **Proposta de marco:** v0.6.0-alpha.14 (sujeito à revisão da sequência de releases)

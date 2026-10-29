@@ -1,3 +1,5 @@
+> **TIPO: REGISTRO DATADO / HISTÓRICO.** Fila de revisão humana ainda não concluída; não classificar resultados automaticamente como homologados. Para o estado consolidado e as métricas mais recentes, consulte [Estado vigente](current-state.md). Preservar os resultados originais para rastreabilidade.
+
 # Fila de adjudicação humana — Orelhão IA
 
 29/10/2026. NÃO revisado por humanos; rótulos provisórios criados com auxílio de IA.
