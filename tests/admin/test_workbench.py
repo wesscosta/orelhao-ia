@@ -91,6 +91,7 @@ def test_admin_prepares_stt_before_recording(tmp_path: Path) -> None:
     assert payload["status"] == "ready"
     llm_status = client.get("/workbench/llm-status").json()
     assert llm_status["available"]
+    assert 'id="tts-status"' in response.text
 
 
 def test_admin_transcribes_wav_and_synthesizes_answer(tmp_path: Path) -> None:
@@ -106,9 +107,16 @@ def test_admin_transcribes_wav_and_synthesizes_answer(tmp_path: Path) -> None:
     assert response.status_code == 200
     assert response.json()["text"] == "Qual é o horário?"
 
-    response = client.get("/workbench/speech/test", params={"text": "Resposta"})
+    result = client.post("/workbench/run", data={"question": "Qual é o horário?"})
+    assert result.status_code == 200
+    assert "Ouvir resposta" in result.text
+    assert "spoken-status" in result.text
+    observation = json.loads((tmp_path / "observations.jsonl").read_text(encoding="utf-8"))
+    response = client.get(f"/workbench/speech/{observation['observation_id']}")
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
+    assert response.headers["cache-control"] == "no-store"
+    assert response.content.startswith(b"RIFF")
 
 
 def test_admin_records_human_rating(tmp_path: Path) -> None:
@@ -151,3 +159,28 @@ def test_admin_rejects_invalid_policy(tmp_path: Path) -> None:
         data={"question": "Qual é o horário?", "mode": "invalid"},
     )
     assert response.status_code == 422
+
+def test_workbench_tts_status_and_rejects_arbitrary_speech(tmp_path: Path) -> None:
+    client, _ = _client(tmp_path)
+    status = client.get("/workbench/tts-status")
+    assert status.status_code == 200
+    assert status.json()["available"] is True
+
+    invalid = client.get("/workbench/speech/unknown", params={"text": "não autorizado"})
+    assert invalid.status_code == 404
+    missing = client.get("/workbench/speech/" + "f" * 32)
+    assert missing.status_code == 404
+
+
+def test_workbench_speech_uses_presented_answer_in_safe_mode(tmp_path: Path) -> None:
+    client, log = _client(tmp_path)
+    result = client.post(
+        "/workbench/run",
+        data={"question": "Qual é o horário?", "mode": "enforce"},
+    )
+    assert result.status_code == 200
+    observation = json.loads(log.path.read_text(encoding="utf-8"))
+    assert observation["presented_answer"] != observation["answer"]
+    assert log.presented_answer_for(observation["observation_id"]) == observation["presented_answer"]
+    response = client.get(f"/workbench/speech/{observation['observation_id']}")
+    assert response.status_code == 200

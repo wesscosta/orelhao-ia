@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -42,9 +43,22 @@ class PiperTTSService:
     def __init__(self, config: TTSConfig) -> None:
         self.config = config
 
+    def _executable(self) -> str:
+        """Resolução estável inclusive quando o CLI não ativou o ambiente virtual."""
+        configured = self.config.executable
+        found = shutil.which(configured)
+        if found is not None:
+            return found
+        if Path(configured).name == configured:
+            candidate = Path(sys.executable).parent / configured
+            if candidate.is_file() and candidate.stat().st_mode & 0o111:
+                return str(candidate)
+        raise RuntimeError(
+            f"Piper não encontrado no PATH ou no ambiente Python: {configured!r}"
+        )
+
     def validate(self) -> None:
-        if shutil.which(self.config.executable) is None:
-            raise RuntimeError(f"Piper não encontrado no PATH: {self.config.executable!r}")
+        self._executable()
         model = resolve_project_path(self.config.model)
         config = resolve_project_path(self.config.config) if self.config.config else None
         if not model.is_file():
@@ -63,7 +77,7 @@ class PiperTTSService:
             wav = Path(tmp) / "speech.wav"
             model = resolve_project_path(self.config.model)
             model_config = resolve_project_path(self.config.config) if self.config.config else None
-            cmd = [self.config.executable, "--model", str(model), "--output_file", str(wav)]
+            cmd = [self._executable(), "--model", str(model), "--output_file", str(wav)]
             if model_config is not None:
                 cmd += ["--config", str(model_config)]
             if self.config.speaker is not None:
@@ -83,6 +97,8 @@ class PiperTTSService:
                 input=clean + "\n",
                 text=True,
                 capture_output=True,
+                check=False,
+                timeout=45,
             )
 
             elapsed = perf_counter() - started

@@ -152,6 +152,27 @@ class ObservationLog:
     def append_observation(self, observation: GroundingObservation) -> None:
         self._append({"event": "observation", **observation.as_dict()})
 
+    def presented_answer_for(self, observation_id: str) -> str | None:
+        """Resolve áudio somente de uma observação legítima já registrada."""
+        if re.fullmatch(r"[0-9a-f]{32}", observation_id) is None:
+            return None
+        try:
+            with self.path.open(encoding="utf-8") as stream:
+                for line in stream:
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if (
+                        payload.get("event") == "observation"
+                        and payload.get("observation_id") == observation_id
+                    ):
+                        answer = payload.get("presented_answer")
+                        return answer if isinstance(answer, str) and answer else None
+        except FileNotFoundError:
+            return None
+        return None
+
     def append_rating(
         self,
         observation_id: str,

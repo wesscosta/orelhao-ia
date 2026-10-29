@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import subprocess
 import threading
 from pathlib import Path
 from time import perf_counter
@@ -28,9 +29,11 @@ from orelhao.services.tts.service import PiperTTSService, TTSService
 try:
     from fastapi import FastAPI, File, Form, HTTPException, UploadFile
     from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+    from starlette.concurrency import run_in_threadpool
 except ImportError:  # pacote base continua utilizável sem o extra [admin]
     FastAPI = File = Form = HTTPException = UploadFile = None
     HTMLResponse = JSONResponse = RedirectResponse = Response = None
+    run_in_threadpool = None
 
 from .source_manager import (
     MAX_SOURCE_BYTES,
@@ -387,6 +390,7 @@ def create_admin_app(
 <p>Compare a resposta gerada e a decisão factual. O modo seguro bloqueia
 a resposta quando qualquer afirmação não for suportada.</p>
 <p id="llm-status" class="muted">Verificando LLM local...</p>
+<p id="tts-status" class="muted">Verificando voz local...</p>
 <form method="post" action="/workbench/run">
 <label>Pergunta</label>
 <textarea id="question" name="question" style="min-height:110px" required></textarea>
@@ -405,7 +409,20 @@ const recordButton = document.getElementById('record');
 const statusBox = document.getElementById('voice-status');
 const runButton = document.getElementById('run');
 const llmStatusBox = document.getElementById('llm-status');
+const ttsStatusBox = document.getElementById('tts-status');
 let audioContext, processor, source, stream, samples = [], stopTimer;
+async function updateTtsStatus() {
+  try {
+    const response = await fetch('/workbench/tts-status');
+    const payload = await response.json();
+    ttsStatusBox.textContent = payload.available
+      ? 'Voz pt-BR pronta: ' + payload.detail
+      : 'Voz indisponível: ' + payload.detail;
+  } catch (error) {
+    ttsStatusBox.textContent = 'Não foi possível verificar a voz: ' + error.message;
+  }
+}
+updateTtsStatus();
 async function updateLlmStatus() {
   const response = await fetch('/workbench/llm-status');
   const payload = await response.json();
@@ -553,6 +570,47 @@ function encodeWav(input, sampleRate) {
             if observation.mode == "enforce"
             else "Modo observação: saída mostrada para diagnóstico, mesmo se não suportada."
         )
+        speech_controls = """
+<button type="button" id="speak-answer">Ouvir resposta</button>
+<audio id="spoken-answer" controls preload="none" hidden></audio>
+<p id="spoken-status" class="muted" role="status">Clique em Ouvir resposta para sintetizar a voz em pt-BR.</p>
+<script>
+(() => {
+  const button = document.getElementById('speak-answer');
+  const player = document.getElementById('spoken-answer');
+  const status = document.getElementById('spoken-status');
+  let currentUrl = null;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    status.textContent = 'Gerando áudio com Piper...';
+    try {
+      const response = await fetch('/workbench/speech/__OBSERVATION_ID__');
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || 'Falha HTTP ' + response.status);
+      }
+      if (currentUrl) URL.revokeObjectURL(currentUrl);
+      currentUrl = URL.createObjectURL(await response.blob());
+      player.src = currentUrl;
+      player.hidden = false;
+      try {
+        await player.play();
+        status.textContent = 'Reproduzindo resposta em português brasileiro.';
+      } catch (_) {
+        status.textContent = 'Áudio pronto. Clique no botão de reprodução do player.';
+      }
+    } catch (error) {
+      status.textContent = 'Não foi possível gerar áudio: ' + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+  });
+})();
+</script>
+""".replace("__OBSERVATION_ID__", observation.observation_id)
         body = f"""
 <section class="card">
 <h2>Resultado</h2>
@@ -563,7 +621,7 @@ function encodeWav(input, sampleRate) {
 <p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
 <h3>Resposta apresentada</h3>
 <p>{html.escape(observation.presented_answer)}</p>
-<audio controls src="/workbench/speech/{observation.observation_id}?text={quote(observation.presented_answer)}"></audio>
+{speech_controls}
 <p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
 </section>
 <section class="card">
@@ -645,13 +703,30 @@ function encodeWav(input, sampleRate) {
             }
         )
 
-    @app.get("/workbench/speech/{observation_id}", response_class=Response)
-    async def synthesize_workbench(observation_id: str, text: str):
-        del observation_id
+    @app.get("/workbench/tts-status", response_class=JSONResponse)
+    async def tts_status():
         try:
-            audio = get_tts().synthesize(text)
+            service = get_tts()
+            check = getattr(service, "validate", None)
+            if callable(check):
+                check()
+            return JSONResponse({"available": True, "detail": "Piper pronto para síntese"})
         except (RuntimeError, ValueError) as exc:
-            raise HTTPException(status_code=422, detail=str(exc)) from exc
-        return Response(content=audio.to_wav_bytes(), media_type="audio/wav")
+            return JSONResponse({"available": False, "detail": str(exc)})
+
+    @app.get("/workbench/speech/{observation_id}", response_class=Response)
+    async def synthesize_workbench(observation_id: str):
+        answer = get_workbench().log.presented_answer_for(observation_id)
+        if answer is None:
+            raise HTTPException(status_code=404, detail="Observação não encontrada")
+        try:
+            audio = await run_in_threadpool(get_tts().synthesize, answer)
+        except (RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
+            raise HTTPException(status_code=422, detail=f"Falha de síntese de voz: {exc}") from exc
+        return Response(
+            content=audio.to_wav_bytes(),
+            media_type="audio/wav",
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
 
     return app

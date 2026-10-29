@@ -12,6 +12,6 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -e '.[dev,admin,vad,tts]'
-      - run: ruff check src/orelhao/services/knowledge src/orelhao/services/llm src/orelhao/admin tests/knowledge tests/llm tests/admin
-      - run: mypy src/orelhao/services/knowledge src/orelhao/services/llm
+      - run: ruff check src/orelhao/services/knowledge src/orelhao/services/llm src/orelhao/services/tts src/orelhao/admin tests/knowledge tests/llm tests/tts tests/admin
+      - run: mypy src/orelhao/services/knowledge src/orelhao/services/llm src/orelhao/services/tts
       - run: pytest -q

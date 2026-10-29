@@ -394,3 +394,14 @@ Consulte [plano de benchmark e gates](docs/benchmark-optiplex-7050.md).
 ### Etapa experimental pt-BR e grounding (29/10/2026)
 
 A branch `feat/ptbr-grounding-eval-stage1` adiciona normalização de abstenção, modo seguro opt-in na bancada, dataset sintético de 20 casos e integração comparativa de Tucano2-qwen-1.5B-Instruct GGUF (pt-BR), sem promover modelos à produção. Veja [resultados, riscos e próximos gates](docs/ptbr-grounding-stage1.md).
+
+### Correção de saída de voz na bancada — branch experimental
+
+A correção de 29/10/2026 resolve o executável Piper do ambiente virtual
+mesmo com CLI iniciado sem \`source .venv/bin/activate\`, adiciona status de
+TTS e o botão **Ouvir resposta**, além de servir WAV somente a partir da
+observação registrada (sem texto na URL). Veja
+[diagnóstico, testes e limites](docs/workbench-voice-fix-2026-10-29.md).
+
+A base informativa Senac PI permanece com 14 documentos e 23 chunks.
+[Auditoria de cobertura e ingestão priorizada](docs/knowledge-coverage-audit-2026-10-29.md).
