@@ -78,6 +78,7 @@ def test_admin_runs_observation_and_keeps_uncertain_answer(tmp_path: Path) -> No
     assert "Trecho candidato" in response.text
     assert "cobertura lexical" in response.text
     payload = json.loads(log.path.read_text(encoding="utf-8"))
+    assert payload["claims"][0]["span_selection"]["support_verified"] is False
     assert payload["claims"][0]["span_selection"]["span"]["source"] == "faq.md"
     assert payload["claims"][0]["span_selection"]["span"]["text"] == (
         "O atendimento ocorre de segunda a sexta."

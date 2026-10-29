@@ -145,6 +145,16 @@ class GroundingObservation:
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
         payload["grounding"] = self.grounding.as_dict()
+        payload["claims"] = [
+            {
+                **asdict(claim),
+                "span_selection": (
+                    claim.span_selection.as_dict()
+                    if claim.span_selection is not None else None
+                ),
+            }
+            for claim in self.claims
+        ]
         if self.answerability is not None:
             payload["answerability"] = self.answerability.as_dict()
         return payload
