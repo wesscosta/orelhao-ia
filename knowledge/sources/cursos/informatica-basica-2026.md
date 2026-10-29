@@ -9,7 +9,7 @@ source_url: "https://pi.senac.br/tecnologia-da-informacao-ti/informatica-basica"
 ---
 # Curso de Informática Básica — Senac Piauí
 
-Na consulta à página oficial em 29 de outubro de 2026, o curso Informática Básica tinha **140 horas**, com turmas anunciadas em modalidade presencial. Como requisitos de acesso, a página mencionava ensino fundamental incompleto e idade de **12 anos ou mais**. Como documentação para matrícula, informava CPF e RG.
+Na consulta à página oficial em 29 de outubro de 2026, havia turmas de **140 horas e de 80 horas**, dependendo da oferta e unidade. Por exemplo, a listagem apresentava oferta de **80 horas em Picos**, além de opções de 140 horas. As turmas mostradas eram presenciais. Como requisitos de acesso, a página mencionava ensino fundamental incompleto e idade de **12 anos ou mais**. Como documentação para matrícula, informava CPF e RG.
 
 ## Localidades que apareciam nas turmas anunciadas
 
@@ -20,7 +20,7 @@ Na consulta à página oficial em 29 de outubro de 2026, o curso Informática B�
 - Teresina — Parque Piauí.
 - Teresina — Severino Ramos Brasil.
 
-A página exibia o valor total de **R$ 862,00** na consulta de referência, mas os valores e condições comerciais podem mudar.
+A página exibia **R$ 862,00 para ofertas de 140 horas** e também outros valores, como **R$ 620,00 para uma oferta de 80 horas em Picos**. Os valores e as condições comerciais podem mudar; não presumir um preço ou carga horária únicos para todas as turmas.
 
 ## Regra de validade para respostas
 

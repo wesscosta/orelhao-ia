@@ -565,7 +565,9 @@ function encodeWav(input, sampleRate) {
                 f"<p>Fontes admitidas: {len(precheck.admissible_chunk_ids)}"
                 f" · conflitos: {len(precheck.conflicting_chunk_ids)}"
                 f" · verificação específica: {str(precheck.verified_specific_answer).lower()}"
-                f" · geração ignorada: {str(observation.generation_skipped).lower()}</p>"
+                f" · geração ignorada: {str(observation.generation_skipped).lower()}"
+                f" · entidade incorreta na resposta: "
+                f"{str(observation.answer_entity_mismatch).lower()}</p>"
             )
         evidence = "".join(
             f"<article class='card'><strong>{html.escape(item.source)}</strong> "

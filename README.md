@@ -422,3 +422,7 @@ motivos de abstenção antes da LLM. O modo `enforce` evita geração quando há
 impedimento verificável; o modo `observe` preserva diagnóstico. Há avaliação
 por CLI com 120 casos **sintéticos** (não homologação).
 [Relatório de implementação, métricas e limitações](docs/implementation-answerability-stage2-2026-10-29.md).
+
+### Gate adversarial real — resultado experimental (29/10/2026)
+
+Foi implementado um avaliador do pipeline RAG → answerability → LLM → NLI, com 40 perguntas naturalísticas, comparação Tucano2/Qwen3.5, proteção de entidades sobrepostas e correção factual do corpus. Resultado: **NO-GO para produção** até revisar falsos bloqueios, realizar adjudicação humana independente e validar no Dell 8 GB. Consulte [relatório técnico](docs/benchmark-grounding-real-2026-10-29.md) e [fila de revisão](docs/review-grounding-real-2026-10-29.md).

@@ -26,6 +26,7 @@ from .evidence import (
 )
 from .grounding_decision import GroundingDecision, GroundingPolicy
 from .models import SearchResult
+from .query_constraints import explicitly_named_entities
 from .retriever import Retriever
 from .vector_retriever import PersistentVectorRetriever
 
@@ -139,6 +140,7 @@ class GroundingObservation:
     mode: str = "observe"
     answerability: EvidenceAssessment | None = None
     generation_skipped: bool = False
+    answer_entity_mismatch: bool = False
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
@@ -292,10 +294,24 @@ class ObservationWorkbench:
         )
         grounding_ms = _elapsed_ms(started)
         decision = assessment.decision
+        answer_entities = explicitly_named_entities(
+            answer,
+            [
+                str(result.chunk.metadata["entity_id"])
+                for result in results
+                if result.chunk.metadata.get("entity_id")
+            ],
+        )
+        answer_entity_mismatch = bool(
+            precheck is not None and precheck.constraints.entity_id
+            and any(entity != precheck.constraints.entity_id for entity in answer_entities)
+        )
+        if answer_entity_mismatch:
+            decision = self._policy.decide(0.0)
         presented = (
             GENERATION_ABSTENTION_MESSAGE
             if effective_mode == "enforce" and (
-                decision.should_abstain or (
+                decision.should_abstain or answer_entity_mismatch or (
                     precheck is not None and not precheck.decision.answerable
                 )
             ) and not blocked_before_generation
@@ -332,6 +348,7 @@ class ObservationWorkbench:
             mode=effective_mode,
             answerability=precheck,
             generation_skipped=blocked_before_generation,
+            answer_entity_mismatch=answer_entity_mismatch,
         )
         self.log.append_observation(observation)
         return observation

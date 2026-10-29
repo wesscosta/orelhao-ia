@@ -47,7 +47,15 @@ class EvidenceAdjudicator:
     def assess(
         self, question: str, evidence: list[SearchResult], *, as_of: date,
     ) -> EvidenceAssessment:
-        constraints = parse_query_constraints(question, as_of=as_of)
+        constraints = parse_query_constraints(
+            question,
+            as_of=as_of,
+            known_entities=[
+                str(item.chunk.metadata["entity_id"])
+                for item in evidence
+                if item.chunk.metadata.get("entity_id")
+            ],
+        )
         if not evidence:
             return EvidenceAssessment(
                 EvidenceDecision.abstain(AbstentionReason.NO_RELEVANT_EVIDENCE), constraints, ()

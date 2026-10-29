@@ -218,3 +218,52 @@ def test_observe_precheck_preserves_diagnostic_llm_generation(tmp_path: Path) ->
     assert observation.answerability is not None
     assert not observation.answerability.decision.answerable
     assert observation.presented_answer == "Há vagas hoje."
+
+
+
+class AlwaysEntailedVerifier:
+    def support_score(self, query: str, passage: str) -> float:
+        return 0.99
+
+
+class ExcelSourceRetriever:
+    def search(self, query: str, *, limit: int = 4) -> list[SearchResult]:
+        del query, limit
+        return [
+            SearchResult(Chunk(
+                "advanced:0", "advanced", "Excel Avançado: 60 horas.", "advanced.md",
+                0, {"entity_id": "curso:excel avancado"},
+            ), 0.9),
+            SearchResult(Chunk(
+                "excel:0", "excel", "Excel: 30 horas.", "excel.md",
+                0, {"entity_id": "curso:excel"},
+            ), 0.8),
+        ]
+
+
+class WrongNamedEntityGenerator:
+    def __init__(self) -> None:
+        self.used_sources: list[str] = []
+
+    def generate(self, question: str, evidence: list[SearchResult]) -> str:
+        del question
+        self.used_sources = [result.chunk.source for result in evidence]
+        return "Excel Avançado tem 60 horas."
+
+
+def test_enforce_does_not_trust_nli_for_wrong_named_entity(tmp_path: Path) -> None:
+    from orelhao.services.knowledge.answerability import EvidenceAdjudicator
+
+    generator = WrongNamedEntityGenerator()
+    bench = ObservationWorkbench(
+        ExcelSourceRetriever(), generator, AlwaysEntailedVerifier(),
+        ObservationLog(tmp_path / "observations.jsonl"),
+        adjudicator=EvidenceAdjudicator(),
+    )
+    result = bench.observe("Qual a carga horária de Excel?", mode="enforce")
+    assert generator.used_sources == ["excel.md"]
+    assert result.answer_entity_mismatch
+    assert result.grounding.should_abstain
+    assert result.presented_answer == GENERATION_ABSTENTION_MESSAGE
+    assert result.answerability is not None
+    assert result.answerability.constraints.entity_id == "curso:excel"

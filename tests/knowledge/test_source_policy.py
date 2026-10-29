@@ -40,3 +40,29 @@ def test_self_declared_current_data_needs_authoritative_origin() -> None:
     assert not current_state_is_verified(metadata, q, as_of=today)
     metadata.update({"authority": "primary", "source_url": "https://example.org/fonte"})
     assert current_state_is_verified(metadata, q, as_of=today)
+
+
+
+def test_known_entity_selection_prefers_specific_name() -> None:
+    from orelhao.services.knowledge.query_constraints import (
+        explicitly_named_entities,
+        parse_query_constraints,
+    )
+
+    identities = ("curso:excel", "curso:excel avancado")
+    day = date(2026,10,29)
+    base = parse_query_constraints(
+        "Qual a carga horária de Excel?", as_of=day, known_entities=identities,
+    )
+    advanced = parse_query_constraints(
+        "Quantas horas tem Excel Avançado?", as_of=day, known_entities=identities,
+    )
+    comparison = explicitly_named_entities(
+        "Qual a diferença entre Excel e Excel Avançado?", identities,
+    )
+    assert base.entity_id == "curso:excel"
+    assert advanced.entity_id == "curso:excel avancado"
+    assert set(comparison) == set(identities)
+    assert parse_query_constraints(
+        "Qual é o preço atual do Excel?", as_of=day, known_entities=identities,
+    ).requires_current_state

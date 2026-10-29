@@ -213,6 +213,7 @@ def test_admin_precheck_enforce_blocks_llm_and_tts_reads_only_safe_answer(
     assert "Answerability pré-geração" in response.text
     assert "temporal_evidence_unavailable" in response.text
     assert "geração ignorada: true" in response.text
+    assert "entidade incorreta na resposta: false" in response.text
     row = json.loads(log.path.read_text(encoding="utf-8"))
     assert row["generation_skipped"]
     assert row["answerability"]["reason"] == "temporal_evidence_unavailable"
