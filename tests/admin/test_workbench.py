@@ -75,7 +75,13 @@ def test_admin_runs_observation_and_keeps_uncertain_answer(tmp_path: Path) -> No
     assert "UNCERTAIN" in response.text
     assert "Modo observação" in response.text
     assert "O atendimento ocorre de segunda a sexta." in response.text
+    assert "Trecho candidato" in response.text
+    assert "cobertura lexical" in response.text
     payload = json.loads(log.path.read_text(encoding="utf-8"))
+    assert payload["claims"][0]["span_selection"]["span"]["source"] == "faq.md"
+    assert payload["claims"][0]["span_selection"]["span"]["text"] == (
+        "O atendimento ocorre de segunda a sexta."
+    )
     assert payload["grounding"]["status"] == "uncertain"
 
 

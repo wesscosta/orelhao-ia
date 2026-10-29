@@ -14,6 +14,7 @@ from orelhao.config import AppConfig, load_config
 from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.interfaces.voice.resample import resample_pcm16, trim_silence_pcm16
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.knowledge.evidence_selector import SpanSelection
 from orelhao.services.knowledge.index import build_index
 from orelhao.services.knowledge.loader import load_documents
 from orelhao.services.knowledge.observation import (
@@ -51,6 +52,19 @@ def _require_web() -> None:
         raise RuntimeError(
             "Interface web não instalada. Execute: pip install -e '.[admin]'"
         )
+
+
+def _render_evidence_span(selection: SpanSelection | None) -> str:
+    """Exibe um candidato textual literal, nunca como prova de suporte."""
+    if selection is None:
+        return "<span class='muted'>Sem correspondência lexical</span>"
+    span = selection.span
+    label = f"[{span.start}:{span.end}]"
+    return (
+        f"<small class='muted'>caracteres {html.escape(label)}; "
+        f"cobertura lexical {selection.lexical_coverage:.0%}</small>"
+        f"<blockquote>{html.escape(span.text)}</blockquote>"
+    )
 
 
 def _layout(title: str, body: str) -> str:
@@ -580,7 +594,8 @@ function encodeWav(input, sampleRate) {
             f"<td>{html.escape(item.decision.status.value.upper())}</td>"
             f"<td>{item.decision.score:.4f}</td>"
             f"<td>{html.escape(item.source or '—')}</td>"
-            f"<td>{html.escape(item.chunk_id or '—')}</td></tr>"
+            f"<td>{html.escape(item.chunk_id or '—')}</td>"
+            f"<td>{_render_evidence_span(item.span_selection)}</td></tr>"
             for item in observation.claims
         )
         policy_note = (
@@ -645,8 +660,10 @@ function encodeWav(input, sampleRate) {
 </section>
 <section class="card">
 <h2>Verificação por afirmação</h2>
-<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th></tr></thead>
-<tbody>{claim_rows or '<tr><td colspan="5">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
+<p class="muted">Trechos selecionados por sobreposição lexical; não são comprovação
+semântica nem alteram a decisão do NLI.</p>
+<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th><th>Trecho candidato</th></tr></thead>
+<tbody>{claim_rows or '<tr><td colspan="6">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
 </section>
 <section class="card">
 <h2>Avaliação humana</h2>

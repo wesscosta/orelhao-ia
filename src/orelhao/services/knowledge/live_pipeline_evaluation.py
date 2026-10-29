@@ -114,6 +114,9 @@ def assess_live_case(case: LiveCase, obs: GroundingObservation) -> dict[str, Any
             {
                 "claim": claim.claim, "score": claim.decision.score,
                 "source": claim.source, "chunk_id": claim.chunk_id,
+                "span_selection": (
+                    claim.span_selection.as_dict() if claim.span_selection else None
+                ),
             }
             for claim in obs.claims
         ],

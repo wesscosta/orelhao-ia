@@ -9,6 +9,7 @@ import re
 from dataclasses import dataclass
 from typing import Protocol
 
+from .evidence_selector import SpanSelection, select_evidence_span
 from .grounding_decision import GroundingDecision, GroundingPolicy
 from .models import SearchResult
 
@@ -25,6 +26,7 @@ class ClaimAssessment:
     decision: GroundingDecision
     source: str | None
     chunk_id: str | None = None
+    span_selection: SpanSelection | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,14 +68,21 @@ def assess_answer(
         best_score = 0.0
         source: str | None = None
         chunk_id: str | None = None
+        best_chunk: SearchResult | None = None
         for result in evidence:
             score = verifier.support_score(claim, result.chunk.text)
             if score > best_score:
                 best_score = score
                 source = result.chunk.source
                 chunk_id = result.chunk.id
+                best_chunk = result
+        # Span é diagnóstico, nunca substitui o suporte NLI do chunk.
+        selection = (
+            select_evidence_span(claim, best_chunk.chunk)
+            if best_chunk is not None else None
+        )
         evaluations.append(
-            ClaimAssessment(claim, policy.decide(best_score), source, chunk_id)
+            ClaimAssessment(claim, policy.decide(best_score), source, chunk_id, selection)
         )
     # O elo mais fraco determina a decisão. Uma frase não sustentada bloqueia o todo.
     return AnswerAssessment(

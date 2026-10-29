@@ -69,6 +69,10 @@ python scripts/run_live_grounding_gate.py \
 
 O primeiro incremento da nova etapa adiciona **auditoria triclasse do NLI** e classificação reproduzível de falhas de retrieval, pré-gate e pós-gate. Não modifica thresholds nem promove modelos. Consulte [PR-01 e resultados do NLI](docs/grounding-v3-pr01-nli-diagnostics-2026-10-29.md) e [estado técnico](docs/current-state.md). O quadro de qualidade acima continua sendo o baseline anterior à V3.
 
+### PR-02 — Evidence Span Extraction (29/10/2026)
+
+A linha experimental do Grounding V3 passou a registrar **trechos literais do chunk com offsets verificáveis** em cada avaliação de afirmação e na bancada. Uma auditoria com o NLI ONNX comparou chunks inteiros com passagens curtas: 48 pares, 23 scores maiores, 24 menores e 1 estável. **Sem alteração da política factual ou promoção de modelo.** Consulte [PR-02 e diagnóstico](docs/grounding-v3-pr02-evidence-spans-2026-10-29.md).
+
 ## Alvo de hardware e próximos gates
 
 O piloto está restrito ao **Dell OptiPlex 7050 Micro**, i5-7500T (4 núcleos/4 threads), **8 GiB RAM fixos**, SSD ~256 GB, Ubuntu Server 24.04 LTS minimal e inferência CPU. Desempenho da máquina Arch Linux **não substitui benchmark no Dell**. Ainda faltam validação humana independente, redução de falsos bloqueios, integração autônoma de voz e integração eletrônica do monofone, teclado e gancho.

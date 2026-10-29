@@ -84,3 +84,15 @@ def test_each_claim_records_supporting_chunk() -> None:
     )
     assert result.decision.allows_response
     assert result.claims[0].chunk_id == "curso.md"
+
+
+
+def test_claim_audit_includes_exact_span_without_altering_nli_decision() -> None:
+    chunk = evidence("Introdução irrelevante. O curso é gratuito.", "curso.md")
+    result = assess_answer("O curso é gratuito.", [chunk], FakeVerifier(), GroundingPolicy())
+    assert result.decision.allows_response
+    claim = result.claims[0]
+    assert claim.span_selection is not None
+    assert claim.span_selection.span.text == "O curso é gratuito."
+    assert claim.span_selection.span.matches_chunk(chunk.chunk)
+    assert claim.span_selection.as_dict()["support_verified"] is False

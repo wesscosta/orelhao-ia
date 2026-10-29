@@ -23,6 +23,10 @@ A branch experimental `feat/grounding-v3-diagnostics-20261029` iniciou o **PR-01
 
 Os indicadores da tabela abaixo continuam sendo o **baseline anterior à implementação V3**, e não métricas de progresso de acurácia ou aprovação do novo gate.
 
+### Grounding V3 — PR-02 (29/10/2026)
+
+A branch experimental `feat/grounding-v3-evidence-spans-20261029` implementou **Evidence Span Extraction** (offsets Unicode dentro de `Chunk.text`), seleção lexical independente do score NLI, observabilidade do trecho por claim e script comparativo do NLI do chunk versus passagem. **235 testes** passaram nesta branch; 48 pares auditados (23 scores aumentaram, 24 diminuíram, 1 estável). As decisões de ALLOW/ABSTAIN e os thresholds permanecem inalterados. Consulte [relatório do PR-02](grounding-v3-pr02-evidence-spans-2026-10-29.md). As métricas anteriores de falsos bloqueios continuam sendo o baseline histórico, não um resultado novo de homologação.
+
 ## O que realmente existe
 
 - **Áudio:** captura PipeWire, VAD, STT local faster-whisper pt-BR e Piper TTS, com comandos de diagnóstico e `--voice-test`. O teste de voz histórico `STT → TTS` não demonstra fluxo `STT → RAG → LLM → TTS` autônomo.
