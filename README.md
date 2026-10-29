@@ -405,3 +405,11 @@ observação registrada (sem texto na URL). Veja
 
 A base informativa Senac PI permanece com 14 documentos e 23 chunks.
 [Auditoria de cobertura e ingestão priorizada](docs/knowledge-coverage-audit-2026-10-29.md).
+
+### Corpus Senac Piauí — atualização 29/10/2026 (branch experimental)
+
+A base institucional foi ampliada de 14 documentos/23 chunks para 18 documentos/35 chunks,
+com unidades, contatos centrais, catálogo de Informática Básica/Excel/Excel Avançado
+e editais PSG. A revisão tem proveniência e data de consulta nas fontes; **não**
+comprova vagas ou matrículas abertas em tempo real. O benchmark congelado não
+foi alterado. [Relatório da atualização e resultados de avaliação](docs/knowledge-refresh-senac-pi-2026-10-29.md).
