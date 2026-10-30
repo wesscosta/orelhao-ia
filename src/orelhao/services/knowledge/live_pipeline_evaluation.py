@@ -78,9 +78,13 @@ _REFUSAL = re.compile(
 def assess_live_case(case: LiveCase, obs: GroundingObservation) -> dict[str, Any]:
     presented = normalize(obs.presented_answer)
     refusal = (
-        obs.generation_skipped
-        or obs.presented_answer == GENERATION_ABSTENTION_MESSAGE
-        or bool(_REFUSAL.search(presented))
+        obs.grounding_v3.should_abstain
+        if obs.mode == "enforce" and obs.grounding_v3 is not None
+        else (
+            obs.generation_skipped
+            or obs.presented_answer == GENERATION_ABSTENTION_MESSAGE
+            or bool(_REFUSAL.search(presented))
+        )
     )
     source_hit = case.source is None or any(ev.source == case.source for ev in obs.evidence)
     anchor_pass = (not refusal) and all(normalize(term) in presented for term in case.required_terms)
@@ -108,6 +112,7 @@ def assess_live_case(case: LiveCase, obs: GroundingObservation) -> dict[str, Any
         "grounding_score": obs.grounding.score,
         "generation_skipped": obs.generation_skipped,
         "fact_validations": [fact.as_dict() for fact in obs.fact_validations],
+        "grounding_v3": obs.grounding_v3.as_dict() if obs.grounding_v3 else None,
         "answer": obs.answer,
         "presented_answer": obs.presented_answer,
         "evidence_sources": [e.source for e in obs.evidence],

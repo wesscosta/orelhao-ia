@@ -6,6 +6,10 @@
 
 A bancada exibe comparações de valores explícitos entre a resposta e as fontes primárias recuperadas, com resultado por atributo, proveniência e offsets. Os estados de valor **não modificam** a decisão do NLI nem a fala apresentada. Consulte [Fact Validator PR-03](grounding-v3-pr03-fact-validator-2026-10-29.md).
 
+## Grounding V3 — política de decisão integrada
+
+Em observe, a bancada mostra a resposta da LLM e o diagnóstico V3. Em enforce, o V3 determina a resposta exibida e sintetizada pelo Piper, com estados ALLOW, ABSTAIN ou CLARIFY e motivos no JSONL. NLI incerto/unsupported continua bloqueado mesmo com match numérico. A autenticação do Admin não é de produção; mantenha loopback. [PR-04](grounding-v3-pr04-decision-policy-2026-10-29.md).
+
 ## Requisitos e execução
 
 ```bash

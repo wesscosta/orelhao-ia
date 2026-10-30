@@ -18,10 +18,12 @@ class FactKind(StrEnum):
     PRICE = "price_brl"
     DURATION = "duration_hours"
     AGE = "minimum_age_years"
+    AGE_RANGE = "age_range_years"
     DEADLINE = "deadline_days"
     VACANCIES = "vacancies"
     PHONE = "phone"
     DATE = "date"
+    CAPACITY = "capacity"
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,8 +52,16 @@ class ExtractedFact:
 _PRICE = re.compile(r"R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+)(?![\d,])", re.IGNORECASE)
 _HOURS = re.compile(r"(?<![\w/])(\d{1,4})\s+horas?\b", re.IGNORECASE)
 _AGE = re.compile(r"(?<!\d)(\d{1,3})\s+anos\b", re.IGNORECASE)
+_AGE_RANGE = re.compile(
+    r"(?<!\d)(\d{1,3})\s+(?:a|até|ate|-)\s+(\d{1,3})\s+anos\b",
+    re.IGNORECASE,
+)
 _DAYS = re.compile(r"(?<!\d)(\d{1,4})\s+dias?\s*(úteis|uteis|corridos)?\b", re.IGNORECASE)
 _VACANCIES = re.compile(r"(?<!\d)(\d{1,6})\s+vagas\b", re.IGNORECASE)
+_CAPACITY = re.compile(
+    r"(?<!\d)(\d{1,5})\s+(pessoas?|lugares?|assentos?|visitantes?)\b",
+    re.IGNORECASE,
+)
 _PHONE = re.compile(r"(?<!\d)(?:\+55[\s-]*)?\(?\d{2}\)?[\s-]*\d{4,5}[\s-]*-?\d{4}(?!\d)")
 _DATE = re.compile(r"(?<!\d)(?:\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})(?!\d)")
 _REF = re.compile(r"(?<!\d)(\d{1,3}/20\d{2})(?!\d)")
@@ -102,7 +112,18 @@ def extract_explicit_facts(text: str) -> tuple[ExtractedFact, ...]:
         if "prazo" in head and not any(k in head for k in ("curso", "carga", "turma")):
             continue
         add(m, FactKind.DURATION, str(int(m.group(1))), "hours")
+    age_ranges: list[tuple[int, int]] = []
+    for m in _AGE_RANGE.finditer(text):
+        # "14 a 24 anos" já expressa explicitamente uma faixa etária, mesmo
+        # quando uma resposta curta omite a palavra "idade".
+        first, last = int(m.group(1)), int(m.group(2))
+        if not 0 <= first <= last <= 120:
+            continue
+        add(m, FactKind.AGE_RANGE, f"{first}-{last}", "years_range", "range")
+        age_ranges.append((m.start(), m.end()))
     for m in _AGE.finditer(text):
+        if any(start <= m.start() < end for start, end in age_ranges):
+            continue
         context = normalize(text[max(0, m.start() - 65):min(len(text), m.end() + 18)])
         if not re.search(r"\b(?:idade|etaria|minima|acesso|a partir|anos ou mais)\b", context):
             continue
@@ -127,6 +148,11 @@ def extract_explicit_facts(text: str) -> tuple[ExtractedFact, ...]:
             m, FactKind.VACANCIES, str(int(m.group(1))), "vacancies",
             role, _reference(text, m.start()),
         )
+    for m in _CAPACITY.finditer(text):
+        # Não classificar um contador casual como lotação sem marcador de capacidade.
+        ctx = normalize(_line(text, m.start()))
+        if re.search(r"\b(?:lotac\w*|capacidade|comporta\w*|suporta\w*)\b", ctx):
+            add(m, FactKind.CAPACITY, str(int(m.group(1))), "persons")
     for m in _PHONE.finditer(text):
         # Uma sequência nua de 11 dígitos pode ser CPF, não telefone.
         if re.fullmatch(r"\d{10,11}", m.group()) and not re.search(

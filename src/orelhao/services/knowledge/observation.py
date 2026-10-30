@@ -17,6 +17,7 @@ from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .answer_requirements import missing_requested_fact
 from .answerability import EvidenceAdjudicator, EvidenceAssessment
 from .claim_grounding import ClaimAssessment, assess_answer
 from .evidence import (
@@ -26,6 +27,7 @@ from .evidence import (
 )
 from .fact_validation import FactValidation, validate_claim_facts
 from .grounding_decision import GroundingDecision, GroundingPolicy
+from .grounding_v3 import GroundingV3Decision, decide_grounding_v3
 from .models import SearchResult
 from .query_constraints import explicitly_named_entities
 from .retriever import Retriever
@@ -143,10 +145,14 @@ class GroundingObservation:
     generation_skipped: bool = False
     answer_entity_mismatch: bool = False
     fact_validations: tuple[FactValidation, ...] = ()
+    grounding_v3: GroundingV3Decision | None = None
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
         payload["grounding"] = self.grounding.as_dict()
+        payload["grounding_v3"] = (
+            self.grounding_v3.as_dict() if self.grounding_v3 is not None else None
+        )
         payload["fact_validations"] = [
             result.as_dict() for result in self.fact_validations
         ]
@@ -335,15 +341,24 @@ class ObservationWorkbench:
         )
         if answer_entity_mismatch:
             decision = self._policy.decide(0.0)
-        presented = (
-            GENERATION_ABSTENTION_MESSAGE
-            if effective_mode == "enforce" and (
-                decision.should_abstain or answer_entity_mismatch or (
-                    precheck is not None and not precheck.decision.answerable
-                )
-            ) and not blocked_before_generation
-            else answer
+        v3 = decide_grounding_v3(
+            decision, fact_validations,
+            precheck_blocked=blocked_before_generation or bool(
+                precheck is not None and not precheck.decision.answerable
+            ),
+            generation_abstained=generation_abstained,
+            entity_mismatch=answer_entity_mismatch,
+            requested_attribute_missing=(
+                not generation_abstained
+                and missing_requested_fact(clean_question, answer)
+            ),
+            enforce=effective_mode == "enforce",
         )
+        # Em observe, resposta bruta é preservada para revisão.
+        # Em enforce, o texto (inclusive o áudio subsequente) passa pelo V3.
+        presented = answer
+        if effective_mode == "enforce" and v3.should_abstain and not blocked_before_generation:
+            presented = v3.safe_message or GENERATION_ABSTENTION_MESSAGE
 
         observation = GroundingObservation(
             observation_id=uuid.uuid4().hex,
@@ -377,6 +392,7 @@ class ObservationWorkbench:
             generation_skipped=blocked_before_generation,
             answer_entity_mismatch=answer_entity_mismatch,
             fact_validations=fact_validations,
+            grounding_v3=v3,
         )
         self.log.append_observation(observation)
         return observation

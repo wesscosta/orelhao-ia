@@ -242,3 +242,28 @@ def test_fact_check_includes_literal_source_offsets() -> None:
     assert item.source_start is not None and item.source_end is not None
     assert source.chunk.text[item.source_start:item.source_end] == item.supporting_literal
     assert result.as_dict()["checks"][0]["supporting_literal"] == "30 horas"
+
+
+
+def test_age_range_comparison_is_not_confused_with_minimum_age() -> None:
+    source = evidence("O Programa Aprendiz atende jovens de 14 a 24 anos.")
+    assert check(
+        "O programa atende jovens de 14 a 24 anos.", [source]
+    ) == FactStatus.VALUE_MATCH
+    assert check(
+        "O programa atende jovens de 14 a 25 anos.", [source]
+    ) == FactStatus.VALUE_MISMATCH
+    facts = extract_explicit_facts(source.chunk.text)
+    assert len(facts) == 1
+    assert facts[0].kind == FactKind.AGE_RANGE
+    assert facts[0].value == "14-24"
+    assert check(
+        "O curso exige idade mínima de 14 anos.", [source]
+    ) == FactStatus.NO_ADMISSIBLE_SOURCE
+
+
+
+def test_short_age_range_answer_can_match_same_range_in_source() -> None:
+    source = evidence("O programa atende jovens de 14 a 24 anos.")
+    assert check("14 a 24 anos.", [source]) == FactStatus.VALUE_MATCH
+    assert check("14 a 25 anos.", [source]) == FactStatus.VALUE_MISMATCH

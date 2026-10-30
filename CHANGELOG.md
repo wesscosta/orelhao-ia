@@ -2,6 +2,10 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Grounding V3 — PR-04 experimental (29/10/2026; não é release)
+
+Nova decisão conservadora ALLOW/ABSTAIN/CLARIFY, com verificação de completude do atributo solicitado, capacidade e intervalo etário. Em enforce o Piper recebe somente o texto seguro. 275 testes aprovados; avaliação automatizada de 40 casos por modelo: 0/20 falsas permissões em ambos, oito bloqueios positivos Tucano2 e onze Qwen, sem revisão humana independente. [Relatório](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
+
 ## Grounding V3 — PR-03 experimental (29/10/2026; não é release)
 
 Nova extração e verificação factual tipada de números, prazos e entidades, com diagnóstico na bancada, regressão preservada e sem alteração de gates de autorização. 250 testes aprovados no Arch. Ver [relatório PR-03](docs/grounding-v3-pr03-fact-validator-2026-10-29.md).

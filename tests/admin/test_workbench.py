@@ -229,3 +229,61 @@ def test_admin_precheck_enforce_blocks_llm_and_tts_reads_only_safe_answer(
     assert client.get(
         f"/workbench/speech/{row['observation_id']}"
     ).status_code == 200
+
+
+
+def test_admin_v3_blocks_wrong_numeric_answer_and_speaks_only_safe_text(
+    tmp_path: Path,
+) -> None:
+    class ExcelRetriever:
+        def search(self, query: str, *, limit: int = 8) -> list[SearchResult]:
+            del query, limit
+            return [SearchResult(Chunk(
+                "excel:0", "excel", "O curso Excel tem 30 horas.",
+                "excel.md", 0, {
+                    "entity_id": "curso:excel", "authority": "primary",
+                    "source_url": "https://example.org/excel",
+                },
+            ), 0.94)]
+
+    class WrongLLM:
+        def generate(self, question: str, evidence: list[SearchResult]) -> str:
+            del question, evidence
+            return "O curso Excel tem 60 horas."
+
+    class BadNLI:
+        def support_score(self, query: str, passage: str) -> float:
+            del query, passage
+            return 0.99
+
+    class RecordingTTS:
+        def __init__(self) -> None:
+            self.texts: list[str] = []
+
+        def synthesize(self, text: str) -> PCM16Audio:
+            self.texts.append(text)
+            return PCM16Audio(b"\x00\x00" * 160)
+
+    log = ObservationLog(tmp_path / "observations-v3.jsonl")
+    tts = RecordingTTS()
+    workbench = ObservationWorkbench(
+        ExcelRetriever(), WrongLLM(), BadNLI(), log,
+    )
+    client = TestClient(create_admin_app(
+        KnowledgePaths(tmp_path / "sources", tmp_path / "index"),
+        workbench=workbench, stt=StubSTT(), tts=tts,
+    ))
+    result = client.post("/workbench/run", data={
+        "question": "Qual a carga horária de Excel?", "mode": "enforce",
+    })
+    assert result.status_code == 200
+    assert "Grounding V3 (decisão final)" in result.text
+    assert "fact_mismatch" in result.text
+    payload = json.loads(log.path.read_text())
+    assert payload["grounding"]["status"] == "supported"
+    assert payload["grounding_v3"]["reason"] == "fact_mismatch"
+    assert payload["answer"] != payload["presented_answer"]
+    assert "60 horas" not in payload["presented_answer"]
+    response = client.get("/workbench/speech/" + payload["observation_id"])
+    assert response.status_code == 200
+    assert tts.texts == [payload["presented_answer"]]

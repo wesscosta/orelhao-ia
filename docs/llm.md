@@ -2,6 +2,10 @@
 
 **Atualizado em 29/10/2026.** A evolução da alpha.13 passou por implementação do pré-gate e pelo benchmark adversarial, mas **não existe release alpha.14 homologada**. Estado, modelos e erros conhecidos: [Estado vigente](current-state.md), [gate adversarial](benchmark-grounding-real-2026-10-29.md).
 
+## Política de apresentação V3 — PR-04
+
+O NLI triclasse segue disponível para diagnóstico, com thresholds anteriores preservados. A decisão V3 pode vetar por informação numérica divergente, entidade incompatível, atributo solicitado ausente ou escopo insuficiente; nenhum match numérico pode liberar NLI incerto. [PR-04 e limites](grounding-v3-pr04-decision-policy-2026-10-29.md).
+
 ## Runtime
 
 O Orelhão IA utiliza cliente HTTP compatível com `POST /v1/chat/completions`, restrito a `127.0.0.1`, `localhost` ou `::1`. O `llama-server` é um serviço **externo ao processo Python** e precisa estar iniciado antes da bancada. Exemplo CPU conservador:

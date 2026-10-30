@@ -565,7 +565,20 @@ function encodeWav(input, sampleRate) {
         except (RuntimeError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         decision = observation.grounding
-        status_class = "ok" if decision.allows_response else "warn"
+        v3 = observation.grounding_v3
+        status_class = (
+            "ok" if (v3.allows_response if v3 else decision.allows_response)
+            else "warn"
+        )
+        v3_html = (
+            "<p><strong>Grounding V3 (decisão final):</strong> "
+            f"<span class='pill'>{html.escape(v3.disposition.value.upper())}</span> "
+            f"Motivo: {html.escape(v3.reason.value)}; "
+            f"NLI anterior: {html.escape(v3.nli_status.value)} "
+            f"({v3.nli_score:.4f}); "
+            f"fatos verificados: {len(v3.supporting_chunk_ids)} chunks.</p>"
+            if v3 else "<p>Decisão V3 indisponível.</p>"
+        )
         precheck = observation.answerability
         if precheck is None:
             precheck_html = "<p>Gate de answerability não habilitado nesta bancada.</p>"
@@ -659,7 +672,8 @@ function encodeWav(input, sampleRate) {
 <h2>Resultado</h2>
 <p><strong>Pergunta:</strong> {html.escape(observation.question)}</p>
 {precheck_html}
-<p><strong>Grounding:</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
+{v3_html}
+<p><strong>Grounding (NLI legado):</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
 <span class="pill">NLI {decision.score:.6f}</span></p>
 <p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
 <p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
@@ -677,8 +691,9 @@ semântica nem alteram a decisão do NLI.</p>
 </section>
 <section class="card">
 <h2>Fact Validator V3 — diagnóstico</h2>
-<p class="muted">Compara atributos explícitos e escopos de fontes primárias; não
-comprova a afirmação inteira e não altera a autorização de respostas.</p>
+<p class="muted">Compara atributos explícitos e escopos de fontes primárias.
+O resultado V3 pode vetar uma resposta no modo enforce, mas valores coincidentes
+não comprovam a afirmação inteira nem superam bloqueios do NLI.</p>
 <table><thead><tr><th>Valor mencionado</th><th>Atributo</th><th>Resultado</th>
 <th>Fonte</th><th>Justificativa</th></tr></thead>
 <tbody>{fact_rows or '<tr><td colspan="5">Nenhum atributo tipado identificado.</td></tr>'}</tbody></table>

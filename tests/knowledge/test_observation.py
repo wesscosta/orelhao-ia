@@ -266,7 +266,10 @@ def test_enforce_does_not_trust_nli_for_wrong_named_entity(tmp_path: Path) -> No
     assert generator.used_sources == ["excel.md"]
     assert result.answer_entity_mismatch
     assert result.grounding.should_abstain
-    assert result.presented_answer == GENERATION_ABSTENTION_MESSAGE
+    assert result.presented_answer != result.answer
+    assert "não corresponde" in result.presented_answer
+    assert result.grounding_v3 is not None
+    assert result.grounding_v3.reason.value == "entity_mismatch"
     assert result.answerability is not None
     assert result.answerability.constraints.entity_id == "curso:excel"
 
@@ -307,8 +310,13 @@ def test_fact_validator_reports_wrong_duration_without_overriding_nli(
     assert result.grounding.allows_response
     assert result.fact_validations[0].status.value == "value_mismatch"
     assert result.fact_validations[0].checks[0].supporting_literal == "30 horas"
-    # O PR-03 é estritamente diagnóstico. O PR-04 fará a decisão combinada.
-    assert result.presented_answer == "O curso Excel tem 60 horas."
+    # PR-04 aplica veto factual sem reduzir o score NLI congelado.
+    assert result.presented_answer != result.answer
+    assert "valores divergentes" in result.presented_answer
+    assert result.grounding_v3 is not None
+    assert result.grounding_v3.reason.value == "fact_mismatch"
     row = json.loads((tmp_path / "facts.jsonl").read_text())
+    assert row["grounding_v3"]["enforced"] is True
+    assert row["grounding_v3"]["disposition"] == "abstain"
     assert row["fact_validations"][0]["enforced"] is False
     assert row["fact_validations"][0]["full_claim_verified"] is False

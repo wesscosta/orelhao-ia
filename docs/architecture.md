@@ -2,6 +2,10 @@
 
 **Revisão 29/10/2026.** Monólito modular e **offline-first**. Esta página separa a arquitetura existente da arquitetura-alvo; leia [Estado vigente](current-state.md).
 
+## Política V3 — PR-04 (29/10/2026)
+
+O pipeline registra a decisão grounding legada, as fact_validations e a decisão final grounding_v3. Apenas em enforce esta última determina presented_answer e o texto do Piper. Precedência: pré-gate, recusa de geração, identidade, completude do atributo, valores tipados e NLI. A decisão permanece limitada à precisão das evidências e não é homologada. [Relatório](grounding-v3-pr04-decision-policy-2026-10-29.md).
+
 ## Arquitetura experimental implementada
 
 ```text
