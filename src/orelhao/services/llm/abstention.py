@@ -30,7 +30,10 @@ def normalize_abstention(text: str) -> str:
     answer = text.strip()
     # Modelos pequenos podem acrescentar pontuação ou repetir apenas o sentinel.
     # A saída inteira deve consistir somente no marcador, sem fatos misturados.
-    if re.fullmatch(r"(?:INSUFFICIENT_CONTEXT[.!]?\s*)+", answer, re.IGNORECASE):
+    if re.fullmatch(
+        r"(?:INSUFFICIENT[\s_]+CONTEXT[.!]?\s*)+(?:INSUFFICIENT)?",
+        answer, re.IGNORECASE,
+    ):
         return INSUFFICIENT_CONTEXT
     if (
         len(answer) <= 240

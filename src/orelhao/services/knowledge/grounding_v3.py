@@ -29,6 +29,7 @@ class V3Reason(StrEnum):
     NLI_UNCERTAIN = "nli_uncertain"
     NLI_UNSUPPORTED = "nli_unsupported"
     SUPPORTED = "supported"
+    LOCAL_CLOCK = "local_clock"
 
 
 _MESSAGES: dict[V3Reason, str] = {
@@ -80,7 +81,10 @@ class GroundingV3Decision:
             "disposition": self.disposition.value,
             "reason": self.reason.value,
             "nli_status": self.nli_status.value,
-            "nli_score": self.nli_score,
+            "nli_score": (
+                None if self.nli_status is GroundingStatus.NOT_APPLICABLE
+                else self.nli_score
+            ),
             "fact_statuses": list(self.fact_statuses),
             "supporting_chunk_ids": list(self.supporting_chunk_ids),
             "allows_response": self.allows_response,

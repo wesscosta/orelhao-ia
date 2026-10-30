@@ -9,6 +9,7 @@ NLI_SUPPORTED_AT_OR_ABOVE = 0.7557643056
 
 
 class GroundingStatus(StrEnum):
+    NOT_APPLICABLE = "not_applicable"
     SUPPORTED = "supported"
     UNSUPPORTED = "unsupported"
     UNCERTAIN = "uncertain"
@@ -27,10 +28,12 @@ class GroundingDecision:
     def should_abstain(self) -> bool:
         return not self.allows_response
 
-    def as_dict(self) -> dict[str, str | float | bool]:
+    def as_dict(self) -> dict[str, str | float | bool | None]:
         return {
             "status": self.status.value,
-            "score": self.score,
+            "score": (
+                None if self.status is GroundingStatus.NOT_APPLICABLE else self.score
+            ),
             "allows_response": self.allows_response,
             "should_abstain": self.should_abstain,
         }
@@ -69,7 +72,13 @@ def summarize_grounding_scores(
     policy: GroundingPolicy | None = None,
 ) -> dict[str, int]:
     active_policy = policy or GroundingPolicy()
-    summary = {status.value: 0 for status in GroundingStatus}
+    summary = {
+        status.value: 0 for status in (
+            GroundingStatus.SUPPORTED,
+            GroundingStatus.UNSUPPORTED,
+            GroundingStatus.UNCERTAIN,
+        )
+    }
     for score in scores:
         decision = active_policy.decide(score)
         summary[decision.status.value] += 1

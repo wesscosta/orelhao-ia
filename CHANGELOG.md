@@ -6,6 +6,10 @@
 
 O adjudicador da bancada agora usa o catálogo completo de entidades do índice: mesmo quando retrieval não encontra Excel, uma consulta explicitamente nomeada exige fonte daquele curso antes de chamar a LLM, impedindo a mistura com Informática Básica. É requisito reiniciar a bancada após reindexação para atualizar identidades. Não há alteração de ranking.
 
+## Correção de data/hora e repetição da abstenção (30/10/2026; experimental)
+
+Consultas explícitas ao relógio do terminal são determinísticas, com timezone configurável e proveniência auditável; NLI não é executado nem recebe scores inventados. Corrigida a repetição de `INSUFFICIENT CONTEXT` do Tucano2, inclusive para sintetização de logs antigos. 327 testes aprovados. [Relatório](docs/local-clock-abstention-fix-2026-10-30.md).
+
 ## Workbench Cadu/Faber e identidade masculina do Lumi (30/10/2026; experimental)
 
 Seletor de voz por requisição, prévia fixa, alternância da síntese de respostas previamente verificadas e provisionamento Faber separado. Corrigida a referência **o Lumi** no prompt e na saída da LLM antes do Grounding. 285 testes aprovados. [Relatório](docs/workbench-piper-voices-lumi-2026-10-30.md).

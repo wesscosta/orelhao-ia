@@ -1,6 +1,6 @@
 # Estado técnico vigente — Orelhão IA
 
-**Revisado em:** 30/10/2026. **Fonte:** código, configuração e testes da branch `feat/workbench-piper-voices-lumi-20261030` (desenvolvimento experimental cumulativo, PR-01 a PR-04). Este arquivo consolida o estado verificável da linha experimental, **não constitui homologação ou nova release**.
+**Revisado em:** 30/10/2026. **Fonte:** código, configuração e testes da branch `fix/local-clock-and-abstention-20261030` (desenvolvimento experimental cumulativo, PR-01 a PR-04). Este arquivo consolida o estado verificável da linha experimental, **não constitui homologação ou nova release**.
 
 ## Identificação e promoção
 
@@ -8,9 +8,9 @@
 |---|---|
 | Última tag Git de release encontrada | `v0.3.10` (baseline histórica de voz) |
 | Base da `main` | `351aacd` — linha v0.6.0-alpha.13 (verificar antes de promover) |
-| Branch experimental mais recente | `feat/workbench-piper-voices-lumi-20261030` |
+| Branch experimental mais recente | `fix/local-clock-and-abstention-20261030` |
 | Commit experimental | HEAD da branch acima (ver histórico Git) |
-| Suíte de testes, Arch Python 3.14 | **285 aprovados**, 1 aviso de depreciação de Starlette |
+| Suíte de testes, Arch Python 3.14 | **327 aprovados**, 1 aviso de depreciação de Starlette |
 | Lint e tipagem | Ruff aprovado; Mypy aprovado no módulo Knowledge |
 | Conhecimento Senac PI indexado | **18 documentos, 36 chunks** (após revisão de Informática Básica) |
 | Resultado operacional | **NO-GO** para uso público e terminal físico; teste Dell 8 GB e revisão humana faltantes |
@@ -40,6 +40,10 @@ O orquestrador V3 determina o texto apresentado em enforce; observe permanece di
 ### Workbench: seleção de voz e identidade (30/10/2026)
 
 Cadu/Faber podem ser selecionados por requisição para sintetizar a mesma resposta, sem alterar o Grounding V3. A prévia de voz usa texto fixo e caminhos de modelos não são aceitos do navegador. A identidade da LLM usa **o Lumi**; o texto corrigido passa pelo grounding e a saída bruta existe na conclusão da LLM, mas não é persistida no JSONL da bancada. Faber deve ser provisionada localmente; o TTS físico permanece inalterado. **285 testes** aprovados. [Relatório do experimento](workbench-piper-voices-lumi-2026-10-30.md).
+
+### Correção de data/hora local e abstenção repetida (30/10/2026)
+
+O Workbench roteia perguntas exclusivamente sobre dia e horário ao serviço determinístico `local_clock`. RAG/LLM/NLI não são executados; a fonte é o relógio local, com fuso `ORELHAO_TIMEZONE`, timestamp ISO e NLI marcado como não aplicável, sem score artificial. Perguntas institucionais temporais (vagas, atendimento) continuam no RAG. A normalização de recusas cobre marcadores repetidos `INSUFFICIENT CONTEXT` do Tucano2 e impede leitura dos marcadores antigos no TTS. **327 testes**, Ruff/Mypy Knowledge/LLM sem erros e smoke HTTP com Cadu/Faber. [Relatório](local-clock-abstention-fix-2026-10-30.md).
 
 ## O que realmente existe
 

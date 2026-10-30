@@ -287,3 +287,33 @@ def test_admin_v3_blocks_wrong_numeric_answer_and_speaks_only_safe_text(
     response = client.get("/workbench/speech/" + payload["observation_id"])
     assert response.status_code == 200
     assert tts.texts == [payload["presented_answer"]]
+
+
+
+@pytest.mark.parametrize("question", [
+    "Que dia é hoje?",
+    "Que horas são agora?",
+    "Que dia é hoje? Que horas são agora?",
+])
+@pytest.mark.parametrize("mode", ["observe", "enforce"])
+def test_admin_clock_response_does_not_show_or_speak_rag_sentinel(
+    tmp_path: Path, question: str, mode: str,
+) -> None:
+    client, log = _client(tmp_path)
+    result = client.post(
+        "/workbench/run", data={"question": question, "mode": mode, "voice": "cadu"}
+    )
+    assert result.status_code == 200
+    assert "Resposta operacional" in result.text
+    assert "NLI não executado" in result.text
+    assert "INSUFFICIENT CONTEXT" not in result.text
+    row = json.loads(log.path.read_text(encoding="utf-8"))
+    assert row["answer_origin"] == "local_clock"
+    assert row["grounding_v3"]["reason"] == "local_clock"
+    assert row["grounding_v3"]["disposition"] == "allow"
+    assert row["grounding"]["score"] is None
+    assert row["generation_skipped"]
+    assert row["presented_answer"] == row["answer"]
+    speech = client.get(f"/workbench/speech/{row['observation_id']}")
+    assert speech.status_code == 200
+    assert speech.content.startswith(b"RIFF")

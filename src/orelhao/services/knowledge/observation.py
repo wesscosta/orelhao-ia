@@ -14,6 +14,7 @@ from typing import ClassVar, Protocol
 from zoneinfo import ZoneInfo
 
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.llm.abstention import normalize_abstention
 from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
 from orelhao.services.rag.retriever import RetrievedContext
 
@@ -26,9 +27,19 @@ from .evidence import (
     evidence_model_directory,
 )
 from .fact_validation import FactValidation, validate_claim_facts
-from .grounding_decision import GroundingDecision, GroundingPolicy
-from .grounding_v3 import GroundingV3Decision, decide_grounding_v3
+from .grounding_decision import (
+    GroundingDecision,
+    GroundingPolicy,
+    GroundingStatus,
+)
+from .grounding_v3 import (
+    GroundingV3Decision,
+    V3Disposition,
+    V3Reason,
+    decide_grounding_v3,
+)
 from .index import load_chunks
+from .local_clock import LocalClockAnswer, answer_local_clock
 from .models import SearchResult
 from .query_constraints import explicitly_named_entities
 from .retriever import Retriever
@@ -91,7 +102,7 @@ class LocalLLMAnswerGenerator:
             RetrievedContext(text=result.chunk.text, source=result.chunk.source)
             for result in evidence
         ]
-        answer = self._service.generate(question, context).strip()
+        answer = normalize_abstention(self._service.generate(question, context))
         if answer == INSUFFICIENT_CONTEXT:
             return GENERATION_ABSTENTION_MESSAGE
         clean = _plain_text(answer)
@@ -147,6 +158,8 @@ class GroundingObservation:
     answer_entity_mismatch: bool = False
     fact_validations: tuple[FactValidation, ...] = ()
     grounding_v3: GroundingV3Decision | None = None
+    answer_origin: str = "rag"
+    local_clock: dict[str, str] | None = None
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
@@ -200,7 +213,11 @@ class ObservationLog:
                         and payload.get("observation_id") == observation_id
                     ):
                         answer = payload.get("presented_answer")
-                        return answer if isinstance(answer, str) and answer else None
+                        if not isinstance(answer, str) or not answer:
+                            return None
+                        if normalize_abstention(answer) == INSUFFICIENT_CONTEXT:
+                            return GENERATION_ABSTENTION_MESSAGE
+                        return answer
         except FileNotFoundError:
             return None
         return None
@@ -258,6 +275,52 @@ class ObservationWorkbench:
         self._policy = policy or GroundingPolicy()
         self._adjudicator = adjudicator
 
+    def _observe_local_clock(
+        self,
+        question: str,
+        resolved: LocalClockAnswer,
+        mode: str,
+        started: float,
+    ) -> GroundingObservation:
+        # A fonte é o relógio local do servidor; NLI/RAG/LLM não são executados.
+        nli = GroundingDecision(GroundingStatus.NOT_APPLICABLE, 0.0)
+        v3 = GroundingV3Decision(
+            disposition=V3Disposition.ALLOW,
+            reason=V3Reason.LOCAL_CLOCK,
+            nli_status=GroundingStatus.NOT_APPLICABLE,
+            nli_score=0.0,
+            enforced=mode == "enforce",
+        )
+        observation = GroundingObservation(
+            observation_id=uuid.uuid4().hex,
+            created_at=datetime.now(UTC).isoformat(),
+            question=question,
+            answer=resolved.text,
+            presented_answer=resolved.text,
+            evidence=(),
+            grounding=nli,
+            claims=(),
+            latency=ObservationLatency(
+                retrieval_ms=0.0,
+                generation_ms=0.0,
+                grounding_ms=0.0,
+                total_ms=_elapsed_ms(started),
+            ),
+            generator="LocalClockService",
+            generation_abstained=False,
+            mode=mode,
+            generation_skipped=True,
+            grounding_v3=v3,
+            answer_origin="local_clock",
+            local_clock={
+                "kind": resolved.kind,
+                "timezone": resolved.timezone,
+                "timestamp": resolved.timestamp,
+            },
+        )
+        self.log.append_observation(observation)
+        return observation
+
     def observe(
         self, question: str, *, limit: int = 8, mode: str | None = None
     ) -> GroundingObservation:
@@ -271,6 +334,12 @@ class ObservationWorkbench:
             raise ValueError("limit deve ser maior que zero")
 
         total_started = perf_counter()
+        timezone = os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza")
+        clock_answer = answer_local_clock(clean_question, timezone=timezone)
+        if clock_answer is not None:
+            return self._observe_local_clock(
+                clean_question, clock_answer, effective_mode, total_started
+            )
         as_of = datetime.now(
             ZoneInfo(os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza"))
         ).date()

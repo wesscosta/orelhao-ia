@@ -2,7 +2,7 @@
 
 **Terminal conversacional de voz offline-first**, modular e reutilizável para atendimento a diferentes instituições e domínios de conhecimento. A implantação piloto utiliza documentos oficiais do Senac Piauí; o core não depende dessa instituição.
 
-> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`feat/workbench-piper-voices-lumi-20261030`](https://github.com/wesscosta/orelhao-ia/tree/feat/grounding-v3-decision-policy-20261029). **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
+> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`fix/local-clock-and-abstention-20261030`](https://github.com/wesscosta/orelhao-ia/tree/feat/grounding-v3-decision-policy-20261029). **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
 
 ## Funcionalidades implementadas e limites
 
@@ -17,7 +17,7 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Arch Linux, Python 3.14) | **285 testes aprovados** e 1 aviso de depreciação |
+| Pytest (Arch Linux, Python 3.14) | **327 testes aprovados** e 1 aviso de depreciação |
 | Ruff / Mypy | Sem erros no escopo analisado |
 | Corpus Senac Piauí | **18 documentos informativos, 36 chunks** |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
@@ -86,6 +86,10 @@ A decisão final agora combina NLI, pré-gate, entidade e Fact Validator. Em mod
 ### Alternância de vozes no Workbench (30/10/2026)
 
 A bancada agora permite alternar Piper Cadu e Faber sem reiniciar e ouvir a mesma resposta sem recomputar retrieval/LLM/Grounding. A saudação utiliza o masculino **o Lumi**; a LLM também recebe essa instrução e a correção é aplicada antes do grounding. Cadu continua como padrão; instale a Faber com python scripts/provision_piper_faber.py. Veja [relatório técnico](docs/workbench-piper-voices-lumi-2026-10-30.md).
+
+### Data/hora e abstenção segura (30/10/2026)
+
+Perguntas exclusivas de data/hora agora usam o relógio local com fuso `ORELHAO_TIMEZONE` (padrão America/Fortaleza), sem RAG ou LLM. O Grounding registra a origem `local_clock` e NLI `not_applicable`, sem score artificial. A normalização reconhece repetições de `INSUFFICIENT CONTEXT` com espaços e impede que o marcador seja sintetizado. **327 testes** aprovados. [Relatório de correção](docs/local-clock-abstention-fix-2026-10-30.md).
 
 ## Alvo de hardware e próximos gates
 

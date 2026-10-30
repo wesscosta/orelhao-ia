@@ -16,6 +16,10 @@ Em observe, a bancada mostra a resposta da LLM e o diagnóstico V3. Em enforce, 
 
 Escolha Cadu ou Faber no formulário, ou selecione outra voz para ouvir a mesma resposta apresentada. A prévia de voz fala uma saudação fixa: **Eu sou o Lumi**. Os parâmetros de voz são validados contra catálogo fechado, sem aceitar caminhos de arquivo; o endpoint de fala só sintetiza observações registradas. Faber pode ser provisionada pelo script scripts/provision_piper_faber.py. [Relatório técnico](workbench-piper-voices-lumi-2026-10-30.md).
 
+## Data e hora do terminal (30/10/2026)
+
+Perguntas como **Que dia é hoje?** e **Que horas são agora?** são resolvidas diretamente pelo relógio do servidor, no fuso `ORELHAO_TIMEZONE` (padrão `America/Fortaleza`), sem retrieval, LLM ou NLI. O Workbench indica origem operacional e NLI não executado. Perguntas sobre vagas e horários de atendimento **não usam** esse atalho. O normalizador converte marcadores `INSUFFICIENT CONTEXT` repetidos em abstenções legíveis, inclusive ao reproduzir registros anteriores. [Relatório com testes](local-clock-abstention-fix-2026-10-30.md).
+
 ## Requisitos e execução
 
 ```bash

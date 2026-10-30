@@ -614,17 +614,33 @@ function encodeWav(input, sampleRate) {
             "ok" if (v3.allows_response if v3 else decision.allows_response)
             else "warn"
         )
+        nli_info = (
+            "NLI não executado (fonte: relógio local)"
+            if observation.answer_origin == "local_clock"
+            else (
+                f"NLI anterior: {html.escape(v3.nli_status.value)} "
+                f"({v3.nli_score:.4f})"
+                if v3 else "Sem NLI"
+            )
+        )
         v3_html = (
             "<p><strong>Grounding V3 (decisão final):</strong> "
             f"<span class='pill'>{html.escape(v3.disposition.value.upper())}</span> "
             f"Motivo: {html.escape(v3.reason.value)}; "
-            f"NLI anterior: {html.escape(v3.nli_status.value)} "
-            f"({v3.nli_score:.4f}); "
+            f"{nli_info}; "
             f"fatos verificados: {len(v3.supporting_chunk_ids)} chunks.</p>"
             if v3 else "<p>Decisão V3 indisponível.</p>"
         )
         precheck = observation.answerability
-        if precheck is None:
+        if observation.answer_origin == "local_clock":
+            clock = observation.local_clock or {}
+            precheck_html = (
+                "<p><strong>Resposta operacional:</strong> data/hora do relógio "
+                "local. RAG, LLM, NLI e pré-gate não foram executados. "
+                f"Fuso: {html.escape(clock.get('timezone', '—'))}; "
+                f"instante: {html.escape(clock.get('timestamp', '—'))}.</p>"
+            )
+        elif precheck is None:
             precheck_html = "<p>Gate de answerability não habilitado nesta bancada.</p>"
         else:
             pre_status = "SEM IMPEDIMENTO DETECTADO" if precheck.decision.answerable else "ABSTENÇÃO"
@@ -728,7 +744,7 @@ function encodeWav(input, sampleRate) {
 {precheck_html}
 {v3_html}
 <p><strong>Grounding (NLI legado):</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
-<span class="pill">NLI {decision.score:.6f}</span></p>
+{"<span class='pill'>NLI não executado</span>" if observation.answer_origin == "local_clock" else f"<span class='pill'>NLI {decision.score:.6f}</span>"}</p>
 <p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
 <p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
 <h3>Resposta apresentada</h3>

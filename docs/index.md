@@ -24,6 +24,7 @@ Revisão editorial: **30/10/2026**. Este é o ponto de entrada para documentaç�
 |---|---|---|
 | [Cobertura inicial](knowledge-coverage-audit-2026-10-29.md) | 14 docs / 23 chunks **antes da ingestão** | diagnóstico histórico |
 | [Atualização da base](knowledge-refresh-senac-pi-2026-10-29.md) | 18 docs / 35 chunks **antes da última revisão** | proveniência e benchmark de 17 casos |
+| [Relógio local e normalização de abstenção](local-clock-abstention-fix-2026-10-30.md) | 30/10/2026, data/hora determinísticas e proteção contra sentinel repetido | experimental, validado no Workbench |
 | [Cadu/Faber e identidade do Lumi](workbench-piper-voices-lumi-2026-10-30.md) | 30/10/2026, alternância por requisição | experimental, não homologado |
 | [Voz na bancada](workbench-voice-fix-2026-10-29.md) | saída Piper restaurada | correção validada no Arch |
 | [Etapa pt-BR inicial](ptbr-grounding-stage1.md) | 20 casos sintéticos | comparação exploratória |
