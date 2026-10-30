@@ -246,3 +246,31 @@ def test_short_age_range_responds_question_without_repeating_attribute(
     assert result.grounding_v3 is not None
     assert result.grounding_v3.reason is V3Reason.SUPPORTED
     assert result.presented_answer == "14 a 24 anos."
+
+
+
+def test_catalog_identifies_named_course_even_if_retrieval_misses_it(
+    tmp_path: Path,
+) -> None:
+    retriever = Retriever(
+        "Informática Básica tem 80 horas ou 140 horas.",
+        entity_id="curso:informatica basica",
+    )
+    generator = Generator("Excel tem 140 horas.")
+    log = ObservationLog(tmp_path / "known-entities.jsonl")
+    bench = ObservationWorkbench(
+        retriever, generator, NLI(0.99), log,
+        mode="enforce",
+        adjudicator=EvidenceAdjudicator(
+            known_entities=("curso:excel", "curso:informatica basica"),
+        ),
+    )
+    observation = bench.observe("Qual é a carga horária de Excel?")
+    assert observation.answerability is not None
+    assert observation.answerability.constraints.entity_id == "curso:excel"
+    assert observation.answerability.decision.answerable is False
+    assert observation.generation_skipped
+    assert generator.calls == 0
+    assert observation.grounding_v3 is not None
+    assert observation.grounding_v3.reason is V3Reason.PRECHECK_BLOCKED
+    assert "140 horas" not in observation.presented_answer

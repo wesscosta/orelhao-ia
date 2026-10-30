@@ -87,3 +87,20 @@ def test_unstructured_positive_is_not_claimed_verified() -> None:
     result = EvidenceAdjudicator().assess("O que é o PSG?", [item("PSG é programa de gratuidade.")], as_of=TODAY)
     assert result.decision.answerable
     assert result.verified_specific_answer is False
+
+
+
+def test_catalog_entity_scope_blocks_mismatched_topk_with_no_matching_entity() -> None:
+    adjudicator = EvidenceAdjudicator(
+        known_entities=["curso:excel", "curso:excel avancado", "curso:informatica basica"],
+    )
+    results = [
+        item("Curso Informática Básica 140 horas.", entity_id="curso:informatica basica"),
+        item("Aprendiz possui carga horária variável."),
+    ]
+    assessment = adjudicator.assess(
+        "Qual é a carga horária de Excel?", results, as_of=TODAY
+    )
+    assert assessment.constraints.entity_id == "curso:excel"
+    assert assessment.decision.reason is AbstentionReason.ENTITY_MISMATCH
+    assert not assessment.admissible_chunk_ids

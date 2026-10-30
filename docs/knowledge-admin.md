@@ -10,6 +10,8 @@ A bancada exibe comparações de valores explícitos entre a resposta e as fonte
 
 Em observe, a bancada mostra a resposta da LLM e o diagnóstico V3. Em enforce, o V3 determina a resposta exibida e sintetizada pelo Piper, com estados ALLOW, ABSTAIN ou CLARIFY e motivos no JSONL. NLI incerto/unsupported continua bloqueado mesmo com match numérico. A autenticação do Admin não é de produção; mantenha loopback. [PR-04](grounding-v3-pr04-decision-policy-2026-10-29.md).
 
+**Atualização de fontes e identidade:** o catálogo completo de entidades é carregado na inicialização da bancada. Depois de editar e reindexar cursos, reinicie o processo Admin para atualizar o catálogo, evitando reconhecer nomes com um snapshot antigo.
+
 ## Requisitos e execução
 
 ```bash

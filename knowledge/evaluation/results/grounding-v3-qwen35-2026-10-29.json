@@ -1,6 +1,6 @@
 {
   "meta": {
-    "created_at": "2026-10-30T02:34:23.014931+00:00",
+    "created_at": "2026-10-30T02:42:16.698253+00:00",
     "dataset": "knowledge/evaluation/grounding-real-senac-pi-v1.json",
     "as_of": "2026-10-29",
     "model": "local-model",
@@ -21,8 +21,8 @@
     "positive_anchor_pass": 8,
     "positive_source_hit": 18,
     "grounding_supported_with_bad_anchor": 1,
-    "latency_p50_ms": 259.26113849993726,
-    "latency_p95_ms": 823.5361760000615,
+    "latency_p50_ms": 268.5297645000446,
+    "latency_p95_ms": 723.7455279998812,
     "human_review_complete": false,
     "label_source": "model-curated, source-anchored; not independently human adjudicated",
     "execution_errors": 0,
@@ -42,7 +42,7 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "supported",
-      "grounding_score": 0.9727957248687744,
+      "grounding_score": 0.7703492641448975,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -53,8 +53,8 @@
                 "kind": "age_range_years",
                 "value": "14-24",
                 "unit": "years_range",
-                "start": 45,
-                "end": 57,
+                "start": 160,
+                "end": 172,
                 "literal": "14 a 24 anos",
                 "qualifier": "range",
                 "reference_id": null
@@ -77,7 +77,7 @@
         "disposition": "allow",
         "reason": "supported",
         "nli_status": "supported",
-        "nli_score": 0.9727957248687744,
+        "nli_score": 0.7703492641448975,
         "fact_statuses": [
           "value_match"
         ],
@@ -88,8 +88,8 @@
         "should_abstain": false,
         "enforced": true
       },
-      "answer": "O Senac é uma empresa que contrata jovens de 14 a 24 anos para atuarem como jovens aprendiz e alterna suas atividades na educação básica, no Senac e na empresa.",
-      "presented_answer": "O Senac é uma empresa que contrata jovens de 14 a 24 anos para atuarem como jovens aprendiz e alterna suas atividades na educação básica, no Senac e na empresa.",
+      "answer": "O Senac é uma entidade pública que atua como um parceiro estratégico para a educação profissional, oferecendo cursos e programas de aprendizagem para jovens de 14 a 24 anos, além de atender pessoas com deficiência.",
+      "presented_answer": "O Senac é uma entidade pública que atua como um parceiro estratégico para a educação profissional, oferecendo cursos e programas de aprendizagem para jovens de 14 a 24 anos, além de atender pessoas com deficiência.",
       "evidence_sources": [
         "aprendizagem/jovem-aprendiz.md",
         "cursos/agenda-e-unidades.md",
@@ -102,41 +102,38 @@
       ],
       "claim_assessments": [
         {
-          "claim": "O Senac é uma empresa que contrata jovens de 14 a 24 anos para atuarem como jovens aprendiz e alterna suas atividades na educação básica, no Senac e na empresa.",
-          "score": 0.9727957248687744,
+          "claim": "O Senac é uma entidade pública que atua como um parceiro estratégico para a educação profissional, oferecendo cursos e programas de aprendizagem para jovens de 14 a 24 anos, além de atender pessoas com deficiência.",
+          "score": 0.7703492641448975,
           "source": "aprendizagem/jovem-aprendiz.md",
           "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
           "span_selection": {
             "span": {
               "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
               "source": "aprendizagem/jovem-aprendiz.md",
-              "start": 438,
-              "end": 510,
-              "text": "O aprendiz alterna atividades na educação básica, no Senac e na empresa.",
+              "start": 175,
+              "end": 246,
+              "text": "## Público A página oficial informa inserção de jovens de 14 a 24 anos.",
               "source_url": "https://psg.pi.senac.br/aprendizagem/",
               "entity_id": null,
               "attribute": null
             },
             "matched_terms": [
-              "alterna",
-              "aprendiz",
-              "atividades",
-              "basica",
-              "educacao",
-              "empresa",
-              "senac"
+              "14",
+              "24",
+              "anos",
+              "jovens"
             ],
-            "lexical_coverage": 0.5,
+            "lexical_coverage": 0.2,
             "support_verified": false
           }
         }
       ],
       "latency": {
-        "total_ms": 1119.3235989999266,
-        "retrieval_ms": 2.351899000132107,
-        "adjudication_ms": 0.44752999997399456,
-        "generation_ms": 1002.468836999924,
-        "grounding_ms": 113.12777600005575
+        "total_ms": 1213.7227050000092,
+        "retrieval_ms": 2.3614310000539263,
+        "adjudication_ms": 0.5640150000090216,
+        "generation_ms": 1095.4284770000413,
+        "grounding_ms": 114.46226699990802
       },
       "requires_human_review": true
     },
@@ -216,11 +213,11 @@
         }
       ],
       "latency": {
-        "total_ms": 494.53582399996776,
-        "retrieval_ms": 3.0215240001325583,
-        "adjudication_ms": 0.1452750000225933,
-        "generation_ms": 396.66653399990537,
-        "grounding_ms": 94.56393899995419
+        "total_ms": 513.2254160000684,
+        "retrieval_ms": 3.00680299983469,
+        "adjudication_ms": 0.10144699990632944,
+        "generation_ms": 414.61173399989093,
+        "grounding_ms": 95.37178499999754
       },
       "requires_human_review": true
     },
@@ -236,10 +233,16 @@
       "text_anchor_pass": false,
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
-      "grounding_status": "unsupported",
-      "grounding_score": 0.05661454424262047,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.750885009765625,
       "generation_skipped": false,
       "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        },
         {
           "status": "not_applicable",
           "checks": [],
@@ -249,10 +252,11 @@
       ],
       "grounding_v3": {
         "disposition": "abstain",
-        "reason": "nli_unsupported",
-        "nli_status": "unsupported",
-        "nli_score": 0.05661454424262047,
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.750885009765625,
         "fact_statuses": [
+          "not_applicable",
           "not_applicable"
         ],
         "supporting_chunk_ids": [],
@@ -260,7 +264,7 @@
         "should_abstain": true,
         "enforced": true
       },
-      "answer": "1954",
+      "answer": "1º de agosto de 1947; 17 de novembro de 1954",
       "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
       "evidence_sources": [
         "institucional/sobre-o-senac-piaui.md",
@@ -269,19 +273,62 @@
       ],
       "claim_assessments": [
         {
-          "claim": "1954",
-          "score": 0.05661454424262047,
-          "source": "unidades/rede-senac-piaui.md",
-          "chunk_id": "unidades/rede-senac-piaui.md:0",
-          "span_selection": null
+          "claim": "1º de agosto de 1947;",
+          "score": 0.750885009765625,
+          "source": "institucional/sobre-o-senac-piaui.md",
+          "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+              "source": "institucional/sobre-o-senac-piaui.md",
+              "start": 272,
+              "end": 478,
+              "text": "## História no Piauí O Senac Piauí iniciou atividades em Teresina em 1º de agosto de 1947, inicialmente como Delegacia Estadual da Administração Nacional, nas dependências da Associação Comercial Piauiense.",
+              "source_url": "https://www.pi.senac.br/institucional/sobresenac",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "1947",
+              "1o",
+              "agosto"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        },
+        {
+          "claim": "17 de novembro de 1954",
+          "score": 0.7822265028953552,
+          "source": "institucional/sobre-o-senac-piaui.md",
+          "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+              "source": "institucional/sobre-o-senac-piaui.md",
+              "start": 479,
+              "end": 574,
+              "text": "O Departamento Regional do Senac no Piauí foi oficialmente instalado em 17 de novembro de 1954.",
+              "source_url": "https://www.pi.senac.br/institucional/sobresenac",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "17",
+              "1954",
+              "novembro"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
         }
       ],
       "latency": {
-        "total_ms": 311.23498100009783,
-        "retrieval_ms": 3.1460180000522087,
-        "adjudication_ms": 0.07475899997189117,
-        "generation_ms": 272.72596300008445,
-        "grounding_ms": 35.18002600003456
+        "total_ms": 714.7336519999499,
+        "retrieval_ms": 3.1323910000082833,
+        "adjudication_ms": 0.0992489999589452,
+        "generation_ms": 641.1433820001093,
+        "grounding_ms": 70.25838399999884
       },
       "requires_human_review": true
     },
@@ -357,11 +404,11 @@
         }
       ],
       "latency": {
-        "total_ms": 537.2459579998576,
-        "retrieval_ms": 2.9328579998946225,
-        "adjudication_ms": 0.06199699987519125,
-        "generation_ms": 508.6705500000335,
-        "grounding_ms": 25.470834999850922
+        "total_ms": 536.1648440000408,
+        "retrieval_ms": 2.255421999961982,
+        "adjudication_ms": 0.07499000003008405,
+        "generation_ms": 511.34585599993443,
+        "grounding_ms": 22.39523899993401
       },
       "requires_human_review": true
     },
@@ -378,7 +425,7 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "supported",
-      "grounding_score": 0.9628493189811707,
+      "grounding_score": 0.9402555227279663,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -392,7 +439,7 @@
         "disposition": "allow",
         "reason": "supported",
         "nli_status": "supported",
-        "nli_score": 0.9628493189811707,
+        "nli_score": 0.9402555227279663,
         "fact_statuses": [
           "not_applicable"
         ],
@@ -401,8 +448,8 @@
         "should_abstain": false,
         "enforced": true
       },
-      "answer": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz e realizando sua inscrição no Senac.",
-      "presented_answer": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz e realizando sua inscrição no Senac.",
+      "answer": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz.",
+      "presented_answer": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz.",
       "evidence_sources": [
         "aprendizagem/jovem-aprendiz.md",
         "aprendizagem/jovem-aprendiz.md",
@@ -415,8 +462,8 @@
       ],
       "claim_assessments": [
         {
-          "claim": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz e realizando sua inscrição no Senac.",
-          "score": 0.9628493189811707,
+          "claim": "A inscrição do jovem aprendiz no Senac é realizada pela empresa contratando o jovem aprendiz.",
+          "score": 0.9402555227279663,
           "source": "aprendizagem/jovem-aprendiz.md",
           "chunk_id": "aprendizagem/jovem-aprendiz.md:1",
           "span_selection": {
@@ -435,17 +482,17 @@
               "inscricao",
               "senac"
             ],
-            "lexical_coverage": 0.3,
+            "lexical_coverage": 0.375,
             "support_verified": false
           }
         }
       ],
       "latency": {
-        "total_ms": 823.5361760000615,
-        "retrieval_ms": 3.0553990000043996,
-        "adjudication_ms": 0.260570000136795,
-        "generation_ms": 726.3237209999716,
-        "grounding_ms": 93.74810000008438
+        "total_ms": 687.5172970001131,
+        "retrieval_ms": 2.3900510000203212,
+        "adjudication_ms": 0.1609870000720548,
+        "generation_ms": 595.3570390001914,
+        "grounding_ms": 89.46168500006024
       },
       "requires_human_review": true
     },
@@ -462,7 +509,7 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "supported",
-      "grounding_score": 0.8499136567115784,
+      "grounding_score": 0.8583210706710815,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -497,7 +544,7 @@
         "disposition": "allow",
         "reason": "supported",
         "nli_status": "supported",
-        "nli_score": 0.8499136567115784,
+        "nli_score": 0.8583210706710815,
         "fact_statuses": [
           "value_match"
         ],
@@ -508,15 +555,15 @@
         "should_abstain": false,
         "enforced": true
       },
-      "answer": "14 a 24 anos",
-      "presented_answer": "14 a 24 anos",
+      "answer": "14 a 24 anos.",
+      "presented_answer": "14 a 24 anos.",
       "evidence_sources": [
         "aprendizagem/jovem-aprendiz.md"
       ],
       "claim_assessments": [
         {
-          "claim": "14 a 24 anos",
-          "score": 0.8499136567115784,
+          "claim": "14 a 24 anos.",
+          "score": 0.8583210706710815,
           "source": "aprendizagem/jovem-aprendiz.md",
           "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
           "span_selection": {
@@ -541,11 +588,11 @@
         }
       ],
       "latency": {
-        "total_ms": 303.13111899999967,
-        "retrieval_ms": 3.006464000009146,
-        "adjudication_ms": 0.06443399979616515,
-        "generation_ms": 287.8990420001628,
-        "grounding_ms": 12.057920999950511
+        "total_ms": 320.4315109999243,
+        "retrieval_ms": 2.9909539998698165,
+        "adjudication_ms": 0.0897220002116228,
+        "generation_ms": 305.25396400003046,
+        "grounding_ms": 11.995338999895466
       },
       "requires_human_review": true
     },
@@ -617,11 +664,11 @@
         }
       ],
       "latency": {
-        "total_ms": 508.67045899985897,
-        "retrieval_ms": 2.952170000071419,
-        "adjudication_ms": 0.06319099998108868,
-        "generation_ms": 492.56350000018756,
-        "grounding_ms": 12.98716099995545
+        "total_ms": 503.0897060000825,
+        "retrieval_ms": 2.9787019998366304,
+        "adjudication_ms": 0.08846099990478251,
+        "generation_ms": 486.367644999973,
+        "grounding_ms": 13.55158899991693
       },
       "requires_human_review": true
     },
@@ -720,11 +767,11 @@
         }
       ],
       "latency": {
-        "total_ms": 549.8651739999332,
-        "retrieval_ms": 2.913622000050964,
-        "adjudication_ms": 0.06214099994394928,
-        "generation_ms": 531.6572640001596,
-        "grounding_ms": 15.141328000026988
+        "total_ms": 527.2151740000481,
+        "retrieval_ms": 2.840608000042266,
+        "adjudication_ms": 0.08522100006302935,
+        "generation_ms": 509.2133170001034,
+        "grounding_ms": 14.981961000103183
       },
       "requires_human_review": true
     },
@@ -741,7 +788,7 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "supported",
-      "grounding_score": 0.9851688146591187,
+      "grounding_score": 0.988405704498291,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -755,7 +802,7 @@
         "disposition": "allow",
         "reason": "supported",
         "nli_status": "supported",
-        "nli_score": 0.9851688146591187,
+        "nli_score": 0.988405704498291,
         "fact_statuses": [
           "not_applicable"
         ],
@@ -764,8 +811,8 @@
         "should_abstain": false,
         "enforced": true
       },
-      "answer": "O Senac Piauí possui uma plataforma de biblioteca virtual chamada Cachola, que oferece serviços como empréstimo domiciliar, renovação e reserva de livros, além de computação para pesquisa e elaboração de fichas catalográficas.",
-      "presented_answer": "O Senac Piauí possui uma plataforma de biblioteca virtual chamada Cachola, que oferece serviços como empréstimo domiciliar, renovação e reserva de livros, além de computação para pesquisa e elaboração de fichas catalográficas.",
+      "answer": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a biblioteca virtual pela Plataforma Cachola.",
+      "presented_answer": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a biblioteca virtual pela Plataforma Cachola.",
       "evidence_sources": [
         "biblioteca/bibliotecas-e-cachola.md",
         "biblioteca/bibliotecas-e-cachola.md",
@@ -773,39 +820,38 @@
       ],
       "claim_assessments": [
         {
-          "claim": "O Senac Piauí possui uma plataforma de biblioteca virtual chamada Cachola, que oferece serviços como empréstimo domiciliar, renovação e reserva de livros, além de computação para pesquisa e elaboração de fichas catalográficas.",
-          "score": 0.9851688146591187,
+          "claim": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a biblioteca virtual pela Plataforma Cachola.",
+          "score": 0.988405704498291,
           "source": "biblioteca/bibliotecas-e-cachola.md",
-          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
           "span_selection": {
             "span": {
-              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
               "source": "biblioteca/bibliotecas-e-cachola.md",
-              "start": 273,
-              "end": 328,
-              "text": "- Empréstimo domiciliar, renovação e reserva de livros.",
+              "start": 226,
+              "end": 362,
+              "text": "## Cachola A Cachola é a biblioteca virtual especializada do Senac, com e-books, materiais didáticos, vídeos, artigos e outros recursos.",
               "source_url": "https://www.pi.senac.br/institucional/biblioteca",
               "entity_id": null,
               "attribute": null
             },
             "matched_terms": [
-              "domiciliar",
-              "emprestimo",
-              "livros",
-              "renovacao",
-              "reserva"
+              "biblioteca",
+              "cachola",
+              "senac",
+              "virtual"
             ],
-            "lexical_coverage": 0.23809523809523808,
+            "lexical_coverage": 0.4444444444444444,
             "support_verified": false
           }
         }
       ],
       "latency": {
-        "total_ms": 1187.7593539998088,
-        "retrieval_ms": 2.3835829999825364,
-        "adjudication_ms": 0.06481300010818813,
-        "generation_ms": 1144.6607809998568,
-        "grounding_ms": 40.522606999957134
+        "total_ms": 762.6724599999761,
+        "retrieval_ms": 3.0959779999193415,
+        "adjudication_ms": 0.09366500012220058,
+        "generation_ms": 718.0074279999644,
+        "grounding_ms": 41.365634999920076
       },
       "requires_human_review": true
     },
@@ -878,11 +924,11 @@
         }
       ],
       "latency": {
-        "total_ms": 383.61282100004246,
-        "retrieval_ms": 3.092272000003504,
-        "adjudication_ms": 0.06956600009289104,
-        "generation_ms": 367.1180589999494,
-        "grounding_ms": 13.22872700006883
+        "total_ms": 416.02311399992686,
+        "retrieval_ms": 3.1622750000224187,
+        "adjudication_ms": 0.0952729999426083,
+        "generation_ms": 398.67944000002353,
+        "grounding_ms": 13.976400000046851
       },
       "requires_human_review": true
     },
@@ -980,11 +1026,11 @@
         }
       ],
       "latency": {
-        "total_ms": 236.31020299990269,
-        "retrieval_ms": 3.124509000144826,
-        "adjudication_ms": 0.12007800000901625,
-        "generation_ms": 219.76881000000503,
-        "grounding_ms": 13.17656099990927
+        "total_ms": 250.43830599997818,
+        "retrieval_ms": 3.1750979999287665,
+        "adjudication_ms": 0.1318839999839838,
+        "generation_ms": 232.44763100001364,
+        "grounding_ms": 14.550308000025325
       },
       "requires_human_review": true
     },
@@ -1080,11 +1126,11 @@
         }
       ],
       "latency": {
-        "total_ms": 141.84419499997603,
-        "retrieval_ms": 2.4114670000017213,
-        "adjudication_ms": 0.08911899999475281,
-        "generation_ms": 127.96203200014133,
-        "grounding_ms": 11.273322000079133
+        "total_ms": 154.18331199998647,
+        "retrieval_ms": 3.090264000093157,
+        "adjudication_ms": 0.11985099990852177,
+        "generation_ms": 139.01229799989778,
+        "grounding_ms": 11.85428700000557
       },
       "requires_human_review": true
     },
@@ -1120,11 +1166,11 @@
       "evidence_sources": [],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 2.428400999860969,
-        "retrieval_ms": 2.314142999921387,
-        "adjudication_ms": 0.05164000003787805,
-        "generation_ms": 0.0017749998733052053,
-        "grounding_ms": 0.017684999875200447
+        "total_ms": 3.1560439999793743,
+        "retrieval_ms": 3.000460000066596,
+        "adjudication_ms": 0.08963200002654048,
+        "generation_ms": 0.0018400000953988638,
+        "grounding_ms": 0.01851900015026331
       },
       "requires_human_review": true
     },
@@ -1221,11 +1267,11 @@
         }
       ],
       "latency": {
-        "total_ms": 178.8541210000858,
-        "retrieval_ms": 2.216687999862188,
-        "adjudication_ms": 0.06509699983325845,
-        "generation_ms": 164.14974299982532,
-        "grounding_ms": 12.329820000104519
+        "total_ms": 191.13433299980898,
+        "retrieval_ms": 2.868281000019124,
+        "adjudication_ms": 0.08583099997849786,
+        "generation_ms": 174.7567820000313,
+        "grounding_ms": 13.320068000211904
       },
       "requires_human_review": true
     },
@@ -1325,11 +1371,11 @@
         }
       ],
       "latency": {
-        "total_ms": 656.7446500000642,
-        "retrieval_ms": 2.289195999992444,
-        "adjudication_ms": 0.05543099996430101,
-        "generation_ms": 596.7089630000828,
-        "grounding_ms": 57.57663600002161
+        "total_ms": 709.5415740000135,
+        "retrieval_ms": 2.973278999888862,
+        "adjudication_ms": 0.08597999999437889,
+        "generation_ms": 635.5319809999855,
+        "grounding_ms": 70.82159200012939
       },
       "requires_human_review": true
     },
@@ -1346,7 +1392,7 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "supported",
-      "grounding_score": 0.9728890061378479,
+      "grounding_score": 0.9777293801307678,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -1360,7 +1406,7 @@
         "disposition": "allow",
         "reason": "supported",
         "nli_status": "supported",
-        "nli_score": 0.9728890061378479,
+        "nli_score": 0.9777293801307678,
         "fact_statuses": [
           "not_applicable"
         ],
@@ -1369,8 +1415,8 @@
         "should_abstain": false,
         "enforced": true
       },
-      "answer": "13 entradas de unidades apareciam na seção de unidades.",
-      "presented_answer": "13 entradas de unidades apareciam na seção de unidades.",
+      "answer": "13 entradas de unidades apareciam na seção de unidades do portal.",
+      "presented_answer": "13 entradas de unidades apareciam na seção de unidades do portal.",
       "evidence_sources": [
         "unidades/rede-senac-piaui.md",
         "unidades/rede-senac-piaui.md",
@@ -1378,8 +1424,8 @@
       ],
       "claim_assessments": [
         {
-          "claim": "13 entradas de unidades apareciam na seção de unidades.",
-          "score": 0.9728890061378479,
+          "claim": "13 entradas de unidades apareciam na seção de unidades do portal.",
+          "score": 0.9777293801307678,
           "source": "unidades/rede-senac-piaui.md",
           "chunk_id": "unidades/rede-senac-piaui.md:0",
           "span_selection": {
@@ -1396,20 +1442,21 @@
             "matched_terms": [
               "13",
               "entradas",
+              "portal",
               "secao",
               "unidades"
             ],
-            "lexical_coverage": 0.8,
+            "lexical_coverage": 0.8333333333333334,
             "support_verified": false
           }
         }
       ],
       "latency": {
-        "total_ms": 480.2385749999303,
-        "retrieval_ms": 2.3680589999912627,
-        "adjudication_ms": 0.060165999911987456,
-        "generation_ms": 441.22305099995174,
-        "grounding_ms": 36.48955600010595
+        "total_ms": 549.406633999979,
+        "retrieval_ms": 3.0580370000734547,
+        "adjudication_ms": 0.09331000001111533,
+        "generation_ms": 499.49718999982906,
+        "grounding_ms": 46.64792399989892
       },
       "requires_human_review": true
     },
@@ -1511,11 +1558,11 @@
         }
       ],
       "latency": {
-        "total_ms": 703.0086729998857,
-        "retrieval_ms": 2.3855409999669064,
-        "adjudication_ms": 0.06067200001780293,
-        "generation_ms": 665.2333619999808,
-        "grounding_ms": 35.19311300010486
+        "total_ms": 720.9304630000588,
+        "retrieval_ms": 3.1813209998290404,
+        "adjudication_ms": 0.09172000000035041,
+        "generation_ms": 676.0578170001281,
+        "grounding_ms": 41.46103900006892
       },
       "requires_human_review": true
     },
@@ -1618,11 +1665,11 @@
         }
       ],
       "latency": {
-        "total_ms": 671.8093079998653,
-        "retrieval_ms": 2.965161000020089,
-        "adjudication_ms": 0.06452799993894587,
-        "generation_ms": 642.0079429999532,
-        "grounding_ms": 26.674715999888576
+        "total_ms": 723.7455279998812,
+        "retrieval_ms": 2.993029999970531,
+        "adjudication_ms": 0.08744699994167604,
+        "generation_ms": 689.7608799999944,
+        "grounding_ms": 30.80830900012188
       },
       "requires_human_review": true
     },
@@ -1701,11 +1748,11 @@
         }
       ],
       "latency": {
-        "total_ms": 472.4246549999407,
-        "retrieval_ms": 2.9142989999400015,
-        "adjudication_ms": 0.06600200003958889,
-        "generation_ms": 403.6997450000399,
-        "grounding_ms": 65.63275899998189
+        "total_ms": 487.18754700007594,
+        "retrieval_ms": 2.990728999975545,
+        "adjudication_ms": 0.08828499994706362,
+        "generation_ms": 408.93990800009306,
+        "grounding_ms": 75.0591070000155
       },
       "requires_human_review": true
     },
@@ -1781,11 +1828,11 @@
         }
       ],
       "latency": {
-        "total_ms": 370.25195299997904,
-        "retrieval_ms": 2.869938000003458,
-        "adjudication_ms": 0.06165799982227327,
-        "generation_ms": 337.0569589999377,
-        "grounding_ms": 30.156108000028325
+        "total_ms": 378.3228469999358,
+        "retrieval_ms": 2.951393999865104,
+        "adjudication_ms": 0.08535400002074311,
+        "generation_ms": 346.31427699991946,
+        "grounding_ms": 28.87244299995473
       },
       "requires_human_review": true
     },
@@ -1799,7 +1846,7 @@
       "false_block": false,
       "source_hit": true,
       "text_anchor_pass": null,
-      "answerability_reason": "temporal_evidence_unavailable",
+      "answerability_reason": "entity_mismatch",
       "precheck_verified_specific_answer": false,
       "grounding_status": "unsupported",
       "grounding_score": 0.0,
@@ -1816,8 +1863,8 @@
         "should_abstain": true,
         "enforced": true
       },
-      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
-      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
       "evidence_sources": [
         "cursos/excel-2026.md",
         "psg/vagas-e-editais.md",
@@ -1825,11 +1872,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.116468999905919,
-        "retrieval_ms": 2.9636330000357702,
-        "adjudication_ms": 0.0667750000502565,
-        "generation_ms": 0.0025970000478992006,
-        "grounding_ms": 0.01883600020846643
+        "total_ms": 3.1403259999933653,
+        "retrieval_ms": 2.97856099996352,
+        "adjudication_ms": 0.07960699986142572,
+        "generation_ms": 0.0022039998839318287,
+        "grounding_ms": 0.019564000012906035
       },
       "requires_human_review": true
     },
@@ -1872,11 +1919,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.246269999863216,
-        "retrieval_ms": 3.081203999954596,
-        "adjudication_ms": 0.08834100003696221,
-        "generation_ms": 0.000717000148142688,
-        "grounding_ms": 0.01350799993815599
+        "total_ms": 3.262351000103081,
+        "retrieval_ms": 3.0893929999820102,
+        "adjudication_ms": 0.09644700003264006,
+        "generation_ms": 0.0009640000371291535,
+        "grounding_ms": 0.013958999943497474
       },
       "requires_human_review": true
     },
@@ -1916,11 +1963,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.0045989999507583,
-        "retrieval_ms": 2.909054000156175,
-        "adjudication_ms": 0.03618999994614569,
-        "generation_ms": 0.0006380000741046388,
-        "grounding_ms": 0.013063000096735777
+        "total_ms": 3.041849000055663,
+        "retrieval_ms": 2.9240470000786445,
+        "adjudication_ms": 0.058008999985759147,
+        "generation_ms": 0.0006150000899651786,
+        "grounding_ms": 0.012794999975085375
       },
       "requires_human_review": true
     },
@@ -1960,11 +2007,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.1271750001451437,
-        "retrieval_ms": 3.0274160001226846,
-        "adjudication_ms": 0.04154500015829399,
-        "generation_ms": 0.0007369999366346747,
-        "grounding_ms": 0.013413000033324352
+        "total_ms": 3.1427490000623948,
+        "retrieval_ms": 3.0219709999528277,
+        "adjudication_ms": 0.06379899991770799,
+        "generation_ms": 0.0006179998308653012,
+        "grounding_ms": 0.013012999943384784
       },
       "requires_human_review": true
     },
@@ -2002,11 +2049,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.165922999869508,
-        "retrieval_ms": 3.038010999944163,
-        "adjudication_ms": 0.06671400001323491,
-        "generation_ms": 0.000675000137562165,
-        "grounding_ms": 0.01230800012308464
+        "total_ms": 3.1991769999422104,
+        "retrieval_ms": 3.0576459998883365,
+        "adjudication_ms": 0.08004899996194581,
+        "generation_ms": 0.0006679999842162943,
+        "grounding_ms": 0.012032999848088366
       },
       "requires_human_review": true
     },
@@ -2051,11 +2098,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.0996650000361115,
-        "retrieval_ms": 2.8607269998701668,
-        "adjudication_ms": 0.17064400003619085,
-        "generation_ms": 0.000678000105835963,
-        "grounding_ms": 0.012386999969749013
+        "total_ms": 3.1040649998885783,
+        "retrieval_ms": 2.860923999833176,
+        "adjudication_ms": 0.17598500016902108,
+        "generation_ms": 0.0006839998150098836,
+        "grounding_ms": 0.012621999985640286
       },
       "requires_human_review": true
     },
@@ -2100,11 +2147,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 2.870962000088184,
-        "retrieval_ms": 2.74374000014177,
-        "adjudication_ms": 0.05403000000114844,
-        "generation_ms": 0.0006200000370881753,
-        "grounding_ms": 0.012769000022672117
+        "total_ms": 2.886394999904951,
+        "retrieval_ms": 2.7502699999786273,
+        "adjudication_ms": 0.06348500005515234,
+        "generation_ms": 0.0006719999419146916,
+        "grounding_ms": 0.016826000091896276
       },
       "requires_human_review": true
     },
@@ -2144,11 +2191,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.096373000062158,
-        "retrieval_ms": 2.9953289999866684,
-        "adjudication_ms": 0.046613999984401744,
-        "generation_ms": 0.0006390000635292381,
-        "grounding_ms": 0.012326999922152027
+        "total_ms": 3.1157030000485975,
+        "retrieval_ms": 2.989343000081135,
+        "adjudication_ms": 0.06835499993940175,
+        "generation_ms": 0.0007529999948019395,
+        "grounding_ms": 0.012233000006744987
       },
       "requires_human_review": true
     },
@@ -2192,11 +2239,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 2.920645000131117,
-        "retrieval_ms": 2.801181999984692,
-        "adjudication_ms": 0.053828999853067216,
-        "generation_ms": 0.0006060001851437846,
-        "grounding_ms": 0.012481000112529728
+        "total_ms": 2.9503099999601545,
+        "retrieval_ms": 2.817520999997214,
+        "adjudication_ms": 0.06575299994437955,
+        "generation_ms": 0.0007139999524952145,
+        "grounding_ms": 0.012171999969723402
       },
       "requires_human_review": true
     },
@@ -2236,11 +2283,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 2.916618999961429,
-        "retrieval_ms": 2.80127399992125,
-        "adjudication_ms": 0.053049000143801095,
-        "generation_ms": 0.0006620000476686982,
-        "grounding_ms": 0.012197000160085736
+        "total_ms": 2.9182860000673827,
+        "retrieval_ms": 2.794052999888663,
+        "adjudication_ms": 0.06291899990173988,
+        "generation_ms": 0.0006360000952554401,
+        "grounding_ms": 0.012186000049041468
       },
       "requires_human_review": true
     },
@@ -2279,11 +2326,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 252.46139799992307,
-        "retrieval_ms": 2.8897059999053454,
-        "adjudication_ms": 0.05544100008592068,
-        "generation_ms": 249.40677700010383,
-        "grounding_ms": 0.022881000177221722
+        "total_ms": 253.22935799999868,
+        "retrieval_ms": 2.915949999987788,
+        "adjudication_ms": 0.07509299985031248,
+        "generation_ms": 250.13313199997356,
+        "grounding_ms": 0.023849999934100197
       },
       "requires_human_review": true
     },
@@ -2326,11 +2373,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 283.55018199999904,
-        "retrieval_ms": 2.918576000183748,
-        "adjudication_ms": 0.06003599992254749,
-        "generation_ms": 280.466572000023,
-        "grounding_ms": 0.021454000034282217
+        "total_ms": 286.7037650000839,
+        "retrieval_ms": 2.917376000141303,
+        "adjudication_ms": 0.08211599993046548,
+        "generation_ms": 283.6028300000635,
+        "grounding_ms": 0.021969000044919085
       },
       "requires_human_review": true
     },
@@ -2373,11 +2420,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 166.0354840000764,
-        "retrieval_ms": 2.424129000019093,
-        "adjudication_ms": 0.07532299991908076,
-        "generation_ms": 163.40782999986914,
-        "grounding_ms": 0.022236000177144888
+        "total_ms": 155.0427669999408,
+        "retrieval_ms": 2.4381430000630644,
+        "adjudication_ms": 0.07298800005628436,
+        "generation_ms": 152.41050800000266,
+        "grounding_ms": 0.0211300000501069
       },
       "requires_human_review": true
     },
@@ -2394,33 +2441,123 @@
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
       "grounding_status": "unsupported",
-      "grounding_score": 0.0,
+      "grounding_score": 0.12300258874893188,
       "generation_skipped": false,
-      "fact_validations": [],
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "duration_hours",
+                "value": "30",
+                "unit": "hours",
+                "start": 21,
+                "end": 29,
+                "literal": "30 horas",
+                "qualifier": "unspecified",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "cursos/excel-2026.md",
+              "chunk_id": "cursos/excel-2026.md:0",
+              "supporting_literal": "30 horas",
+              "source_start": 129,
+              "source_end": 137,
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        },
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
       "grounding_v3": {
         "disposition": "abstain",
-        "reason": "generation_abstained",
+        "reason": "nli_unsupported",
         "nli_status": "unsupported",
-        "nli_score": 0.0,
-        "fact_statuses": [],
-        "supporting_chunk_ids": [],
+        "nli_score": 0.12300258874893188,
+        "fact_statuses": [
+          "value_match",
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [
+          "cursos/excel-2026.md:0"
+        ],
         "allows_response": false,
         "should_abstain": true,
         "enforced": true
       },
-      "answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "answer": "O curso de Excel tem 30 horas de ensino fundamental incompleto e a modalidade é presencial.",
       "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
       "evidence_sources": [
         "cursos/excel-2026.md",
         "cursos/agenda-e-unidades.md"
       ],
-      "claim_assessments": [],
+      "claim_assessments": [
+        {
+          "claim": "O curso de Excel tem 30 horas de ensino fundamental incompleto",
+          "score": 0.9591535329818726,
+          "source": "cursos/excel-2026.md",
+          "chunk_id": "cursos/excel-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/excel-2026.md:0",
+              "source": "cursos/excel-2026.md",
+              "start": 0,
+              "end": 167,
+              "text": "# Curso de Excel — Senac Piauí Na consulta à página oficial em 29 de outubro de 2026, as turmas listadas do curso Excel tinham **30 horas**, com modalidade presencial.",
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "entity_id": "curso:excel",
+              "attribute": null
+            },
+            "matched_terms": [
+              "30",
+              "curso",
+              "excel",
+              "horas"
+            ],
+            "lexical_coverage": 0.5714285714285714,
+            "support_verified": false
+          }
+        },
+        {
+          "claim": "a modalidade é presencial.",
+          "score": 0.12300258874893188,
+          "source": "cursos/excel-2026.md",
+          "chunk_id": "cursos/excel-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/excel-2026.md:0",
+              "source": "cursos/excel-2026.md",
+              "start": 0,
+              "end": 167,
+              "text": "# Curso de Excel — Senac Piauí Na consulta à página oficial em 29 de outubro de 2026, as turmas listadas do curso Excel tinham **30 horas**, com modalidade presencial.",
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "entity_id": "curso:excel",
+              "attribute": null
+            },
+            "matched_terms": [
+              "modalidade",
+              "presencial"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
       "latency": {
-        "total_ms": 242.68981699992764,
-        "retrieval_ms": 2.387911000141685,
-        "adjudication_ms": 0.06917199993949907,
-        "generation_ms": 240.1202819999071,
-        "grounding_ms": 0.02165699993383896
+        "total_ms": 594.7529889999714,
+        "retrieval_ms": 2.3291239999707614,
+        "adjudication_ms": 0.07707200006734638,
+        "generation_ms": 566.0870300000624,
+        "grounding_ms": 26.145948000021235
       },
       "requires_human_review": true
     },
@@ -2460,11 +2597,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 267.62691600015387,
-        "retrieval_ms": 2.3794290000296314,
-        "adjudication_ms": 0.061999000081414124,
-        "generation_ms": 265.0848830000996,
-        "grounding_ms": 0.02018400004999421
+        "total_ms": 276.3711320001221,
+        "retrieval_ms": 2.9839569999694504,
+        "adjudication_ms": 0.08954300005825644,
+        "generation_ms": 273.18547999993825,
+        "grounding_ms": 0.023954999960551504
       },
       "requires_human_review": true
     },
@@ -2509,11 +2646,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 266.06087899995146,
-        "retrieval_ms": 2.2874220001085632,
-        "adjudication_ms": 0.05982200013932015,
-        "generation_ms": 263.60781699986546,
-        "grounding_ms": 0.022118000060800114
+        "total_ms": 260.68839699996715,
+        "retrieval_ms": 3.027057000053901,
+        "adjudication_ms": 0.09500299984210869,
+        "generation_ms": 257.45436600004723,
+        "grounding_ms": 0.024269000050480827
       },
       "requires_human_review": true
     },
@@ -2529,8 +2666,8 @@
       "text_anchor_pass": null,
       "answerability_reason": null,
       "precheck_verified_specific_answer": false,
-      "grounding_status": "uncertain",
-      "grounding_score": 0.23935642838478088,
+      "grounding_status": "supported",
+      "grounding_score": 0.9500077962875366,
       "generation_skipped": false,
       "fact_validations": [
         {
@@ -2543,8 +2680,8 @@
       "grounding_v3": {
         "disposition": "abstain",
         "reason": "requested_attribute_missing",
-        "nli_status": "uncertain",
-        "nli_score": 0.23935642838478088,
+        "nli_status": "supported",
+        "nli_score": 0.9500077962875366,
         "fact_statuses": [
           "not_applicable"
         ],
@@ -2553,7 +2690,7 @@
         "should_abstain": true,
         "enforced": true
       },
-      "answer": "A lotação máxima da biblioteca do Senac de Picos é 13 entradas.",
+      "answer": "O acesso é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
       "presented_answer": "Encontrei informações relacionadas, mas não o dado específico solicitado.",
       "evidence_sources": [
         "biblioteca/bibliotecas-e-cachola.md",
@@ -2565,37 +2702,41 @@
       ],
       "claim_assessments": [
         {
-          "claim": "A lotação máxima da biblioteca do Senac de Picos é 13 entradas.",
-          "score": 0.23935642838478088,
-          "source": "unidades/rede-senac-piaui.md",
-          "chunk_id": "unidades/rede-senac-piaui.md:0",
+          "claim": "O acesso é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
+          "score": 0.9500077962875366,
+          "source": "biblioteca/bibliotecas-e-cachola.md",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
           "span_selection": {
             "span": {
-              "chunk_id": "unidades/rede-senac-piaui.md:0",
-              "source": "unidades/rede-senac-piaui.md",
-              "start": 0,
-              "end": 194,
-              "text": "# Unidades do Senac Piauí Na consulta ao portal oficial do Senac Piauí em 29 de outubro de 2026, a seção \"Conheça Nossas Unidades\" apresentava **13 entradas**, distribuídas em **10 municípios**.",
-              "source_url": "https://www.pi.senac.br/",
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+              "source": "biblioteca/bibliotecas-e-cachola.md",
+              "start": 140,
+              "end": 214,
+              "text": "O acesso é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
+              "source_url": "https://www.pi.senac.br/institucional/biblioteca",
               "entity_id": null,
               "attribute": null
             },
             "matched_terms": [
-              "13",
-              "entradas",
+              "acesso",
+              "alunos",
+              "colaboradores",
+              "destinado",
+              "instrutores",
+              "piaui",
               "senac"
             ],
-            "lexical_coverage": 0.42857142857142855,
+            "lexical_coverage": 1.0,
             "support_verified": false
           }
         }
       ],
       "latency": {
-        "total_ms": 618.522793000011,
-        "retrieval_ms": 2.323991999901409,
-        "adjudication_ms": 0.05991399984850432,
-        "generation_ms": 544.2998339999576,
-        "grounding_ms": 71.71539599994503
+        "total_ms": 599.9840320000658,
+        "retrieval_ms": 2.5787839999793505,
+        "adjudication_ms": 0.08351900009984092,
+        "generation_ms": 525.3667199999654,
+        "grounding_ms": 71.85013599996637
       },
       "requires_human_review": true
     },
@@ -2631,11 +2772,11 @@
       "evidence_sources": [],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.1706120000762894,
-        "retrieval_ms": 3.044011999918439,
-        "adjudication_ms": 0.062034999928073375,
-        "generation_ms": 0.001210999926115619,
-        "grounding_ms": 0.017080000134228612
+        "total_ms": 2.6269029999639315,
+        "retrieval_ms": 2.481798999951934,
+        "adjudication_ms": 0.08609600013187446,
+        "generation_ms": 0.0009289999525208259,
+        "grounding_ms": 0.015489999896090012
       },
       "requires_human_review": true
     },
@@ -2673,11 +2814,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.1265869999970164,
-        "retrieval_ms": 2.981413000043176,
-        "adjudication_ms": 0.08026599994082062,
-        "generation_ms": 0.0007950000053824624,
-        "grounding_ms": 0.013179000006857677
+        "total_ms": 2.5013989998114994,
+        "retrieval_ms": 2.366571999800726,
+        "adjudication_ms": 0.07732100016255572,
+        "generation_ms": 0.0009809998573473422,
+        "grounding_ms": 0.011839999842777615
       },
       "requires_human_review": true
     },
@@ -2719,11 +2860,11 @@
       ],
       "claim_assessments": [],
       "latency": {
-        "total_ms": 3.071116000000984,
-        "retrieval_ms": 2.9187850000198523,
-        "adjudication_ms": 0.07617699998263561,
-        "generation_ms": 0.0007400001322821481,
-        "grounding_ms": 0.012497999932747916
+        "total_ms": 2.4170089998278854,
+        "retrieval_ms": 2.2805699998116324,
+        "adjudication_ms": 0.06942899995010521,
+        "generation_ms": 0.0005839999630552484,
+        "grounding_ms": 0.010811999800353078
       },
       "requires_human_review": true
     }

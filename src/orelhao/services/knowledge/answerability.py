@@ -5,6 +5,7 @@ de fatos estruturados, a validação factual permanece responsabilidade do NLI.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 
@@ -44,6 +45,10 @@ class EvidenceAssessment:
 
 
 class EvidenceAdjudicator:
+    def __init__(self, *, known_entities: Iterable[str] = ()) -> None:
+        # Catálogo indexado completo, não apenas os chunks do top-k.
+        self._known_entities = tuple(sorted(set(known_entities)))
+
     def assess(
         self, question: str, evidence: list[SearchResult], *, as_of: date,
     ) -> EvidenceAssessment:
@@ -51,9 +56,11 @@ class EvidenceAdjudicator:
             question,
             as_of=as_of,
             known_entities=[
-                str(item.chunk.metadata["entity_id"])
-                for item in evidence
-                if item.chunk.metadata.get("entity_id")
+                *self._known_entities,
+                *(
+                    str(item.chunk.metadata["entity_id"])
+                    for item in evidence if item.chunk.metadata.get("entity_id")
+                ),
             ],
         )
         if not evidence:

@@ -28,6 +28,7 @@ from .evidence import (
 from .fact_validation import FactValidation, validate_claim_facts
 from .grounding_decision import GroundingDecision, GroundingPolicy
 from .grounding_v3 import GroundingV3Decision, decide_grounding_v3
+from .index import load_chunks
 from .models import SearchResult
 from .query_constraints import explicitly_named_entities
 from .retriever import Retriever
@@ -414,7 +415,13 @@ def build_default_observation_workbench(
         OnnxNliEvidenceVerifier(model_dir),
         ObservationLog(log_path or index_dir.parent / "observations" / "grounding.jsonl"),
         mode=mode,
-        adjudicator=EvidenceAdjudicator(),
+        adjudicator=EvidenceAdjudicator(
+            known_entities=[
+                str(chunk.metadata["entity_id"])
+                for chunk in load_chunks(index_dir)
+                if chunk.metadata.get("entity_id")
+            ],
+        ),
     )
 
 

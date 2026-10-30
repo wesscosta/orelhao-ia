@@ -32,6 +32,14 @@ A política V3 **não eleva NLI `UNCERTAIN` ou `UNSUPPORTED` para `ALLOW`**, mes
 
 Essas regras fazem **fail closed**, mas não resolvem integralmente perguntas sem atributos tipados nem contradições semânticas de linguagem natural. O NLI triclasse segue instrumentado e não tem thresholds de contradição novos calibrados.
 
+## Correção adicional de resolução de entidades
+
+O smoke test real da bancada revelou um risco anterior: uma pergunta sobre Excel recuperou apenas chunks de Informática Básica e Aprendizagem. Quando o pré-gate extraía os nomes de entidades apenas do top-k, deixava de identificar Excel e podia produzir explicação de oferta ambígua baseada no curso errado.
+
+O EvidenceAdjudicator agora aceita um **catálogo de entidades conhecido**; a bancada constrói esse catálogo a partir de todos os chunks do índice persistente no momento da inicialização, não só dos resultados de retrieval. Se nenhuma fonte recuperada corresponde ao curso solicitado, o pré-gate retorna entity_mismatch e, em enforce, a geração é ignorada. A atualização da base exige reindexação e reinício da bancada para carregar novas identidades. O mecanismo é um bloqueio por ausência de evidência; **não recupera automaticamente o chunk correto**.
+
+O teste HTTP com Tucano2 identificou explicitamente curso:excel, detectou entity_mismatch e pulou a LLM sem apresentar 140 horas recuperadas de Informática Básica. Testes adicionados asseguram esse isolamento do corpus.
+
 ## Segurança e privacidade
 
 - A síntese no endpoint `/workbench/speech/{observation_id}` resolve apenas a resposta **apresentada** já registrada, sem aceitar texto arbitrário.
@@ -55,8 +63,8 @@ Benchmarks reais em CPU no Arch com retrieval, Answerability, geração local, N
 | Falsas permissões em 20 negativos | **0** | **0** |
 | Falsos bloqueios em 20 positivos | **8** | **11** |
 | Respostas positivas apresentadas com âncoras esperadas | **12** | **8** |
-| P50 pipeline textual no Arch | **682 ms** | **259 ms** |
-| P95 pipeline textual no Arch | **1278 ms** | **824 ms** |
+| P50 pipeline textual no Arch | **714 ms** | **269 ms** |
+| P95 pipeline textual no Arch | **1299 ms** | **724 ms** |
 
 O Tucano2 manteve os oito falsos bloqueios históricos, mas as respostas podem variar entre execuções. O Qwen registrou 11 contra dez no checkpoint anterior, com regressões e melhorias distintas. A política passou a bloquear respostas semanticamente relacionadas mas incapazes de informar o atributo solicitado, como a lotação máxima de biblioteca. A faixa etária curta de 14 a 24 anos foi reconhecida após nova normalização.
 

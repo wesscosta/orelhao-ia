@@ -10,7 +10,7 @@
 | Base da `main` | `351aacd` — linha v0.6.0-alpha.13 (verificar antes de promover) |
 | Branch experimental mais recente | `feat/grounding-v3-decision-policy-20261029` |
 | Commit experimental | HEAD da branch acima (ver histórico Git) |
-| Suíte de testes, Arch Python 3.14 | **275 aprovados**, 1 aviso de depreciação de Starlette |
+| Suíte de testes, Arch Python 3.14 | **277 aprovados**, 1 aviso de depreciação de Starlette |
 | Lint e tipagem | Ruff aprovado; Mypy aprovado no módulo Knowledge |
 | Conhecimento Senac PI indexado | **18 documentos, 36 chunks** (após revisão de Informática Básica) |
 | Resultado operacional | **NO-GO** para uso público e terminal físico; teste Dell 8 GB e revisão humana faltantes |
@@ -33,7 +33,9 @@ O **Fact Validator** em `fact_extraction.py` e `fact_validation.py` identifica f
 
 ### Grounding V3 — PR-04 (29/10/2026)
 
-O orquestrador V3 determina o texto apresentado em enforce; observe permanece diagnóstico. A ordem de veto considera pré-gate, recusa da geração, entidade, atributo solicitado ausente, divergência factual, ambiguidade e fontes insuficientes. NLI incerto continua bloqueado mesmo com números coincidentes. **275 testes** aprovados. No benchmark automatizado de 40 casos por modelo: **0/20 falsas permissões** em ambos e **8/20** falsos bloqueios positivos no Tucano2, **11/20** no Qwen. Não há validação humana independente. [Relatório PR-04](grounding-v3-pr04-decision-policy-2026-10-29.md).
+O orquestrador V3 determina o texto apresentado em enforce; observe permanece diagnóstico. A ordem de veto considera pré-gate, recusa da geração, entidade, atributo solicitado ausente, divergência factual, ambiguidade e fontes insuficientes. NLI incerto continua bloqueado mesmo com números coincidentes. **277 testes** aprovados. No benchmark automatizado de 40 casos por modelo: **0/20 falsas permissões** em ambos e **8/20** falsos bloqueios positivos no Tucano2, **11/20** no Qwen. Não há validação humana independente. [Relatório PR-04](grounding-v3-pr04-decision-policy-2026-10-29.md).
+
+**Resolução de entidades:** o adjudicador da bancada recebe catálogo de identidades de todos os chunks persistidos na inicialização, não somente do top-k; curso nomeado sem fonte recuperada recebe abstenção específica. Essa alteração não corrige ranking, e os números do benchmark devem ser comparados após reconstruir o índice.
 
 ## O que realmente existe
 

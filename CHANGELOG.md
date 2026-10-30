@@ -2,9 +2,13 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Correção de escopo por catálogo indexado (PR-04, 29/10/2026)
+
+O adjudicador da bancada agora usa o catálogo completo de entidades do índice: mesmo quando retrieval não encontra Excel, uma consulta explicitamente nomeada exige fonte daquele curso antes de chamar a LLM, impedindo a mistura com Informática Básica. É requisito reiniciar a bancada após reindexação para atualizar identidades. Não há alteração de ranking.
+
 ## Grounding V3 — PR-04 experimental (29/10/2026; não é release)
 
-Nova decisão conservadora ALLOW/ABSTAIN/CLARIFY, com verificação de completude do atributo solicitado, capacidade e intervalo etário. Em enforce o Piper recebe somente o texto seguro. 275 testes aprovados; avaliação automatizada de 40 casos por modelo: 0/20 falsas permissões em ambos, oito bloqueios positivos Tucano2 e onze Qwen, sem revisão humana independente. [Relatório](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
+Nova decisão conservadora ALLOW/ABSTAIN/CLARIFY, com verificação de completude do atributo solicitado, capacidade e intervalo etário. Em enforce o Piper recebe somente o texto seguro. 277 testes aprovados; avaliação automatizada de 40 casos por modelo: 0/20 falsas permissões em ambos, oito bloqueios positivos Tucano2 e onze Qwen, sem revisão humana independente. [Relatório](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
 
 ## Grounding V3 — PR-03 experimental (29/10/2026; não é release)
 

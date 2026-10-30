@@ -17,7 +17,7 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Arch Linux, Python 3.14) | **275 testes aprovados** e 1 aviso de depreciação |
+| Pytest (Arch Linux, Python 3.14) | **277 testes aprovados** e 1 aviso de depreciação |
 | Ruff / Mypy | Sem erros no escopo analisado |
 | Corpus Senac Piauí | **18 documentos informativos, 36 chunks** |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
@@ -79,7 +79,9 @@ O Grounding V3 passou a registrar comparações **diagnósticas** de valores, ho
 
 ### PR-04 — Grounding Decision V3 (29/10/2026)
 
-A decisão final agora combina NLI, pré-gate, entidade e Fact Validator. Em modo seguro, divergências verificáveis e atributos faltantes bloqueiam texto e áudio; ofertas múltiplas podem exigir esclarecimento. Correspondência lexical/numérica não eleva NLI incerto para resposta aprovada. **275 testes** aprovados; avaliação com 40 casos por modelo: 0 falsas permissões nos 20 negativos de cada, **8/20** falsos bloqueios Tucano2 e **11/20** Qwen. Conjunto não independente. Veja [Relatório PR-04](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
+A decisão final agora combina NLI, pré-gate, entidade e Fact Validator. Em modo seguro, divergências verificáveis e atributos faltantes bloqueiam texto e áudio; ofertas múltiplas podem exigir esclarecimento. Correspondência lexical/numérica não eleva NLI incerto para resposta aprovada. **277 testes** aprovados; avaliação com 40 casos por modelo: 0 falsas permissões nos 20 negativos de cada, **8/20** falsos bloqueios Tucano2 e **11/20** Qwen. Conjunto não independente. Veja [Relatório PR-04](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
+
+**Escopo do catálogo:** a bancada carrega todas as entidades indexadas para verificar cursos nomeados, evitando confundir ausência de evidência para Excel com ofertas de Informática Básica. Novas fontes requerem reindexação e reinício do Admin.
 
 ## Alvo de hardware e próximos gates
 
