@@ -6,6 +6,10 @@
 
 O adjudicador da bancada agora usa o catálogo completo de entidades do índice: mesmo quando retrieval não encontra Excel, uma consulta explicitamente nomeada exige fonte daquele curso antes de chamar a LLM, impedindo a mistura com Informática Básica. É requisito reiniciar a bancada após reindexação para atualizar identidades. Não há alteração de ranking.
 
+## Workbench Cadu/Faber e identidade masculina do Lumi (30/10/2026; experimental)
+
+Seletor de voz por requisição, prévia fixa, alternância da síntese de respostas previamente verificadas e provisionamento Faber separado. Corrigida a referência **o Lumi** no prompt e na saída da LLM antes do Grounding. 285 testes aprovados. [Relatório](docs/workbench-piper-voices-lumi-2026-10-30.md).
+
 ## Grounding V3 — PR-04 experimental (29/10/2026; não é release)
 
 Nova decisão conservadora ALLOW/ABSTAIN/CLARIFY, com verificação de completude do atributo solicitado, capacidade e intervalo etário. Em enforce o Piper recebe somente o texto seguro. 277 testes aprovados; avaliação automatizada de 40 casos por modelo: 0/20 falsas permissões em ambos, oito bloqueios positivos Tucano2 e onze Qwen, sem revisão humana independente. [Relatório](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).

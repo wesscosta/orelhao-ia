@@ -2,7 +2,7 @@
 
 **Terminal conversacional de voz offline-first**, modular e reutilizável para atendimento a diferentes instituições e domínios de conhecimento. A implantação piloto utiliza documentos oficiais do Senac Piauí; o core não depende dessa instituição.
 
-> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`feat/grounding-v3-decision-policy-20261029`](https://github.com/wesscosta/orelhao-ia/tree/feat/grounding-v3-decision-policy-20261029). **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
+> **Estado em 29/10/2026:** a **última tag de release encontrada é `v0.3.10`**; a linha `main` permanece na baseline `v0.6.0-alpha.13`, enquanto o desenvolvimento experimental mais recente está na branch [`feat/workbench-piper-voices-lumi-20261030`](https://github.com/wesscosta/orelhao-ia/tree/feat/grounding-v3-decision-policy-20261029). **Ainda não foi homologado nem promovido para produção física.** Consulte sempre [Estado técnico vigente](docs/current-state.md).
 
 ## Funcionalidades implementadas e limites
 
@@ -17,7 +17,7 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Arch Linux, Python 3.14) | **277 testes aprovados** e 1 aviso de depreciação |
+| Pytest (Arch Linux, Python 3.14) | **285 testes aprovados** e 1 aviso de depreciação |
 | Ruff / Mypy | Sem erros no escopo analisado |
 | Corpus Senac Piauí | **18 documentos informativos, 36 chunks** |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
@@ -82,6 +82,10 @@ O Grounding V3 passou a registrar comparações **diagnósticas** de valores, ho
 A decisão final agora combina NLI, pré-gate, entidade e Fact Validator. Em modo seguro, divergências verificáveis e atributos faltantes bloqueiam texto e áudio; ofertas múltiplas podem exigir esclarecimento. Correspondência lexical/numérica não eleva NLI incerto para resposta aprovada. **277 testes** aprovados; avaliação com 40 casos por modelo: 0 falsas permissões nos 20 negativos de cada, **8/20** falsos bloqueios Tucano2 e **11/20** Qwen. Conjunto não independente. Veja [Relatório PR-04](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
 
 **Escopo do catálogo:** a bancada carrega todas as entidades indexadas para verificar cursos nomeados, evitando confundir ausência de evidência para Excel com ofertas de Informática Básica. Novas fontes requerem reindexação e reinício do Admin.
+
+### Alternância de vozes no Workbench (30/10/2026)
+
+A bancada agora permite alternar Piper Cadu e Faber sem reiniciar e ouvir a mesma resposta sem recomputar retrieval/LLM/Grounding. A saudação utiliza o masculino **o Lumi**; a LLM também recebe essa instrução e a correção é aplicada antes do grounding. Cadu continua como padrão; instale a Faber com python scripts/provision_piper_faber.py. Veja [relatório técnico](docs/workbench-piper-voices-lumi-2026-10-30.md).
 
 ## Alvo de hardware e próximos gates
 

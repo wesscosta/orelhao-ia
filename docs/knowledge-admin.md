@@ -1,6 +1,6 @@
 # Knowledge Admin e bancada de conversação — estado experimental
 
-**Atualização: 29/10/2026.** A versão inicial da interface foi entregue na v0.4; a bancada incorporou posteriormente a LLM local, o NLI, o gate de answerability e a reprodução por Piper. Consulte [Estado vigente](current-state.md).
+**Atualização: 30/10/2026.** A versão inicial da interface foi entregue na v0.4; a bancada incorporou posteriormente a LLM local, o NLI, o gate de answerability e a reprodução por Piper. Consulte [Estado vigente](current-state.md).
 
 ## Diagnósticos Grounding V3 (PR-03)
 
@@ -11,6 +11,10 @@ A bancada exibe comparações de valores explícitos entre a resposta e as fonte
 Em observe, a bancada mostra a resposta da LLM e o diagnóstico V3. Em enforce, o V3 determina a resposta exibida e sintetizada pelo Piper, com estados ALLOW, ABSTAIN ou CLARIFY e motivos no JSONL. NLI incerto/unsupported continua bloqueado mesmo com match numérico. A autenticação do Admin não é de produção; mantenha loopback. [PR-04](grounding-v3-pr04-decision-policy-2026-10-29.md).
 
 **Atualização de fontes e identidade:** o catálogo completo de entidades é carregado na inicialização da bancada. Depois de editar e reindexar cursos, reinicie o processo Admin para atualizar o catálogo, evitando reconhecer nomes com um snapshot antigo.
+
+## Seleção TTS por requisição (30/10/2026)
+
+Escolha Cadu ou Faber no formulário, ou selecione outra voz para ouvir a mesma resposta apresentada. A prévia de voz fala uma saudação fixa: **Eu sou o Lumi**. Os parâmetros de voz são validados contra catálogo fechado, sem aceitar caminhos de arquivo; o endpoint de fala só sintetiza observações registradas. Faber pode ser provisionada pelo script scripts/provision_piper_faber.py. [Relatório técnico](workbench-piper-voices-lumi-2026-10-30.md).
 
 ## Requisitos e execução
 

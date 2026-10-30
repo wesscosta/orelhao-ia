@@ -123,3 +123,41 @@ def test_normalizes_llm_refusal_and_retains_original(monkeypatch: pytest.MonkeyP
     )
     assert completion.text == "INSUFFICIENT_CONTEXT"
     assert completion.raw_text == raw
+
+
+
+def test_lumi_uses_masculine_article_and_preserves_raw_llm_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from orelhao.services.llm.service import normalize_lumi_identity
+
+    assert normalize_lumi_identity("Eu sou a Lumi, assistente virtual.") == (
+        "Eu sou o Lumi, assistente virtual."
+    )
+    assert normalize_lumi_identity("A Lumi responde à Lumi.") == (
+        "O Lumi responde ao Lumi."
+    )
+    assert normalize_lumi_identity("Os serviços da Lumi.") == "Os serviços do Lumi."
+    assert normalize_lumi_identity("O Lumi está disponível.") == "O Lumi está disponível."
+    assert normalize_lumi_identity("a luminosidade melhorou") == "a luminosidade melhorou"
+
+    raw = "Olá! Eu sou a Lumi, assistente virtual."
+
+    def fake_urlopen(request: Any, timeout: float) -> FakeResponse:
+        del request, timeout
+        return FakeResponse({"choices": [{"message": {"content": raw}}]})
+
+    monkeypatch.setattr(service_module, "urlopen", fake_urlopen)
+    service = LocalOpenAICompatibleLLMService(LLMConfig())
+    completion = service.generate_completion(
+        "Qual seu nome?", [RetrievedContext("Assistente.", "institucional.md")]
+    )
+    assert completion.text == "Olá! Eu sou o Lumi, assistente virtual."
+    assert completion.raw_text == raw
+
+
+def test_system_prompt_uses_lumi_masculine_identity() -> None:
+    from orelhao.services.llm.prompts import SYSTEM_PROMPT
+
+    assert '"o Lumi"' in SYSTEM_PROMPT
+    assert '"sou o Lumi"' in SYSTEM_PROMPT

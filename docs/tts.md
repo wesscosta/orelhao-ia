@@ -24,3 +24,8 @@ O teste real no Arch confirmou WAV mono a 22.050 Hz com sinal não silencioso. E
 Os índices PortAudio mudam entre reinicializações: preferir nomes estáveis e conferir com `orelhao --list-audio-devices`. É necessário validar interface USB, pinagem, impedância do monofone, aterramento, latência e reprodução após retirada do gancho.
 
 O comando `--voice-test` cobre o fluxo histórico de STT → TTS, não o pipeline de RAG/LLM completo. O navegador pode impedir autoplay sem clique. Operação física autônoma é meta de MVP ainda aberta.
+
+
+## Seletor Piper no Workbench (30/10/2026)
+
+Na bancada, a voz Cadu ou Faber pode ser escolhida para sintetizar a mesma resposta, sem repetir a geração. A prévia usa a frase **Eu sou o Lumi**. Para instalar Faber, execute python scripts/provision_piper_faber.py. Cadu continua como padrão do runtime e o loop físico não foi alterado. [Detalhes](workbench-piper-voices-lumi-2026-10-30.md).
