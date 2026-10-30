@@ -12,7 +12,7 @@ A comparação auditiva de 24 gravações (8 vozes/configurações × 3 textos) 
 - No formulário `/workbench`: seletor de voz + botão **Ouvir apresentação do Lumi**. `/workbench/voice-preview?voice=faber` sintetiza **apenas texto fixo**, não texto arbitrário enviado pelo navegador.
 - No resultado da pergunta: seletor independente que permite ouvir **a mesma resposta apresentada** com Cadu ou Faber, sem executar retrieval/LLM/NLI novamente. `/workbench/speech/{observation_id}?voice=faber` continua validando a observação contra JSONL e jamais sintetiza texto livre fornecido pelo navegador.
 - `/workbench/tts-status?voice=faber` consulta a disponibilidade do modelo escolhido. Se Faber não estiver provisionado, a operação informa indisponibilidade/falha; não há troca silenciosa de voz.
-- A geração recebe instrução explícita de identidade masculina. `normalize_lumi_identity` corrige artigos como `a Lumi` → `o Lumi`, `da Lumi` → `do Lumi` e `à Lumi` → `ao Lumi` **antes** da checagem de Grounding. O campo `raw_text` mantém o retorno original da LLM para auditoria; a correção não modifica evidências ou o corpus.
+- A geração recebe instrução explícita de identidade masculina. `normalize_lumi_identity` corrige artigos como `a Lumi` → `o Lumi`, `da Lumi` → `do Lumi` e `à Lumi` → `ao Lumi` **antes** da checagem de Grounding. O campo `LLMCompletion.raw_text` mantém o retorno bruto na conclusão da LLM. **O JSONL da bancada não persiste esse campo**; a correção não modifica evidências ou corpus.
 - Modelo Faber localmente provisionado em `models/tts/pt_BR-faber-medium.onnx` e `.onnx.json`, mantidos fora do Git conforme `.gitignore`.
 
 ## Como provisionar Faber em outra instalação

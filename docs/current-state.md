@@ -39,7 +39,7 @@ O orquestrador V3 determina o texto apresentado em enforce; observe permanece di
 
 ### Workbench: seleção de voz e identidade (30/10/2026)
 
-Cadu/Faber podem ser selecionados por requisição para sintetizar a mesma resposta, sem alterar o Grounding V3. A prévia de voz usa texto fixo e caminhos de modelos não são aceitos do navegador. A identidade da LLM usa **o Lumi**; o texto corrigido passa pelo grounding e a saída bruta é retida. Faber deve ser provisionada localmente; o TTS físico permanece inalterado. **285 testes** aprovados. [Relatório do experimento](workbench-piper-voices-lumi-2026-10-30.md).
+Cadu/Faber podem ser selecionados por requisição para sintetizar a mesma resposta, sem alterar o Grounding V3. A prévia de voz usa texto fixo e caminhos de modelos não são aceitos do navegador. A identidade da LLM usa **o Lumi**; o texto corrigido passa pelo grounding e a saída bruta existe na conclusão da LLM, mas não é persistida no JSONL da bancada. Faber deve ser provisionada localmente; o TTS físico permanece inalterado. **285 testes** aprovados. [Relatório do experimento](workbench-piper-voices-lumi-2026-10-30.md).
 
 ## O que realmente existe
 
