@@ -59,6 +59,8 @@ from .source_manager import (
     normalize_uploaded_text,
     read_source,
 )
+from .system_metrics import SystemMetricsCollector
+from .system_view import SYSTEM_BODY
 
 
 def _require_web() -> None:
@@ -109,7 +111,7 @@ th, td {{ text-align:left; padding:.6rem; border-bottom:1px solid #e5e7eb; }}
 </style>
 </head>
 <body>
-<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a></nav></header>
+<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a><a href="/system">Máquina</a></nav></header>
 {body}
 </body>
 </html>"""
@@ -177,6 +179,7 @@ def create_admin_app(
     active_llm = llm
     voice_catalog: WorkbenchPiperVoices | None = None
     stt_preparation_lock = threading.Lock()
+    system_collector = SystemMetricsCollector()
     app.state.stt_preparation = {"status": "idle", "elapsed_ms": None, "error": None}
 
     def app_config() -> AppConfig:
@@ -246,6 +249,21 @@ def create_admin_app(
             }
 
         threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
+
+    @app.get("/system", response_class=HTMLResponse)
+    async def system_home():
+        return HTMLResponse(
+            _layout("Saúde do Servidor", SYSTEM_BODY),
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
+
+    @app.get("/system/state", response_class=JSONResponse)
+    async def system_state():
+        # systemctl e /proc são leitura local; não bloquear o event loop ASGI.
+        data = await run_in_threadpool(system_collector.snapshot)
+        return JSONResponse(
+            data, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
 
     @app.get("/monitor", response_class=HTMLResponse)
     async def monitor_home():

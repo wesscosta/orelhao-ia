@@ -11,6 +11,7 @@ systemctl --user status orelhao-hook-voice.service orelhao-workbench-benchmark.s
 journalctl --user -u orelhao-hook-voice.service -f
 ls -l /dev/ttyUSB0
 curl -sS http://127.0.0.1:8765/monitor/state
+curl -sS http://127.0.0.1:8765/system/state
 ```
 
 De outra máquina na rede local, usar **túnel SSH**, por exemplo `ssh -N -L 8765:127.0.0.1:8765 lumi@10.42.0.174`, e abrir `http://127.0.0.1:8765/monitor` na máquina cliente. O IP local pode mudar com DHCP; o IP Tailscale depende da conexão autorizada. **Não expor a porta 8765 publicamente**, pois a interface ainda não dispõe de autenticação própria.

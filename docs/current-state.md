@@ -7,7 +7,7 @@
 | Dimensão | Verificação atual |
 |---|---|
 | Branch de implementação | `feat/esp32-hook-serial-20261030`, derivada de `f2957c9`; `main` anterior à promoção em `351aacd` |
-| Testes no Dell Ubuntu 24.04, Python 3.12 | **464 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
+| Testes no Dell Ubuntu 24.04, Python 3.12 | **471 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
 | Corpus Senac PI | **28 documentos / 59 trechos**, índice local não versionado |
 | Retrieval legado (40 casos) | Hit@1 0,600; Hit@4 0,833; MRR 0,697; acurácia de abstenção 0,600: sem regressão |
 | Dataset de expansão (11 perguntas) | Hit@1 1,0; **não independente**, não mede respostas da LLM |
@@ -16,6 +16,7 @@
 | Teste real de geração/grounding no Dell | Duração do Técnico em Enfermagem corretamente fundamentada; vagas atuais bloqueadas; **nome de curso alterado pelo Qwen passou indevidamente como supported**. [Auditoria](auditoria-knowledge-2026-11-03.md) |
 | Voz física | ESP32 GPIO27/GND e USB serial, monofone P3 com entrada PipeWire pré-ativada por 2,6 s durante a saudação, Whisper small CPU e Piper `length_scale: 0.88`; qualidade STT ainda exige validação humana |
 | Monitor do atendimento | `/monitor` por SSE, somente leitura da mesma sessão; sem segundo STT/LLM/TTS |
+| Saúde da máquina | `/system` e `/system/state` oferecem telemetria leve CPU/RAM/disco, sensores CPU/SSD e estado de serviços, com polling de 5 s e cache de 4 s. [Operação](system-monitor.md) |
 | Memória de diálogo | Até 4 interações na RAM da ligação, contexto de navegação e respostas guiadas. Abstenção do monofone: humor no máximo uma vez por ligação e encaminhamento ao atendimento/supervisão, preservando as causas técnicas no monitor e na bancada |
 | Limites do atendimento | 12 perguntas válidas, 36 capturas e 180 segundos; silêncio comum: aviso e encerramento após duas escutas (~14 s); pausa solicitada: até quatro (~28 s), retomando automaticamente se houver fala |
 | Segurança do Admin | Somente loopback `127.0.0.1:8765`; túnel SSH para outra máquina, sem autenticação para exposição pública |

@@ -2,6 +2,14 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — monitoramento da máquina no Admin (03/11/2026)
+
+- Nova página de **Saúde do Servidor** em `/system`, com endpoint de leitura `/system/state` e link “Máquina” na navegação do Knowledge Admin.
+- CPU, RAM, swap, disco raiz, temperaturas de CPU/SSD, uptime, estados dos serviços e RSS agregado de processos essenciais, sem agentes adicionais nem dados sensíveis de processos.
+- Atualização do navegador a cada 5 s, cache de coleta de 4 s e suspensão quando a aba não está visível. Coleta local medida no Dell em aproximadamente 20–22 ms, sem teste de carga real.
+- Admin continua somente em loopback, sem exposição pública, armazenamento de histórico ou alteração da sessão física.
+- Documentação: [Saúde do Servidor](docs/system-monitor.md); testes em `tests/admin/test_system_metrics.py`. **471 testes aprovados**, Ruff/Mypy sem erros. Implementação experimental, sem nova tag/release.
+
 ## Não lançado — atualização datada do catálogo de novembro/2026 (03/11/2026)
 
 - Fichas oficiais novas: Introdução à IA (40 h), Business Intelligence com Power BI (40 h) e Procedimentos Técnicos em Sala de Vacina (40 h), com fontes e exemplos de turmas por unidade.

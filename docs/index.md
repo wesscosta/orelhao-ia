@@ -16,6 +16,7 @@ Revisão editorial: **03/11/2026**. Este é o ponto de entrada para documentaç�
 | [Plano de benchmark Dell](benchmark-optiplex-7050.md) | Gates do hardware físico, ainda não executados |
 | [Sessão física](esp32-voice-session.md) | Gancho, monofone P3, limites da ligação e ensaios |
 | [Monitor de atendimento](live-monitor.md) | SSE da mesma sessão física e diagnóstico em tempo real |
+| [Saúde do Servidor](system-monitor.md) | CPU, RAM, SSD, temperaturas, processos e serviços em `/system`, sem inferência adicional |
 | [Intenções de voz](voice-intents.md) | Perguntas guiadas, comandos e regressões |
 | [Atualização do catálogo 03/11](atualizacao-catalogo-2026-11-03.md) | 28 documentos, 59 trechos e novas fichas oficiais de IA, Power BI e Saúde |
 | [Auditoria anterior do Knowledge 03/11](auditoria-knowledge-2026-11-03.md) | Checkpoint de 25 documentos e 51 trechos; falso positivo de grounding ainda pendente |

@@ -10,14 +10,14 @@
 - **Conhecimento/RAG:** fontes editáveis Markdown/TXT, índice local persistente e retrieval baseline; retrievers semânticos/RRF e outras verificações permanecem experimentais.
 - **LLM pt-BR:** servidor local `llama.cpp` com cliente HTTP restrito a loopback. Tucano2 1.5B e Qwen3.5 0.8B foram comparados, **sem vencedor homologado**.
 - **Answerability e grounding:** verificação de fonte, entidade e atualidade antes da LLM e avaliação NLI por afirmação após a geração. A bancada oferece `observe` e `enforce` como modos experimentais.
-- **Admin, bancada e monitor:** `http://127.0.0.1:8765/workbench` para testes no navegador e `/monitor` para espelhar a **mesma sessão física** via SSE (transcrição, resposta, latências e abstenção), sem segunda inferência. **Não expor o Admin diretamente à rede**, pois não há autenticação de produção.
+- **Admin, bancada e monitor:** `http://127.0.0.1:8765/workbench` para testes no navegador, `/monitor` para espelhar a **mesma sessão física** via SSE e `/system` para acompanhar CPU, RAM, disco, temperaturas e serviços em tempo real, sem segunda inferência nem agente residente. **Não expor o Admin diretamente à rede**, pois não há autenticação de produção.
 - **Hardware experimental:** ESP32 DevKit controla o contato seco do gancho via USB serial, iniciando/interrompendo o processo de voz no Dell Ubuntu; há testes físicos do monofone P3 e monitor. **Teclado 4×4 e display continuam pendentes**. Nada disso está homologado para atendimento público.
 
 ## Qualidade da branch experimental
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Dell Ubuntu 24.04, Python 3.12) | **464 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
+| Pytest (Dell Ubuntu 24.04, Python 3.12) | **471 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
 | Ruff / Mypy | Sem erros nos módulos avaliados no Dell |
 | Corpus Senac Piauí | **28 documentos indexados, 59 chunks**; índice reconstruível fora do Git |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
