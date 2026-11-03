@@ -26,6 +26,7 @@ ALLOWED_TYPES = frozenset({
     "session.started", "session.ended", "voice.greeting",
     "voice.listening", "voice.capture", "voice.transcription",
     "voice.transcription_invalid", "voice.context", "voice.processing", "voice.waiting",
+    "voice.paused", "voice.idle_timeout",
     "voice.response", "voice.playback", "voice.error",
 })
 

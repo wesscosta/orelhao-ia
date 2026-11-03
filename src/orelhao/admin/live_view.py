@@ -58,6 +58,8 @@ MONITOR_BODY = """
     'session.ended': 'Atendimento encerrado',
     'voice.greeting': 'Lumi apresentando a saudação',
     'voice.listening': 'Microfone escutando',
+    'voice.paused': 'Pausa solicitada · aguardando a pessoa falar',
+    'voice.idle_timeout': 'Encerrando por inatividade',
     'voice.capture': 'Fala capturada',
     'voice.transcription': 'Transcrição concluída',
     'voice.transcription_invalid': 'Não foi possível reconhecer a fala',
@@ -107,7 +109,9 @@ MONITOR_BODY = """
       ? 'Sessão ' + String(data.session_id).slice(0, 8) : '';
     const latest = events.length ? events[events.length - 1] : null;
     byId('phase').textContent = latest
-      ? (labels[latest.type] || latest.status || 'Atendimento')
+      ? (latest.type === 'voice.listening' && latest.status === 'aguardando_retorno'
+          ? 'Em pausa · aguardando retorno'
+          : (labels[latest.type] || latest.status || 'Atendimento'))
       : 'Aguardando o monofone';
     transcript.replaceChildren();
     let count = 0;

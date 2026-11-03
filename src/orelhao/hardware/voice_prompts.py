@@ -21,6 +21,8 @@ PROMPTS: dict[str, str] = {
     "waiting": "Só um instante.",
     "closing": "Até logo!",
     "no_speech": "Não ouvi sua voz. Tente novamente.",
+    "idle_check": "Você ainda está aí? Pode falar.",
+    "closing_inactivity": "Como não ouvi resposta, vou encerrar. Até logo.",
     "no_transcription": "Não entendi. Pode repetir?",
     "ask_location": "Para encontrar uma unidade próxima, diga sua cidade ou bairro.",
     "courses_overview": (

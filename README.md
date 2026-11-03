@@ -17,7 +17,7 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Dell Ubuntu 24.04, Python 3.12) | **384 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
+| Pytest (Dell Ubuntu 24.04, Python 3.12) | **391 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
 | Ruff / Mypy | Sem erros nos módulos avaliados no Dell |
 | Corpus Senac Piauí | **21 documentos indexados, 43 chunks**; índice reconstruível fora do Git |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
@@ -30,7 +30,7 @@ Veja [benchmark adversarial](docs/benchmark-grounding-real-2026-10-29.md), [fila
 
 ## Experimento físico no Dell — 03/11/2026
 
-O fluxo em teste é **gancho ESP32 → USB serial → sessão do monofone P3 → Whisper small CPU → consulta guiada ou RAG/LLM com grounding `enforce` → Piper 0.88**. A ligação mantém memória curta, até 12 perguntas válidas, 36 tentativas de captura e 180 segundos. Mensagens fixas possuem WAV em cache local.
+O fluxo em teste é **gancho ESP32 → USB serial → sessão do monofone P3 → Whisper small CPU → consulta guiada ou RAG/LLM com grounding `enforce` → Piper 0.88**. A ligação mantém memória curta, até 12 perguntas válidas, 36 tentativas de captura e 180 segundos. O silêncio normal recebe um aviso e encerra após duas escutas sem fala (~14 s); pedido explícito de pausa permite até quatro escutas (~28 s), com retorno automático quando houver fala. Mensagens fixas possuem WAV em cache local.
 
 O [monitor SSE](docs/live-monitor.md) espelha **a mesma sessão**, sem inferência nem transmissão de áudio adicionais, e apaga a transcrição da visualização ao encerrar. O acesso web continua restrito a `localhost`: outras máquinas devem usar túnel SSH. A [base revisada](docs/context-and-knowledge-2026-11-03.md) tem 21 documentos e 43 trechos; o benchmark de recuperação legado de 40 casos **não regrediu**, mas isso **não homologa a qualidade das respostas da LLM**.
 

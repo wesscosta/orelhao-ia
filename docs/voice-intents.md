@@ -76,3 +76,15 @@ A filtragem de frases de legendagem inventadas pelo Whisper não comprova
 melhoria da precisão geral do microfone: esse problema continua exigindo
 análise física de ruído, VAD e avaliação STT. Não alterar os limiares de
 grounding para contornar perguntas incorretamente transcritas.
+
+## Pausa e encerramento por inatividade (03/11/2026)
+
+O atendimento **não precisa alcançar 12 perguntas ou 36 tentativas** para encerrar. Após uma resposta, a captação fica esperando a próxima fala:
+
+- **Atendimento normal:** cada captura aguarda até aproximadamente **7 segundos** pelo início de uma fala. Na primeira ausência, o Lumi diz **“Você ainda está aí? Pode falar.”**. Na segunda captura consecutiva sem fala (ou com transcrição rejeitada), diz **“Como não ouvi resposta, vou encerrar. Até logo.”** e encerra o processo da ligação.
+- **Pausa solicitada:** ao ouvir **“Só um instante”** ou equivalente, responde brevemente e fica escutando sem avisos repetitivos. A pausa comporta até **quatro capturas silenciosas**, aproximadamente **28 segundos**, antes do encerramento automático. Se a pessoa falar antes disso, o Lumi retoma o diálogo e zera a contagem de inatividade.
+- **Prioridade do gancho:** recolocar o monofone interrompe imediatamente a sessão, sem esperar captura ou despedida. Para abrir outra chamada após encerramento automático, é necessário recolocar e retirar o monofone.
+- Os prazos são aproximados: inicialização do gravador, VAD, calibração e TTS adicionam tempo. Continuam válidos os tetos gerais de **180 segundos, 12 perguntas válidas ou 36 tentativas** como proteções adicionais.
+- Eventos `voice.paused`, `voice.idle_timeout` e `voice.listening` com status `aguardando_retorno` permitem acompanhar os estados no monitor web, **sem segunda inferência**.
+
+Os testes de comportamento estão em `tests/unit/test_voice_idle_policy.py`. O método `CallIdlePolicy` separa a política de pausa/encerramento da infraestrutura de gravação. A integração física ainda depende de confirmação com o monofone real.

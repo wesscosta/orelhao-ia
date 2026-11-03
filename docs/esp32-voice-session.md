@@ -6,7 +6,7 @@
 - Abrir o contato encerra o grupo de processos, incluindo captura, LLM, TTS e player.
 - Perda de comunicação serial ou ausência de heartbeat por mais de 15 segundos encerra a sessão.
 - Contato fechado na inicialização não inicia conversa sem uma abertura anterior (evita chamada indevida).
-- Fluxo implementado: saudação Piper, captura PipeWire + VAD, STT faster-whisper, consulta guiada ou recuperação/LLM local/Grounding V3 enforce, voz Piper. Limite atual: até **12 transcrições válidas**, **36 capturas** ou **180 segundos**; comandos inequívocos de voz podem finalizar o atendimento.
+- Fluxo implementado: saudação Piper, captura PipeWire + VAD, STT faster-whisper, consulta guiada ou recuperação/LLM local/Grounding V3 enforce, voz Piper. Limite atual: até **12 transcrições válidas**, **36 capturas** ou **180 segundos**; comandos inequívocos de voz podem finalizar o atendimento. Inatividade normal gera um aviso e encerra após duas capturas silenciosas; pedido explícito de pausa permite até quatro. Veja [política de inatividade](voice-intents.md).
 - Logs de serviço não devem incluir a transcrição ou a resposta integral. A bancada de observação possui retenção própria.
 - A sessão serial usa a conexão USB do ESP32; o serviço monitor antigo e o serviço de voz não podem abrir essa porta simultaneamente.
 - Não é necessário alterar o firmware ESP32 já gravado.

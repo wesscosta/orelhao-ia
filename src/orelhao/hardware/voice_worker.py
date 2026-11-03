@@ -10,6 +10,7 @@ from concurrent.futures import TimeoutError as FutureTimeout
 from orelhao.config import load_config
 from orelhao.hardware.conversation_context import ConversationContext
 from orelhao.hardware.hook_runtime import ensure_audio_ready
+from orelhao.hardware.idle_policy import CallIdlePolicy
 from orelhao.hardware.live_monitor import publish, voice_observation_log_path
 from orelhao.hardware.voice_intents import (
     VoiceIntentRouter,
@@ -67,10 +68,10 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         )
         workbench = workbench_future.result()
     publish("voice.playback", status="saudacao_concluida", metrics={"play_ms": (time.monotonic() - greeting_start) * 1000})
-    no_speech_prompted = False
-    no_transcription_prompted = False
+    idle = CallIdlePolicy()
     valid_turns = 0
     closed_by_voice = False
+    closed_by_inactivity = False
     # Capturas sem fala ou com transcrição rejeitada não consomem o orçamento de perguntas.
     # O limite de tentativas e o deadline impedem sessões indefinidas.
     for turn in range(1, max_turns * 3 + 1):
@@ -79,7 +80,10 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         if not ensure_audio_ready():
             raise RuntimeError("Rota P3 indisponível antes da captura")
         LOG.info("escuta_iniciada turno=%d", turn)
-        publish("voice.listening", turn=turn, status="escutando")
+        publish(
+            "voice.listening", turn=turn,
+            status="aguardando_retorno" if idle.paused else "escutando",
+        )
         capture_start = time.monotonic()
         audio = capture.capture()
         capture_ms = (time.monotonic() - capture_start) * 1000
@@ -110,15 +114,18 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         if not audio.data:
             LOG.info("escuta_sem_fala turno=%d", turn)
             publish("voice.transcription_invalid", turn=turn, status="sem_fala")
-            if intents.paused:
-                continue
-            if not no_speech_prompted and time.monotonic() < deadline:
-                no_speech_prompted = True
+            decision = idle.on_missing_speech()
+            if decision == "close":
+                LOG.info("atendimento_encerrado_por_inatividade modo=%s", "pausa" if idle.paused else "normal")
+                publish("voice.idle_timeout", turn=turn, status="encerrando")
+                closed_by_inactivity = True
+                break
+            if decision == "prompt" and time.monotonic() < deadline:
                 if not ensure_audio_ready():
                     raise RuntimeError("Rota P3 indisponível antes do aviso")
                 publish("voice.response", turn=turn, status="aviso", route="prompt",
-                        text=PROMPTS["no_speech"])
-                playback.play(prompts.audio("no_speech"))
+                        text=PROMPTS["idle_check"])
+                playback.play(prompts.audio("idle_check"))
             continue
         stt_start = time.monotonic()
         transcribed = stt.transcribe(audio)
@@ -129,8 +136,13 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             publish("voice.transcription_invalid", turn=turn, text=question,
                     status="suspeita" if question else "vazia",
                     metrics={"stt_ms": stt_ms})
-            if not no_transcription_prompted and time.monotonic() < deadline:
-                no_transcription_prompted = True
+            decision = idle.on_missing_speech()
+            if decision == "close":
+                LOG.info("atendimento_encerrado_por_inatividade modo=%s", "pausa" if idle.paused else "normal")
+                publish("voice.idle_timeout", turn=turn, status="encerrando")
+                closed_by_inactivity = True
+                break
+            if decision == "prompt" and time.monotonic() < deadline:
                 if not ensure_audio_ready():
                     raise RuntimeError("Rota P3 indisponível antes do aviso de transcrição")
                 publish("voice.response", turn=turn, status="aviso", route="prompt",
@@ -142,6 +154,9 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 status="reconhecida", metrics={"stt_ms": stt_ms})
         valid_turns += 1
         directed = intents.route(question)
+        idle.on_phrase(requested_pause=intents.paused)
+        if idle.paused:
+            publish("voice.paused", turn=turn, status="aguardando_retorno")
         if directed is not None:
             LOG.info("resposta_guiada turno=%d tipo=%s", turn, directed.prompt or "location")
             if not ensure_audio_ready():
@@ -224,8 +239,9 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 metrics={"tts_ms": tts_ms, "play_ms": (time.monotonic() - play_start) * 1000})
     LOG.info("atendimento_terminado")
     if not closed_by_voice and ensure_audio_ready():
-        publish("voice.playback", text=PROMPTS["closing"], status="despedida")
-        playback.play(prompts.audio("closing"))
+        closing = "closing_inactivity" if closed_by_inactivity else "closing"
+        publish("voice.playback", text=PROMPTS[closing], status="despedida")
+        playback.play(prompts.audio(closing))
 
 
 def main() -> None:

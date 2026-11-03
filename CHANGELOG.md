@@ -2,6 +2,13 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — controle de inatividade e pausa (03/11/2026)
+
+- Encerramento automático após duas escutas silenciosas (~14 s mais reprodução), sem percorrer todos os turnos; aviso apenas na primeira ausência.
+- Pedido explícito de pausa aguarda até quatro capturas (~28 s), retomando imediatamente ao reconhecer nova fala; sem repetição de avisos.
+- Capturas vazias ou STT rejeitado não consomem o orçamento de perguntas válidas, mas contam para inatividade.
+- Eventos SSE de pausa/timeout no monitor e novos WAVs de aviso/encerramento no cache local; testes unitários e regressões de voz.
+
 ## Não lançado — integração física e contexto (03/11/2026)
 
 - ESP32 DevKit GPIO27/GND, protocolo serial do gancho e supervisor de uma sessão por vez no Dell Ubuntu.
@@ -9,7 +16,7 @@
 - Monitor SSE **da mesma sessão física** em `/monitor` com texto transcrito, resposta, motivo de abstenção e tempos; sem duplicar inferência ou áudio.
 - Roteamento guiado para perguntas gerais do Senac, pedidos de pausa e encerramento; memória curta de referência por ligação; 12 perguntas válidas, 36 capturas, 180 s.
 - Base Senac Piauí ampliada de 18/36 para **21 documentos/43 trechos**, preservando Hit@1, Hit@4, MRR e acurácia de abstenção do conjunto legado de 40 consultas. Novos 11 testes de retrieval derivados dos novos documentos, não independentes.
-- **384 testes aprovados no Dell**, Ruff e Mypy sem erros. Ainda há erros de STT, falsos bloqueios e lacunas documentais. **NO-GO para piloto público; sem tag ou release.**
+- **391 testes aprovados no Dell**, Ruff e Mypy sem erros (após inclusão da política de inatividade). Ainda há erros de STT, falsos bloqueios e lacunas documentais. **NO-GO para piloto público; sem tag ou release.**
 
 Documentos: [estado vigente](docs/current-state.md), [monitor](docs/live-monitor.md), [voz física](docs/esp32-voice-session.md), [memória/corpus](docs/context-and-knowledge-2026-11-03.md).
 

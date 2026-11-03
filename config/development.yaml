@@ -11,7 +11,7 @@ audio:
   max_record_seconds: 30
   adaptive_vad: true
   vad_calibration_ms: 700
-  speech_start_timeout_seconds: 12
+  speech_start_timeout_seconds: 7
   speech_start_min_ms: 180
   min_speech_ms: 360
   false_start_silence_ms: 450
