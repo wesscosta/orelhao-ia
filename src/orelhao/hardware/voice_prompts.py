@@ -61,6 +61,29 @@ PROMPTS: dict[str, str] = {
     "ack_wait": "Tudo bem. Pode falar quando estiver pronto.",
     "ack_continue": "Certo. Pode continuar.",
     "ask_specific_course": "Qual curso do Senac você quer consultar?",
+    "clarify_location": (
+        "Não consegui entender sua cidade ou bairro. Pode repetir só o nome?"
+    ),
+    "location_referral": (
+        "Ainda não consegui identificar sua localidade. "
+        "O atendimento do Senac pode orientar sobre a unidade mais próxima."
+    ),
+    "abstention_humor": (
+        "Essa me pegou! Até um orelhão dos anos 90 tem seus limites. "
+        "Não consegui confirmar essa informação. "
+        "O pessoal do atendimento do Senac pode ajudar!"
+    ),
+    "abstention_followup": (
+        "Ainda não consegui confirmar essa informação. Quer tentar outra pergunta?"
+    ),
+    "abstention_admissions": (
+        "Não consigo confirmar vagas, preços ou matrículas atualizados. "
+        "Para isso, procure o atendimento da unidade do Senac."
+    ),
+    "abstention_pedagogy": (
+        "Não consegui confirmar essa orientação pedagógica. "
+        "Procure a supervisão ou a coordenação da sua unidade do Senac."
+    ),
     "courses_current": (
         "Posso apresentar categorias e cursos da minha base, mas não confirmar "
         "turmas ou vagas abertas hoje. Que área você procura?"

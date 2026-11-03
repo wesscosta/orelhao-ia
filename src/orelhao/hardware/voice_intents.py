@@ -148,6 +148,7 @@ class VoiceIntentRouter:
 
     def __init__(self, *, runtime_summary: str | None = None) -> None:
         self.awaiting_location = False
+        self.location_retries = 0
         self.awaiting_course_area = False
         self.awaiting_technology_choice = False
         self.awaiting_programming_city = False
@@ -161,6 +162,7 @@ class VoiceIntentRouter:
 
     def _location_followup(self, normalized: str) -> VoiceIntentReply:
         self.awaiting_location = False
+        self.location_retries = 0
         for area, display in TERESINA_AREAS.items():
             if re.search(rf"\b{re.escape(area)}\b", normalized):
                 return VoiceIntentReply(
@@ -221,6 +223,25 @@ class VoiceIntentRouter:
             normalized,
         ):
             return VoiceIntentReply(prompt="ack_continue")
+
+        # Perguntas genéricas de disponibilidade exigem escolha de área/unidade.
+        # O catálogo histórico não atesta vagas atuais.
+        if re.fullmatch(
+            r"(?:(?:quais|que|tem|ha) )?(?:os )?cursos?"
+            r"(?: do senac(?: piaui)?)? (?:disponiveis|abertos)"
+            r"(?: (?:hoje|agora|atualmente))?(?: alo)?",
+            normalized,
+        ):
+            self.awaiting_course_area = True
+            return VoiceIntentReply(prompt="courses_current")
+
+        # Metaperguntas vagas não devem depender do retriever.
+        if re.fullmatch(
+            r"(?:(?:quais|que) )?informacoes? (?:voce|voces)"
+            r" (?:tem|possuem|conseguem (?:me )?dar)(?: sobre o senac)?",
+            normalized,
+        ):
+            return VoiceIntentReply(prompt="lumi_capabilities")
 
         # Uma escolha do menu de cursos pode vir depois de "cursos ou preços".
         if _general_courses_request(normalized):
@@ -320,6 +341,19 @@ class VoiceIntentRouter:
             )
             if mentions_place:
                 return self._location_followup(normalized)
+            if (
+                ("piaui" in normalized or len(normalized.split()) <= 5)
+                and not re.search(
+                    r"\b(?:qual|quais|como|quanto|curso|cursos|preco|valor"
+                    r"|matricula|vaga|onde|quando)\b",
+                    normalized,
+                )
+            ):
+                self.location_retries += 1
+                if self.location_retries >= 2:
+                    self.awaiting_location = False
+                    return VoiceIntentReply(prompt="location_referral")
+                return VoiceIntentReply(prompt="clarify_location")
             self.awaiting_location = False
 
         if (

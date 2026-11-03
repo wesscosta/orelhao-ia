@@ -131,3 +131,52 @@ Regressões: `tests/unit/test_voice_programming_flow.py`
 (inclui referências à fonte) e teste integrado do worker em
 `tests/unit/test_voice_idle_policy.py`. Os resultados do retrieval e
 do grounding não foram reinterpretados como garantia de oferta atual.
+
+## Personalidade na abstenção e diagnóstico de recuperação — 03/11/2026
+
+O monitor físico apresenta a **mesma resposta efetivamente falada** no
+monofone. A política `VoiceAbstentionPolicy`, restrita à camada de voz,
+substitui **apenas a apresentação de uma resposta bloqueada pelo
+Grounding V3**; a consulta original, o resultado do retriever, a decisão
+de precheck, o texto original da bancada e o motivo do bloqueio não são
+alterados. O monitor preserva `reason=precheck_blocked`,
+`nli_uncertain`, `generation_abstained` ou a razão aplicável.
+
+- **Primeira abstenção genérica:** uma brincadeira leve com o orelhão dos
+  anos 90 e encaminhamento ao setor de atendimento do Senac;
+- **Abstenções seguintes na mesma ligação:** resposta curta, sem repetir
+  a piada;
+- **Vagas, preços, inscrições e matrículas:** direcionamento ao setor de
+  atendimento da unidade; nenhum dado atual é inferido de agenda antiga;
+- **Acompanhamento pedagógico** (frequência, avaliação, professores):
+  direcionamento à supervisão ou coordenação responsável da unidade;
+- **Transcrição ininteligível:** pede repetição, **não faz piada** e não
+  finge que o fato foi buscado; localização não reconhecida solicita
+  cidade ou bairro novamente antes de orientar o atendimento.
+
+### Investigação de por que o RAG parecia não consultar a base
+
+A execução real do retriever (índice local com 21 documentos) demonstrou:
+
+| Texto reconhecido pelo Whisper | Chunks top-k | Resultado |
+|---|---:|---|
+| Cursos disponíveis. Alô. | 0 | precheck bloqueia por ausência de evidência recuperada |
+| Sua estereza na Piauí. | 0 | cidade não reconhecida; a nova abordagem pede repetição |
+| Informações vocês tem. | 0 | pergunta sobre capacidades do próprio Lumi; agora roteada sem RAG |
+| Quais cursos de programação no Senac Piauí? | 8 | há evidência recuperada; resposta ainda depende da LLM e do verificador |
+| Quais são os cursos do Senac? | 8 | recuperação funcional |
+
+Uma consulta sem trechos não indica falha no carregamento do corpus.
+Agora, perguntas genéricas sobre **cursos disponíveis** provocam
+esclarecimento de área ou unidade, sem afirmar vagas atuais.
+O entendimento da fala continua limitado pela precisão do Whisper.
+Nenhum limiar foi reduzido, nenhuma fonte ou índice foi substituído.
+
+Os textos padrão são pré-gerados em WAV no cache Piper local e
+reutilizados; não há segundo canal de inferência. O comportamento é
+coberto por `tests/unit/test_voice_abstention.py`.
+
+**Limite:** a mudança torna a recusa mais útil, não resolve sozinha
+recusas da LLM quando o retriever já encontra trechos pertinentes.
+Esse problema requer benchmark próprio de geração e grounding,
+com perguntas fundamentadas e avaliação humana de respostas.

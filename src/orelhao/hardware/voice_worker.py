@@ -12,6 +12,7 @@ from orelhao.hardware.conversation_context import ContextResolution, Conversatio
 from orelhao.hardware.hook_runtime import ensure_audio_ready
 from orelhao.hardware.idle_policy import CallIdlePolicy
 from orelhao.hardware.live_monitor import publish, voice_observation_log_path
+from orelhao.hardware.voice_abstention import VoiceAbstentionPolicy
 from orelhao.hardware.voice_intents import (
     VoiceIntentRouter,
     looks_like_stt_hallucination,
@@ -78,6 +79,7 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 LOG.exception("falha_aquecimento_pipewire; continuar com captura normal")
     publish("voice.playback", status="saudacao_concluida", metrics={"play_ms": (time.monotonic() - greeting_start) * 1000})
     idle = CallIdlePolicy()
+    abstentions = VoiceAbstentionPolicy()
     valid_turns = 0
     closed_by_voice = False
     closed_by_inactivity = False
@@ -238,16 +240,24 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         grounding = getattr(observation, "grounding_v3", None)
         denied = bool(getattr(grounding, "should_abstain", False))
         reason = getattr(grounding, "reason", None)
-        context.remember(
-            question, observation.presented_answer, reset_topic=is_clock,
+        # Personalidade apenas na apresentação da abstenção física.
+        # O resultado da bancada, as evidências e a razão V3 permanecem intocados.
+        fallback_prompt = abstentions.choose_prompt(question) if denied else None
+        spoken_text = (
+            PROMPTS[fallback_prompt] if fallback_prompt is not None
+            else observation.presented_answer
         )
-        publish("voice.response", turn=turn, text=observation.presented_answer,
+        context.remember(question, spoken_text, reset_topic=is_clock)
+        publish("voice.response", turn=turn, text=spoken_text,
                 route=str(observation.answer_origin),
                 status="abstencao" if denied else "respondida",
                 reason=str(getattr(reason, "value", reason) or ""),
                 metrics={"rag_ms": (time.monotonic() - started) * 1000})
         synth_start = time.monotonic()
-        outgoing = tts.synthesize(observation.presented_answer)
+        outgoing = (
+            prompts.audio(fallback_prompt) if fallback_prompt is not None
+            else tts.synthesize(spoken_text)
+        )
         tts_ms = (time.monotonic() - synth_start) * 1000
         play_start = time.monotonic()
         playback.play(outgoing)

@@ -2,6 +2,14 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — respostas de abstenção e consultas genéricas (03/11/2026)
+
+- Tom amigável do Lumi quando o grounding nega uma resposta: brincadeira com o orelhão dos anos 90 uma única vez por ligação; demais abstenções recebem texto curto. Perguntas sobre inscrições, vagas e preços são encaminhadas ao atendimento; questões pedagógicas à supervisão/coordenação responsável.
+- A política modifica somente a **fala da sessão física**, sem mudar retrieval, fatos, precheck, NLI, grounding V3 ou observações brutas da bancada. O monitor mostra exatamente a resposta falada e preserva o motivo técnico da recusa.
+- Consultas “Cursos disponíveis. Alô.” e “Informações vocês tem.” passam por orientação guiada, evitando uma busca genérica sem resultado. Localidades incompreensíveis recebem nova tentativa antes do encaminhamento ao atendimento.
+- Pesquisa na base verificada: a expressão genérica “Cursos disponíveis. Alô.” recuperava zero trechos, enquanto consultas específicas sobre programação recuperavam oito. O índice foi mantido sem mudanças.
+- **453 testes aprovados**, Ruff e Mypy sem erros. Os WAVs novos foram gerados localmente no cache Piper 0.88; qualidade da conversa física permanece pendente de validação.
+
 ## Não lançado — navegação por programação e cidade (03/11/2026)
 
 - Corrigida a perda de estado após o menu de Informática: “Programação” e “Cursos na área de programação” passam a ser escolhas válidas, não falas incompreensíveis.
