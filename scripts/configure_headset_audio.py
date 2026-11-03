@@ -33,13 +33,16 @@ def configure() -> None:
                 pulse.source_port_set(source.index, SOURCE_PORT)
                 pulse.sink_mute(sink.index, False)
                 pulse.source_mute(source.index, False)
-            # Modest initial loudness. Increase only after supervised listening.
-            for args in (
-                ("wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0.35"),
-                ("wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0"),
-                ("wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", "0.20"),
-            ):
-                subprocess.run(args, check=True, timeout=5, capture_output=True)
+                # A API Pulse conhece o sink correto, mesmo quando o wpctl não
+                # possui @DEFAULT_AUDIO_SINK@ registrado no metadata PipeWire.
+                pulse.volume_set_all_chans(sink, 0.35)
+            # A placa HDA acopla o volume Pulse da fonte ao ganho ALSA: ajustar
+            # o Pulse para 0.20 eleva Capture a 75% (+18dB) e satura a entrada.
+            # A entrada física do Dell deve operar em ganho moderado e sem boost.
+            subprocess.run(
+                ("amixer", "-c", "0", "sset", "Capture", "40%", "cap"),
+                check=True, timeout=5, capture_output=True,
+            )
             with pulsectl.Pulse("lumi-p3-routing-verification") as pulse:
                 sink = next(s for s in pulse.sink_list() if s.name.startswith("alsa_output."))
                 source = next(s for s in pulse.source_list() if s.name.startswith("alsa_input."))
@@ -47,9 +50,12 @@ def configure() -> None:
                     sink.port_active is None or sink.port_active.name != SINK_PORT or sink.mute
                     or source.port_active is None or source.port_active.name != SOURCE_PORT
                     or source.mute
+                    or not 0.25 <= sink.volume.value_flat <= 0.45
                 ):
-                    raise RuntimeError("Rotas do headset não confirmadas")
-            LOG.info("Headset P3 configurado: fone e microfone selecionados")
+                    raise RuntimeError("Rotas ou ganho de saída do headset não confirmados")
+            LOG.info(
+                "Headset P3 configurado: portas corretas, saída 35%, Capture 40%"
+            )
             return
         except (OSError, RuntimeError, pulsectl.PulseError, subprocess.SubprocessError) as exc:
             error = exc

@@ -14,9 +14,11 @@ def test_system_playback_preserves_wav_sample_rate(monkeypatch):
 
     monkeypatch.setattr("shutil.which", lambda name: f"/usr/bin/{name}" if name == "pw-play" else None)
 
-    def fake_run(cmd, capture_output, text):
+    def fake_run(cmd, check, capture_output, text):
+        assert check is False
         del capture_output, text
-        payload = open(cmd[-1], "rb").read()
+        with open(cmd[-1], "rb") as recording:
+            payload = recording.read()
         with wave.open(BytesIO(payload), "rb") as wav:
             captured["rate"] = wav.getframerate()
             captured["frames"] = wav.getnframes()

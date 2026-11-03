@@ -72,16 +72,21 @@ class SoundDeviceAudioPlayback:
                 return executable
         return None
 
-    @staticmethod
-    def _play_with_system_player(audio: PCM16Audio, executable: str) -> None:
+    def _play_with_system_player(self, audio: PCM16Audio, executable: str) -> None:
         with tempfile.TemporaryDirectory(prefix="orelhao-playback-") as tmp:
             wav_path = Path(tmp) / "speech.wav"
             wav_path.write_bytes(audio.to_wav_bytes())
             name = Path(executable).name
             cmd = [executable, str(wav_path)]
+            if name == "pw-play" and self.config.pipewire_playback_target:
+                cmd = [
+                    executable,
+                    f"--target={self.config.pipewire_playback_target}",
+                    str(wav_path),
+                ]
             if name == "aplay":
                 cmd = [executable, "-q", str(wav_path)]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
             if proc.returncode != 0:
                 detail = (proc.stderr or proc.stdout).strip()
                 raise RuntimeError(
@@ -90,7 +95,7 @@ class SoundDeviceAudioPlayback:
 
     def _play_with_sounddevice(self, audio: PCM16Audio) -> None:
         try:
-            import sounddevice as sd
+            import sounddevice as sd  # type: ignore[import-untyped]
         except ImportError as exc:
             raise RuntimeError(
                 "Suporte de áudio não instalado. Execute: pip install -e '.[audio]'"

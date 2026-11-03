@@ -2,6 +2,14 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — correção de captura e ganho do monofone P3 (03/11/2026)
+
+- Identificada falha de abertura de captura por metadados ausentes do PipeWire: sem alvo explícito, `pw-record` retornava `no target node available`, e `wpctl @DEFAULT_...@` falhava apesar da placa detectada.
+- Perfil local do Dell configurado com nomes explícitos para a fonte `pw-record` e a saída `pw-play`; suporte opcional ao alvo do player, mantendo compatibilidade com outras máquinas.
+- Script de roteamento P3 usa seleção direta do sink Pulse (sem `wpctl @DEFAULT_...@`) e fixa o ganho ALSA do microfone em **40% (+1,5 dB)**, preservando saída em **35%**. Antes, o ganho chegava a **75% (+18 dB)**, com clipping em capturas reais.
+- Teste de gravação sem fala e de reprodução silenciosa passaram; ausência de voz foi tratada corretamente pelo VAD sem alucinação. **A inteligibilidade com fala humana ainda não foi validada.**
+- Testes de regressão de áudio e configuração local adicionados; **475 testes aprovados**, Ruff/Mypy sem erros nos módulos verificados. Documentação em [Áudio](docs/audio.md).
+
 ## Não lançado — monitoramento da máquina no Admin (03/11/2026)
 
 - Nova página de **Saúde do Servidor** em `/system`, com endpoint de leitura `/system/state` e link “Máquina” na navegação do Knowledge Admin.

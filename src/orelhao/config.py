@@ -23,6 +23,7 @@ class AudioConfig(BaseModel):
     capture_backend: str = "pipewire"
     pipewire_executable: str = "pw-record"
     pipewire_target: str | None = None
+    pipewire_playback_target: str | None = None
     vad_threshold_multiplier: float = 1.8  # telemetria RMS; não decide fala no backend webrtc
     vad_min_threshold: float = 0.006
     vad_max_threshold: float = 0.05
