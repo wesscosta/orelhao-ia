@@ -75,8 +75,24 @@ PROMPTS: dict[str, str] = {
         "Você pode consultar as ofertas no portal oficial do Senac Piauí."
     ),
     "technology_area": (
-        "Tenho informações sobre Informática Básica, Excel e Excel Avançado. "
-        "Qual desses cursos você quer conhecer?"
+        "Tenho informações sobre Informática Básica, Excel e programação. "
+        "Qual assunto interessa?"
+    ),
+    "programming_area": (
+        "Em 2026, o Senac anunciou Programação com Minecraft em Teresina "
+        "e Técnico em Desenvolvimento de Sistemas em Piripiri. Qual cidade?"
+    ),
+    "programming_teresina": (
+        "Em 2026, o Senac anunciou Programação com Minecraft na Zona Leste "
+        "de Teresina, com 40 horas. Confira a oferta atual no portal."
+    ),
+    "programming_piripiri": (
+        "Em 2026, o Senac anunciou Técnico em Desenvolvimento de Sistemas "
+        "em Piripiri, com 1200 horas. Confira a oferta atual no portal."
+    ),
+    "programming_city_unverified": (
+        "Não tenho exemplo de programação verificado para essa cidade. "
+        "Isso não significa que não existam cursos. Consulte o catálogo oficial."
     ),
     "language_area": (
         "O Senac Piauí oferece cursos na categoria idiomas. "

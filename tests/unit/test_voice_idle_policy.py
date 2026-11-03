@@ -151,3 +151,24 @@ def test_stt_rejeitado_segue_politica_de_inatividade(monkeypatch) -> None:
         PROMPTS["no_transcription"],
         PROMPTS["closing_inactivity"],
     ]
+
+def test_programming_menu_do_monofone_sem_rag(monkeypatch) -> None:
+    played, captures = _run_scenario(
+        monkeypatch,
+        [
+            "Quais os cursos no Senac?",
+            "Área de Informática.",
+            "Programação.",
+            "Em Teresina.",
+            "Finaliza.",
+        ],
+    )
+    assert captures == 5
+    assert played == [
+        PROMPTS["greeting"],
+        PROMPTS["courses_overview"],
+        PROMPTS["technology_area"],
+        PROMPTS["programming_area"],
+        PROMPTS["programming_teresina"],
+        PROMPTS["closing"],
+    ]

@@ -98,3 +98,36 @@ Os testes de comportamento estão em `tests/unit/test_voice_idle_policy.py`. O m
 - A configuração experimental do Whisper no Dell usa um glossário curto de nomes do Senac, sem a frase metalinguística “Transcrição em português brasileiro”. Ainda não existe comparação independente de qualidade do STT.
 
 Regressões em tests/unit/test_voice_real_utterances_20261103.py e tests/knowledge/test_local_clock.py. A qualidade da conversa continua dependente de teste com voz real.
+
+## Fluxo de programação após Informática — correção de 03/11/2026
+
+O teste físico revelou que, após “Quais os cursos?” → “Área de Informática”,
+a escolha “Programação” era rejeitada pela proteção de falas muito curtas.
+Agora o roteador mantém estados de navegação efêmeros por ligação:
+
+- `awaiting_technology_choice` mantém a seleção de assunto após
+  a resposta `technology_area`;
+- `awaiting_programming_city` mantém o pedido de cidade após uma
+  seleção geral de programação;
+- “Programação”, “Cursos na área de programação”, “E em Teresina?” e
+  “Quero em Piripiri” são reconhecidos como escolhas de navegação;
+- consultas sobre vagas, preços, requisitos, inscrições e carga horária
+  continuam no RAG/grounding, em vez de receber afirmações prontas.
+
+As respostas guiadas citam apenas **exemplos históricos** da fonte
+`knowledge/sources/cursos/tecnologia-qualificacoes-2026.md`
+(publicação do Senac PI em 08/06/2026): Programação com Minecraft na
+Zona Leste de Teresina (40 h) e Técnico em Desenvolvimento de Sistemas
+em Piripiri (1200 h). Não apresentam vagas ou matrículas como atuais.
+
+**Limitação de manutenção:** os exemplos foram selecionados a partir de
+um documento verificado, mas estão incorporados em mensagens fixas,
+não gerados dinamicamente por um catálogo estruturado. Ao atualizar
+ofertas ou incluir cidades, revisar também os prompts e os testes de
+coerência com o corpus; a próxima evolução deve usar dados
+`segmento → curso → unidade → oferta` de forma declarativa.
+
+Regressões: `tests/unit/test_voice_programming_flow.py`
+(inclui referências à fonte) e teste integrado do worker em
+`tests/unit/test_voice_idle_policy.py`. Os resultados do retrieval e
+do grounding não foram reinterpretados como garantia de oferta atual.

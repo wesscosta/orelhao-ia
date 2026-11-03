@@ -2,13 +2,21 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — navegação por programação e cidade (03/11/2026)
+
+- Corrigida a perda de estado após o menu de Informática: “Programação” e “Cursos na área de programação” passam a ser escolhas válidas, não falas incompreensíveis.
+- Fluxo guiado de referência “segmento de tecnologia → programação → cidade” com exemplos históricos da fonte institucional Senac PI, sem declarar matrículas ou vagas abertas.
+- Consultas de preço, vagas, carga horária e inscrição continuam submetidas ao retrieval e grounding, sem alterar limiares.
+- Novas regressões de intenções, localidades, escopo histórico e worker físico; **439 testes aprovados**, Ruff e Mypy sem erros.
+- Os exemplos guiados ainda são mensagens estáticas vinculadas ao corpus, a serem substituídas futuramente por catálogo estruturado e atualizado.
+
 ## Não lançado — robustez de abertura, microfone e intenções (03/11/2026)
 
 - Abertura do Lumi simplificada: “Olá! Eu sou o Lumi. Como posso ajudar?”, com WAV pré-gerado.
 - Escolhas naturais sobre cursos deixam de cair indevidamente no RAG; relógio local aceita prefixos como “Ei” e “Oi, Lumi” sem incorporar o contexto anterior.
 - Perguntas ambíguas sobre configuração e fragmentos curtos recebem esclarecimento, preservando o grounding de dados institucionais.
 - Pré-ativação do PipeWire (2,6 s em paralelo à saudação), áudio temporário descartado, ganho de captura ajustado no Dell; redução de clipping observada, ainda sem WER validado.
-- Glossário inicial do Whisper atualizado no perfil experimental do Dell, sem instrução metalinguística; 412 testes passaram em repetição limpa, Ruff e Mypy sem erros.
+- Glossário inicial do Whisper atualizado no perfil experimental do Dell, sem instrução metalinguística; 439 testes passaram em repetição limpa, Ruff e Mypy sem erros.
 
 ## Não lançado — controle de inatividade e pausa (03/11/2026)
 

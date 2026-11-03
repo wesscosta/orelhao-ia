@@ -39,6 +39,25 @@ def _general_courses_request(normalized: str) -> bool:
     ))
 
 
+def _general_programming_request(normalized: str) -> bool:
+    """Reconhece consultas gerais sobre programação, nunca preços/vagas/carga."""
+    if re.search(
+        r"\b(?:preco|valor|custa|custo|quanto|vagas?|matricula|inscricao|"
+        r"horario|carga horaria|duracao|requisito|abert[oa]s?|disponiveis|hoje|"
+        r"atualmente)\b", normalized,
+    ):
+        return False
+    return bool(re.fullmatch(
+        r"(?:(?:eu |e )?(?:quero|queria|gostaria de|desejo) "
+        r"(?:(?:saber|conhecer|ver|falar) )?(?:sobre |de |os )?|"
+        r"(?:o senac tem |tem |quais sao os |quais os |os |sobre |area de |"
+        r"na area de )?)"
+        r"(?:cursos? (?:na area de |de |sobre ))?"
+        r"programacao(?: (?:no|do) senac(?: piaui)?)?",
+        normalized,
+    ))
+
+
 def looks_like_stt_hallucination(text: str) -> bool:
     """Filtra clichês específicos de geração STT; não tenta corrigir nomes próprios."""
     normalized = _normalize(text)
@@ -130,6 +149,8 @@ class VoiceIntentRouter:
     def __init__(self, *, runtime_summary: str | None = None) -> None:
         self.awaiting_location = False
         self.awaiting_course_area = False
+        self.awaiting_technology_choice = False
+        self.awaiting_programming_city = False
         self.awaiting_courses_or_prices = False
         self.awaiting_supervision_kind = False
         self.paused = False
@@ -308,6 +329,36 @@ class VoiceIntentRouter:
             self.awaiting_location = True
             return VoiceIntentReply(prompt="ask_location")
 
+        # Após o menu de tecnologia, "Programação" é uma escolha válida.
+        # A cidade é usada somente para consultar anúncios históricos verificáveis.
+        programming_request = _general_programming_request(normalized)
+        if self.awaiting_programming_city:
+            city = re.sub(
+                r"^(?:(?:e|mas) )?(?:(?:na cidade de|quero em|pode ser em|aqui em|em|na|no|para) )?",
+                "", normalized,
+            )
+            if city in {"teresina", "zona leste"}:
+                self.awaiting_programming_city = False
+                return VoiceIntentReply(prompt="programming_teresina")
+            if city == "piripiri":
+                self.awaiting_programming_city = False
+                return VoiceIntentReply(prompt="programming_piripiri")
+            if city in CITIES or city in TERESINA_AREAS:
+                self.awaiting_programming_city = False
+                return VoiceIntentReply(prompt="programming_city_unverified")
+            # Repetir o assunto é permitido; perguntas novas seguem seu fluxo.
+            if not programming_request:
+                self.awaiting_programming_city = False
+
+        if programming_request:
+            self.awaiting_course_area = False
+            self.awaiting_technology_choice = False
+            self.awaiting_programming_city = True
+            return VoiceIntentReply(prompt="programming_area")
+
+        if self.awaiting_technology_choice:
+            self.awaiting_technology_choice = False
+
         if self.awaiting_course_area:
             self.awaiting_course_area = False
             if any(term in normalized for term in (
@@ -321,6 +372,7 @@ class VoiceIntentRouter:
                 self.awaiting_course_area = True
                 return VoiceIntentReply(prompt="commerce_area")
             if re.search(r"\b(?:informatica|tecnologia|computadores?|excel)\b", normalized):
+                self.awaiting_technology_choice = True
                 return VoiceIntentReply(prompt="technology_area")
             if re.search(r"\b(?:idiomas?|linguas?|ingles|espanhol)\b", normalized):
                 return VoiceIntentReply(prompt="language_area")
