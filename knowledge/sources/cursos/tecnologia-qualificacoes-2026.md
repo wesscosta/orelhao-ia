@@ -16,7 +16,7 @@ A publicação institucional de 8 de junho de 2026 registrou exemplos por locali
 
 - **Teresina — Severino Ramos Brasil:** Agentes de IA com N8N (30 horas), Prototipação e Impressão 3D (48 horas), Robótica Kids (30 horas) e Robótica Teens (30 horas).
 - **Teresina — Zona Leste:** Aprendendo Programação com Minecraft (40 horas), Robótica Kids (30 horas) e Robótica Teens (30 horas).
-- **Parnaíba:** Engenharia de Prompt: Fazendo a IA Responder o que Você Quer (24 horas).
+- **Parnaíba:** Engenharia de Prompt: Fazendo a IA Responder o que Você Quer (24 horas), na área de TI; e **Aprendendo Programação com Minecraft (40 horas)**, no segmento Games. Ambos constam no anúncio de junho de 2026.
 - **Floriano:** Power BI Avançado: Dominando Power Query e DAX (40 horas).
 - **Piripiri:** Técnico em Desenvolvimento de Sistemas (1200 horas).
 

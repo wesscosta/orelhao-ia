@@ -1,0 +1,109 @@
+[
+  {
+    "query": "Quais cursos de saúde o Senac Piauí anunciou em 2026?",
+    "expected_sources": [
+      "cursos/saude-tecnicos-2026.md",
+      "cursos/saude-capacitacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cursos técnicos de enfermagem foram divulgados para Teresina?",
+    "expected_sources": [
+      "cursos/saude-tecnicos-2026.md"
+    ]
+  },
+  {
+    "query": "O Senac tem técnico em enfermagem em Picos?",
+    "expected_sources": [
+      "cursos/saude-tecnicos-2026.md",
+      "cursos/tecnico-enfermagem-catalogo-2026.md"
+    ]
+  },
+  {
+    "query": "Quais são os cursos de Saúde anunciados no Parque Piauí?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Em qual unidade houve anúncio do curso Lei Lucas de primeiros socorros?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Quais capacitações em Saúde foram anunciadas para Bom Jesus?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md",
+      "cursos/saude-tecnicos-2026.md"
+    ]
+  },
+  {
+    "query": "Houve anúncio de atualização em feridas e curativos em Bom Jesus?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Em Floriano houve anúncio da especialização em Instrumentação Cirúrgica?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md",
+      "cursos/saude-tecnicos-2026.md"
+    ]
+  },
+  {
+    "query": "Qual a carga horária do curso Técnico em Enfermagem no Senac Piauí?",
+    "expected_sources": [
+      "cursos/tecnico-enfermagem-catalogo-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cidades aparecem na página do curso Técnico em Enfermagem?",
+    "expected_sources": [
+      "cursos/tecnico-enfermagem-catalogo-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cursos técnicos de informática foram anunciados em Teresina?",
+    "expected_sources": [
+      "cursos/tecnicos-ti-2026.md"
+    ]
+  },
+  {
+    "query": "Qual curso técnico de informática foi anunciado para Severino Ramos Brasil?",
+    "expected_sources": [
+      "cursos/tecnicos-ti-2026.md"
+    ]
+  },
+  {
+    "query": "Qual curso de Desenvolvimento de Sistemas foi anunciado para Piripiri?",
+    "expected_sources": [
+      "cursos/tecnicos-ti-2026.md",
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cursos técnicos o Senac Piauí divulgou no segmento tecnologia da informação?",
+    "expected_sources": [
+      "cursos/tecnicos-ti-2026.md"
+    ]
+  },
+  {
+    "query": "O Senac divulgou técnico em Podologia na unidade Miguel Sady?",
+    "expected_sources": [
+      "cursos/saude-tecnicos-2026.md"
+    ]
+  },
+  {
+    "query": "Cursos de prevenção de lesões por pressão em São Raimundo Nonato?",
+    "expected_sources": [
+      "cursos/saude-capacitacoes-2026.md"
+    ]
+  },
+  {
+    "query": "O Senac anunciou Aprendendo Programação com Minecraft em Parnaíba?",
+    "expected_sources": [
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  }
+]
