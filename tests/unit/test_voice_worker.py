@@ -60,7 +60,7 @@ def test_voice_worker_uses_enforced_answer(monkeypatch) -> None:
     voice_worker.run_call(max_seconds=100, max_turns=1)
     assert seen_modes == ["enforce"]
     assert played == [
-        "Olá, sou o Lumi. Pode falar.",
+        "Olá! Eu sou o Lumi. Como posso ajudar?",
         "Você ainda está aí? Pode falar.",
         "Resposta validada",
         "Até logo!",
@@ -120,7 +120,7 @@ def test_empty_transcription_warns_once_without_generating_answer(monkeypatch) -
     voice_worker.run_call(max_turns=3)
     assert not called
     assert played == [
-        "Olá, sou o Lumi. Pode falar.",
+        "Olá! Eu sou o Lumi. Como posso ajudar?",
         "Não entendi. Pode repetir?",
         "Como não ouvi resposta, vou encerrar. Até logo.",
     ]

@@ -2,6 +2,14 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — robustez de abertura, microfone e intenções (03/11/2026)
+
+- Abertura do Lumi simplificada: “Olá! Eu sou o Lumi. Como posso ajudar?”, com WAV pré-gerado.
+- Escolhas naturais sobre cursos deixam de cair indevidamente no RAG; relógio local aceita prefixos como “Ei” e “Oi, Lumi” sem incorporar o contexto anterior.
+- Perguntas ambíguas sobre configuração e fragmentos curtos recebem esclarecimento, preservando o grounding de dados institucionais.
+- Pré-ativação do PipeWire (2,6 s em paralelo à saudação), áudio temporário descartado, ganho de captura ajustado no Dell; redução de clipping observada, ainda sem WER validado.
+- Glossário inicial do Whisper atualizado no perfil experimental do Dell, sem instrução metalinguística; 412 testes passaram em repetição limpa, Ruff e Mypy sem erros.
+
 ## Não lançado — controle de inatividade e pausa (03/11/2026)
 
 - Encerramento automático após duas escutas silenciosas (~14 s mais reprodução), sem percorrer todos os turnos; aviso apenas na primeira ausência.

@@ -118,7 +118,7 @@ def test_resposta_invalida_nao_consume_turnos_e_encerra_uma_vez(monkeypatch) -> 
     voice_worker.run_call(max_seconds=100, max_turns=3)
     assert capture.calls == 4
     assert called == []
-    assert outputs[0] == "Olá, sou o Lumi. Pode falar."
+    assert outputs[0] == "Olá! Eu sou o Lumi. Como posso ajudar?"
     assert outputs.count("Até logo!") == 1
     assert "Não entendi. Pode repetir?" in outputs
     assert "Você quer saber os cursos ou o preço de algum curso?" in outputs

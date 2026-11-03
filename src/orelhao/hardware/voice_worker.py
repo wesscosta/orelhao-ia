@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 
 from orelhao.config import load_config
-from orelhao.hardware.conversation_context import ConversationContext
+from orelhao.hardware.conversation_context import ContextResolution, ConversationContext
 from orelhao.hardware.hook_runtime import ensure_audio_ready
 from orelhao.hardware.idle_policy import CallIdlePolicy
 from orelhao.hardware.live_monitor import publish, voice_observation_log_path
@@ -21,6 +21,7 @@ from orelhao.hardware.voice_prompts import PROMPTS, VoicePromptCache
 from orelhao.interfaces.voice.capture import build_audio_capture
 from orelhao.interfaces.voice.playback import SoundDeviceAudioPlayback
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.knowledge.local_clock import answer_local_clock
 from orelhao.services.knowledge.observation import (
     LocalLLMAnswerGenerator,
     build_default_observation_workbench,
@@ -50,8 +51,11 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         raise RuntimeError("Rota P3 indisponível antes da saudação")
     deadline = time.monotonic() + max_seconds
     LOG.info("atendimento_iniciado")
-    # Carregar RAG/verificador em paralelo à saudação reduz o tempo até a primeira fala.
-    with ThreadPoolExecutor(max_workers=1) as startup:
+    # Pré-aquecer o PipeWire durante a saudação elimina o transiente da
+    # primeira abertura; não cria segunda inferência nem gravação persistente.
+    with ThreadPoolExecutor(max_workers=2) as startup:
+        prime = getattr(capture, "prime", None)
+        warmup_future = startup.submit(prime) if callable(prime) else None
         workbench_future = startup.submit(
             build_default_observation_workbench,
             default_knowledge_paths().index,
@@ -67,6 +71,11 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             (time.monotonic() - greeting_start) * 1000,
         )
         workbench = workbench_future.result()
+        if warmup_future is not None:
+            try:
+                warmup_future.result()
+            except Exception:
+                LOG.exception("falha_aquecimento_pipewire; continuar com captura normal")
     publish("voice.playback", status="saudacao_concluida", metrics={"play_ms": (time.monotonic() - greeting_start) * 1000})
     idle = CallIdlePolicy()
     valid_turns = 0
@@ -184,7 +193,12 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 break
             continue
 
-        resolution = context.resolve(question)
+        is_clock = answer_local_clock(
+            question, timezone=os.getenv('ORELHAO_TIMEZONE', 'America/Fortaleza'),
+        ) is not None
+        # Perguntas de relógio nunca herdam o tópico anterior do Senac.
+        resolution = (ContextResolution(question=question) if is_clock
+                      else context.resolve(question))
         if resolution.clarification is not None:
             spoken_text = PROMPTS["ask_specific_course"]
             publish("voice.response", turn=turn, text=spoken_text,
@@ -224,7 +238,9 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         grounding = getattr(observation, "grounding_v3", None)
         denied = bool(getattr(grounding, "should_abstain", False))
         reason = getattr(grounding, "reason", None)
-        context.remember(question, observation.presented_answer)
+        context.remember(
+            question, observation.presented_answer, reset_topic=is_clock,
+        )
         publish("voice.response", turn=turn, text=observation.presented_answer,
                 route=str(observation.answer_origin),
                 status="abstencao" if denied else "respondida",

@@ -88,3 +88,13 @@ O atendimento **não precisa alcançar 12 perguntas ou 36 tentativas** para ence
 - Eventos `voice.paused`, `voice.idle_timeout` e `voice.listening` com status `aguardando_retorno` permitem acompanhar os estados no monitor web, **sem segunda inferência**.
 
 Os testes de comportamento estão em `tests/unit/test_voice_idle_policy.py`. O método `CallIdlePolicy` separa a política de pausa/encerramento da infraestrutura de gravação. A integração física ainda depende de confirmação com o monofone real.
+
+## Robustez de intenções — 03/11/2026
+
+- Abertura: **“Olá! Eu sou o Lumi. Como posso ajudar?”** com WAV em cache na velocidade Piper 0.88.
+- A escolha “Vamos saber sobre os cursos” depois de “cursos ou preços?” abre as categorias sem recorrer ao RAG.
+- O relógio local entende vocativos como “Ei, que dia é hoje?” e “Oi, Lumi, que horas são?”, sem herdar o tópico de cursos. Perguntas sobre horários institucionais ou matrículas continuam exigindo fontes.
+- Perguntas explícitas sobre a configuração recebem informação local não sensível. Frases ambíguas como “É igual à sua configuração” e fragmentos ininteligíveis pedem esclarecimento.
+- A configuração experimental do Whisper no Dell usa um glossário curto de nomes do Senac, sem a frase metalinguística “Transcrição em português brasileiro”. Ainda não existe comparação independente de qualidade do STT.
+
+Regressões em tests/unit/test_voice_real_utterances_20261103.py e tests/knowledge/test_local_clock.py. A qualidade da conversa continua dependente de teste com voz real.

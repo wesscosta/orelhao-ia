@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-from collections import deque
-from dataclasses import asdict, dataclass
 import json
 import shutil
 import signal
-from pathlib import Path
 import subprocess
-import time
 import sys
 import tempfile
-from typing import Callable, Protocol
+import time
+from collections import deque
+from collections.abc import Callable
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Protocol
 
 from orelhao.config import AudioConfig
 from orelhao.interfaces.voice.audio import PCM16Audio
@@ -19,15 +20,14 @@ from orelhao.interfaces.voice.resample import resample_pcm16
 from orelhao.interfaces.voice.vad import (
     AdaptiveEnergyVAD,
     EnergyVAD,
-    SpeechGate,
-    SpeechGateState,
     HysteresisSpeechGate,
+    SpeechGateState,
     WebRTCVAD,
 )
 
 
 class AudioCapture(Protocol):
-    last_diagnostics: "CaptureDiagnostics | None"
+    last_diagnostics: CaptureDiagnostics | None
 
     def capture(self) -> PCM16Audio: ...
 
@@ -125,11 +125,9 @@ class SoundDeviceAudioCapture:
 
             if cfg.adaptive_vad:
                 threshold = adaptive_vad.calibrate(calibration)
-                vad = adaptive_vad
                 noise_floor = adaptive_vad.noise_floor
             else:
                 threshold = fixed_vad.rms_threshold
-                vad = fixed_vad
                 noise_floor = 0.0
 
             if on_ready is not None:
@@ -234,6 +232,41 @@ class PipeWireAudioCapture:
         cmd.append(str(output_path))
         return cmd
 
+    def prime(self) -> None:
+        """Aquece a entrada PipeWire antes da primeira fala do visitante.
+
+        Alguns codecs HDA iniciam com um transiente de alto ganho. Uma captura
+        curta descartada estabiliza a fonte para o próximo pw-record. A
+        inicialização ocorre durante a saudação e não gera STT nem arquivos
+        persistentes. Nunca chamar durante uma captura em andamento.
+        """
+        seconds = self.config.pipewire_warmup_seconds
+        if seconds <= 0:
+            return
+        with tempfile.TemporaryDirectory(prefix="orelhao-pw-prime-") as root:
+            process = subprocess.Popen(
+                self._command(Path(root) / "warmup.raw"),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            try:
+                try:
+                    exit_code = process.wait(timeout=seconds)
+                except subprocess.TimeoutExpired:
+                    pass
+                else:
+                    raise RuntimeError(
+                        f"pw-record encerrou prematuramente durante aquecimento: {exit_code}"
+                    )
+            finally:
+                if process.poll() is None:
+                    process.send_signal(signal.SIGINT)
+                    try:
+                        process.wait(timeout=1.5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=1.0)
+
     @staticmethod
     def _read_exact_file(stream, size: int, proc: subprocess.Popen[bytes], timeout: float) -> bytes:
         chunks: list[bytes] = []
@@ -326,11 +359,9 @@ class PipeWireAudioCapture:
 
             if cfg.adaptive_vad:
                 threshold = adaptive_vad.calibrate(calibration)
-                vad = adaptive_vad
                 noise_floor = adaptive_vad.noise_floor
             else:
                 threshold = fixed_vad.rms_threshold
-                vad = fixed_vad
                 noise_floor = 0.0
 
             print("Pode falar agora.", flush=True)
@@ -401,7 +432,7 @@ class PipeWireAudioCapture:
         if proc.stderr is not None:
             try:
                 stderr = proc.stderr.read() or b""
-            except Exception:
+            except Exception:  # noqa: BLE001 - best-effort cleanup of recorder
                 stderr = b""
         temp_dir.cleanup()
 

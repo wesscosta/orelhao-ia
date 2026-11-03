@@ -40,10 +40,17 @@ def _fold(value: str) -> str:
 
 def _kind(question: str) -> str | None:
     text = _fold(question.strip())
-    text = re.sub(r"^(?:o )?lumi[,;:] *", "", text)
+    # Prefixos de saudação não alteram a intenção temporal.
+    # Horários de cursos e vagas seguem fora da whitelist.
+    text = re.sub(
+        r"^(?:(?:ei|oi|ola|bom dia|boa tarde|boa noite|o lumi|lumi)"
+        r"(?:[,;:!]+|\s+)\s*)+",
+        "",
+        text,
+    )
 
     def classify(part: str) -> str | None:
-        part = re.sub(r"^(?:lumi|o lumi)\s+", "", part).strip()
+        part = re.sub(r"^(?:(?:lumi|o lumi|e)\s+)+", "", part).strip()
         part = re.sub(r"\s+por favor$", "", part).strip()
         if any(re.fullmatch(p, part) for p in DATE_PATTERNS):
             return "date"

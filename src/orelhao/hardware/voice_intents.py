@@ -31,6 +31,7 @@ def _general_courses_request(normalized: str) -> bool:
     return bool(re.fullmatch(
         r"(?:(?:eu |e )?(?:quero|queria|prefiro|desejo|gostaria de) "
         r"(?:(?:saber|conhecer|ver) )?(?:sobre |sobre os |os |dos )?|"
+        r"(?:vamos )?(?:saber|falar|conversar) (?:sobre |sobre os |dos |de )?|"
         r"(?:me fale|fale|me diga|diga) (?:sobre |sobre os |os )?|"
         r"(?:os |sobre os )?)"
         r"cursos(?: (?:do|no) senac(?: piaui)?)?",
@@ -235,12 +236,15 @@ class VoiceIntentRouter:
             return VoiceIntentReply(prompt="lumi_capabilities")
 
         if (
-            re.search(r"\b(?:qual|quais|me diga|fale|explique)\b", normalized)
+            re.search(r"\b(?:qual|quais|me diga|fale|explique|como e|e)\b", normalized)
             and re.search(r"\b(?:sua configuracao|seu hardware|configuracao do lumi"
                           r"|configuracao do orelhao|modelo de ia que voce usa"
                           r"|modelos que voce usa)\b", normalized)
+            and not re.search(r"\b(?:igual|mesma|parecida)\b", normalized)
         ):
             return VoiceIntentReply(text=self.runtime_summary)
+        if re.search(r"\b(?:sua configuracao|configuracao do lumi)\b", normalized):
+            return VoiceIntentReply(prompt="clarify_configuration")
 
         if re.fullmatch(
             r"(?:onde estou|onde eu estou|qual e minha localizacao"
@@ -351,4 +355,13 @@ class VoiceIntentRouter:
             self.awaiting_courses_or_prices = True
             return VoiceIntentReply(prompt="courses_or_prices")
 
+        # Fragmentos curtos não reconhecidos não devem ser enviados como perguntas
+        # factuais. Cursos, localidades e solicitações claras continuam no RAG.
+        tokens = normalized.split()
+        if len(tokens) <= 2 and not re.search(
+            r"\b(?:senac|curso|cursos|excel|enfermagem|saude|gestao|comercio|"
+            r"tecnologia|idiomas|unidade|preco|valor|matricula|psg)\b",
+            normalized,
+        ):
+            return VoiceIntentReply(prompt="clarify_request")
         return None

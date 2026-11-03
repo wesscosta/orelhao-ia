@@ -17,7 +17,9 @@ from orelhao.runtime_paths import resolve_project_path
 from orelhao.services.tts.service import PiperTTSService
 
 PROMPTS: dict[str, str] = {
-    "greeting": "Olá, sou o Lumi. Pode falar.",
+    "greeting": "Olá! Eu sou o Lumi. Como posso ajudar?",
+    "clarify_request": "Não entendi sua pergunta. Pode repetir?",
+    "clarify_configuration": "Você quer saber qual é a minha configuração?",
     "waiting": "Só um instante.",
     "closing": "Até logo!",
     "no_speech": "Não ouvi sua voz. Tente novamente.",

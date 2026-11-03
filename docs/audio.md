@@ -52,3 +52,13 @@ Por padrão o PipeWire escolhe a fonte de entrada ativa. Para fixar uma fonte es
 ### PipeWire capture implementation
 
 Production capture uses `pw-record` to a temporary RAW PCM16 file. The application tails that file in blocks while the recorder is active, preserving real-time VAD without routing native audio through Python stdout/PortAudio.
+
+## Diagnóstico do transiente do PipeWire — 03/11/2026
+
+A primeira abertura do microfone P3 após inatividade apresentava forte transiente no Dell mesmo após reduzir o ganho de captura a 40%, mantendo saída em 35%. Medição sem fala intencional: RMS do primeiro segundo de **0,5883**, com **32,25%** das amostras próximas da saturação. Após aquecer a entrada por **2,6 segundos**, a gravação seguinte apresentou RMS de **0,01086** no primeiro segundo e zero amostras saturadas.
+
+A implementação PipeWireAudioCapture.prime() faz uma gravação curta descartável, apaga o arquivo temporário e encerra o gravador. O voice_worker executa esse procedimento **em paralelo à saudação**, sem segunda transcrição ou inferência. Em caso de falha de pré-aquecimento, registra o erro e preserva a tentativa de captura normal.
+
+O parâmetro audio.pipewire_warmup_seconds está em 2.6 no perfil experimental e a execução está coberta por tests/audio/test_pipewire_prime.py. A redução de clipping não comprova, sozinha, a precisão da transcrição. Ainda precisamos de ensaios de voz real, tempo de resposta e retenção do início das falas.
+
+O glossário experimental do STT do Dell substitui instruções metalinguísticas; seu efeito sobre a taxa de erros de transcrição ainda não foi medido.

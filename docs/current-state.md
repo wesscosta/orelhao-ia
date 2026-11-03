@@ -7,11 +7,11 @@
 | Dimensão | Verificação atual |
 |---|---|
 | Branch de implementação | `feat/esp32-hook-serial-20261030`, derivada de `f2957c9`; `main` anterior à promoção em `351aacd` |
-| Testes no Dell Ubuntu 24.04, Python 3.12 | **391 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
+| Testes no Dell Ubuntu 24.04, Python 3.12 | **412 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
 | Corpus Senac PI | **21 documentos / 43 trechos**, índice local não versionado |
 | Retrieval legado (40 casos) | Hit@1 0,600; Hit@4 0,833; MRR 0,697; acurácia de abstenção 0,600: sem regressão |
 | Dataset de expansão (11 perguntas) | Hit@1 1,0; **não independente**, não mede respostas da LLM |
-| Voz física | ESP32 GPIO27/GND e USB serial, monofone P3, Whisper small CPU e Piper `length_scale: 0.88`; ensaios reais sem homologação |
+| Voz física | ESP32 GPIO27/GND e USB serial, monofone P3 com entrada PipeWire pré-ativada por 2,6 s durante a saudação, Whisper small CPU e Piper `length_scale: 0.88`; qualidade STT ainda exige validação humana |
 | Monitor do atendimento | `/monitor` por SSE, somente leitura da mesma sessão; sem segundo STT/LLM/TTS |
 | Memória de diálogo | Até 4 interações na RAM da ligação para contextualizar a busca, sem tratar respostas anteriores como evidência |
 | Limites do atendimento | 12 perguntas válidas, 36 capturas e 180 segundos; silêncio comum: aviso e encerramento após duas escutas (~14 s); pausa solicitada: até quatro (~28 s), retomando automaticamente se houver fala |
