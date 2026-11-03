@@ -1,5 +1,9 @@
 # Hardware
 
+> **Estado físico em 03/11/2026:** o ESP32 DevKit via USB serial (GPIO27/GND no contato seco do gancho) inicia e interrompe a sessão de voz no Dell, com monofone P3 em testes. O **display e o teclado ainda não estão conectados**; a qualidade do STT e a instalação física não foram homologadas. Veja [sessão e diagnóstico](esp32-voice-session.md) e [estado vigente](current-state.md).
+
+> **Experimento ESP32 — 30/10/2026.** Iniciada a integração USB serial do gancho no GPIO 27 (contato seco, GND). Este novo experimento substitui o Arduino Uno apenas como controlador candidato; a validação física e a aprovação do appliance ainda dependem de ensaios. Consulte [Gancho ESP32](esp32-hook.md).
+
 > **VERIFICAÇÃO — 29/10/2026.** As restrições do Dell de 8 GiB continuam válidas. Não foram realizados ensaios físicos de monofone, gancho, teclado ou boot autônomo até o último commit experimental. Ver [Estado vigente](current-state.md) e [plano de operação](operations.md).
 
 ## Decisão vigente — 28/10/2026
