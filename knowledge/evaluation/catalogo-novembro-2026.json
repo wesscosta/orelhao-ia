@@ -1,0 +1,68 @@
+[
+  {
+    "query": "Qual curso de inteligência artificial na prática tem no Senac Piauí?",
+    "expected_sources": [
+      "cursos/introducao-ia-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Em qual unidade de Teresina foi anunciado Introdução à IA Inteligência Artificial na Prática?",
+    "expected_sources": [
+      "cursos/introducao-ia-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Quantas horas tem Introdução à Inteligência Artificial na Prática no Senac?",
+    "expected_sources": [
+      "cursos/introducao-ia-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Quais cursos de Power BI na unidade Severino Ramos Brasil em novembro de 2026?",
+    "expected_sources": [
+      "cursos/power-bi-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Qual duração de Business Intelligence com Power BI no Senac Piauí?",
+    "expected_sources": [
+      "cursos/power-bi-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "O Senac anunciou Business Intelligence com Power BI em Teresina?",
+    "expected_sources": [
+      "cursos/power-bi-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Existe curso de procedimentos técnicos em sala de vacina na unidade Centro?",
+    "expected_sources": [
+      "cursos/sala-vacina-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "O curso de sala de vacina tem quantas horas no Senac Piauí?",
+    "expected_sources": [
+      "cursos/sala-vacina-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Qual unidade anunciou procedimentos técnicos em sala de vacina em Picos?",
+    "expected_sources": [
+      "cursos/sala-vacina-consulta-2026-11-03.md"
+    ]
+  },
+  {
+    "query": "Quais períodos de Informática Básica foram anunciados para o Parque Piauí em novembro de 2026?",
+    "expected_sources": [
+      "cursos/informatica-basica-2026.md"
+    ]
+  },
+  {
+    "query": "Quando o Senac publicou curso de Excel em Teresina Parque Piauí para novembro de 2026?",
+    "expected_sources": [
+      "cursos/excel-2026.md"
+    ]
+  }
+]

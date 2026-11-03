@@ -17,7 +17,8 @@ Revisão editorial: **03/11/2026**. Este é o ponto de entrada para documentaç�
 | [Sessão física](esp32-voice-session.md) | Gancho, monofone P3, limites da ligação e ensaios |
 | [Monitor de atendimento](live-monitor.md) | SSE da mesma sessão física e diagnóstico em tempo real |
 | [Intenções de voz](voice-intents.md) | Perguntas guiadas, comandos e regressões |
-| [Auditoria atual do Knowledge 03/11](auditoria-knowledge-2026-11-03.md) | 25 fontes, 51 trechos, testes de Saúde/TI e falha identificada no grounding |
+| [Atualização do catálogo 03/11](atualizacao-catalogo-2026-11-03.md) | 28 documentos, 59 trechos e novas fichas oficiais de IA, Power BI e Saúde |
+| [Auditoria anterior do Knowledge 03/11](auditoria-knowledge-2026-11-03.md) | Checkpoint de 25 documentos e 51 trechos; falso positivo de grounding ainda pendente |
 | [Links do catálogo por unidade](catalogo-por-unidade-2026.md) | Referências oficiais para consulta externa, mantidas fora do índice por regressão |
 | [Memória e Knowledge (checkpoint anterior)](context-and-knowledge-2026-11-03.md) | Histórico de 21/43, benchmarks e limites |
 | [Operação](operations.md) | Serviços, acesso seguro e rollback |

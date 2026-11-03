@@ -2,6 +2,14 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — atualização datada do catálogo de novembro/2026 (03/11/2026)
+
+- Fichas oficiais novas: Introdução à IA (40 h), Business Intelligence com Power BI (40 h) e Procedimentos Técnicos em Sala de Vacina (40 h), com fontes e exemplos de turmas por unidade.
+- Fichas de Informática Básica e Excel complementadas com referências do portal em novembro, sem afirmar disponibilidade ou matrícula aberta em tempo real.
+- Corpus candidato ampliado de **25 documentos / 51 trechos** para **28 / 59**. Regressão do retrieval legado (40), expansão anterior (11) e Saúde/TI (17) sem perdas. Novo conjunto derivado de 11 perguntas com Hit@1 de 1,0.
+- Testes de atualização e temporalidade impediram inferir vagas e preços atuais a partir de fontes estáticas. **O falso positivo de grounding para títulos alterados ainda é P0 e impede homologação.**
+- Documentação: [atualização do catálogo](docs/atualizacao-catalogo-2026-11-03.md). **Sem nova tag ou release**.
+
 ## Não lançado — auditoria e ampliação do Knowledge de Saúde/TI (03/11/2026)
 
 - Corpus do Senac PI ampliado de **21 documentos/43 trechos** para **25/51**, com quatro documentos oficiais novos: Saúde técnica, capacitações em Saúde, técnicos de TI por unidade e ficha do Técnico em Enfermagem (1600 h). Datas e fontes preservadas, sem transformar anúncios em vagas atuais.

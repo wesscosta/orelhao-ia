@@ -19,7 +19,12 @@ def test_updated_senac_pi_sources_are_indexable_and_traceable() -> None:
         doc = docs[source]
         assert doc.metadata["authority"] == "primary"
         assert doc.metadata["temporal"] is True
-        assert str(doc.metadata["retrieved_at"]) == "2026-10-29"
+        expected_date = (
+            "2026-11-03"
+            if source in {"cursos/informatica-basica-2026.md", "cursos/excel-2026.md"}
+            else "2026-10-29"
+        )
+        assert str(doc.metadata["retrieved_at"]) == expected_date
         assert doc.metadata["source_url"].startswith("https://")
         assert len(doc.text) >= 250
     assert "Esperantina" in docs["unidades/rede-senac-piaui.md"].text
