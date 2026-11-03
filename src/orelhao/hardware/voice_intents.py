@@ -377,6 +377,9 @@ class VoiceIntentRouter:
             if city == "piripiri":
                 self.awaiting_programming_city = False
                 return VoiceIntentReply(prompt="programming_piripiri")
+            if city == "parnaiba":
+                self.awaiting_programming_city = False
+                return VoiceIntentReply(prompt="programming_parnaiba")
             if city in CITIES or city in TERESINA_AREAS:
                 self.awaiting_programming_city = False
                 return VoiceIntentReply(prompt="programming_city_unverified")

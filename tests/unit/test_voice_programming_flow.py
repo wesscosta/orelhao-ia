@@ -59,7 +59,7 @@ def test_piripiri_programacao_e_atualidade() -> None:
 def test_cidade_sem_exemplo_na_base_nao_nega_oferta() -> None:
     r = VoiceIntentRouter()
     r.route("Programação")
-    reply = r.route("Parnaíba")
+    reply = r.route("Picos")
     assert reply is not None and reply.prompt == "programming_city_unverified"
     assert "não" in PROMPTS[reply.prompt].lower()
     assert "não há cursos" not in PROMPTS[reply.prompt].lower()
@@ -125,4 +125,28 @@ def test_pergunta_de_vagas_em_tempo_real_nao_usa_catalogo_historico() -> None:
     router = VoiceIntentRouter()
     router.route("Cursos de programação")
     assert router.route("E em Teresina tem vagas abertas hoje?") is None
+    assert not router.awaiting_programming_city
+
+
+def test_programacao_parnaiba_tem_exemplo_publicado_em_2026() -> None:
+    router = VoiceIntentRouter()
+    router.route("Quero cursos de programação")
+    result = router.route("Em Parnaíba")
+    assert result is not None and result.prompt == "programming_parnaiba"
+    assert "Minecraft" in PROMPTS[result.prompt]
+    assert "40 horas" in PROMPTS[result.prompt]
+    assert "2026" in PROMPTS[result.prompt]
+
+
+def test_parnaiba_minecraft_presente_na_mesma_fonte_oficial() -> None:
+    source = Path("knowledge/sources/cursos/tecnologia-qualificacoes-2026.md")
+    text = source.read_text(encoding="utf-8")
+    assert "**Parnaíba:**" in text
+    assert "Aprendendo Programação com Minecraft (40 horas)" in text
+
+
+def test_pergunta_atual_de_parnaiba_nao_herda_anuncio_historico() -> None:
+    router = VoiceIntentRouter()
+    router.route("Quero cursos de programação")
+    assert router.route("Em Parnaíba há vagas abertas hoje?") is None
     assert not router.awaiting_programming_city

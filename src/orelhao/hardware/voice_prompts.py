@@ -102,8 +102,8 @@ PROMPTS: dict[str, str] = {
         "Qual assunto interessa?"
     ),
     "programming_area": (
-        "Em 2026, o Senac anunciou Programação com Minecraft em Teresina "
-        "e Técnico em Desenvolvimento de Sistemas em Piripiri. Qual cidade?"
+        "Em 2026, o Senac anunciou Programação com Minecraft em Teresina e "
+        "Parnaíba, e Desenvolvimento de Sistemas em Piripiri. Qual cidade?"
     ),
     "programming_teresina": (
         "Em 2026, o Senac anunciou Programação com Minecraft na Zona Leste "
@@ -112,6 +112,10 @@ PROMPTS: dict[str, str] = {
     "programming_piripiri": (
         "Em 2026, o Senac anunciou Técnico em Desenvolvimento de Sistemas "
         "em Piripiri, com 1200 horas. Confira a oferta atual no portal."
+    ),
+    "programming_parnaiba": (
+        "Em 2026, o Senac anunciou Programação com Minecraft em Parnaíba, "
+        "com 40 horas. Consulte o portal para saber sobre turmas atuais."
     ),
     "programming_city_unverified": (
         "Não tenho exemplo de programação verificado para essa cidade. "
