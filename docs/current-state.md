@@ -1,6 +1,26 @@
 # Estado técnico vigente — Orelhão IA
 
-**Revisado em:** 30/10/2026. **Fonte:** código, configuração e testes da branch `fix/local-clock-and-abstention-20261030` (desenvolvimento experimental cumulativo, PR-01 a PR-04). Este arquivo consolida o estado verificável da linha experimental, **não constitui homologação ou nova release**.
+**Revisado em:** 03/11/2026, a partir do código, testes e serviços em execução no Dell, branch `feat/esp32-hook-serial-20261030`. As métricas e planos de 29–30/10 permanecem abaixo como **checkpoints históricos**, não como situação corrente, homologação ou nova release.
+
+## Estado operacional experimental — 03/11/2026
+
+| Dimensão | Verificação atual |
+|---|---|
+| Branch de implementação | `feat/esp32-hook-serial-20261030`, derivada de `f2957c9`; `main` anterior à promoção em `351aacd` |
+| Testes no Dell Ubuntu 24.04, Python 3.12 | **384 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
+| Corpus Senac PI | **21 documentos / 43 trechos**, índice local não versionado |
+| Retrieval legado (40 casos) | Hit@1 0,600; Hit@4 0,833; MRR 0,697; acurácia de abstenção 0,600: sem regressão |
+| Dataset de expansão (11 perguntas) | Hit@1 1,0; **não independente**, não mede respostas da LLM |
+| Voz física | ESP32 GPIO27/GND e USB serial, monofone P3, Whisper small CPU e Piper `length_scale: 0.88`; ensaios reais sem homologação |
+| Monitor do atendimento | `/monitor` por SSE, somente leitura da mesma sessão; sem segundo STT/LLM/TTS |
+| Memória de diálogo | Até 4 interações na RAM da ligação para contextualizar a busca, sem tratar respostas anteriores como evidência |
+| Limites do atendimento | 12 perguntas válidas, 36 capturas e 180 segundos |
+| Segurança do Admin | Somente loopback `127.0.0.1:8765`; túnel SSH para outra máquina, sem autenticação para exposição pública |
+| Aprovação do piloto | **NO-GO**, até avaliação humana, microfone/STT confiáveis e ensaios físicos repetidos |
+
+O teclado 4×4 e o display do Orelhão **ainda não estão integrados** ao ESP32. Fontes de cursos de 2026 são históricas: **não atestam vagas e matrículas abertas hoje**. Consulte [hardware/voz](esp32-voice-session.md), [monitor](live-monitor.md), [base/memória](context-and-knowledge-2026-11-03.md) e [operação](operations.md).
+
+## Checkpoint histórico — 30/10/2026
 
 ## Identificação e promoção
 

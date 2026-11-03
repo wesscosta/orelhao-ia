@@ -1,6 +1,6 @@
 # Índice oficial de documentação — Orelhão IA
 
-Revisão editorial: **30/10/2026**. Este é o ponto de entrada para documentação atual e histórico. Os relatórios datados descrevem o estado **na data do experimento** e não substituem [Estado vigente](current-state.md).
+Revisão editorial: **03/11/2026**. Este é o ponto de entrada para documentação atual e histórico. Os relatórios datados descrevem o estado **na data do experimento** e não substituem [Estado vigente](current-state.md).
 
 ## Documentos operacionais vivos
 
@@ -12,9 +12,13 @@ Revisão editorial: **30/10/2026**. Este é o ponto de entrada para documentaç�
 | [LLM](llm.md) | Início do servidor local, modelos, geração e segurança factual |
 | [Admin e bancada](knowledge-admin.md) | Indexação, testes de pergunta/voz, segurança e logs |
 | [Áudio](audio.md), [entrada](voice-input.md), [STT](stt.md) e [TTS](tts.md) | Captura, reconhecimento, síntese e diagnósticos |
-| [Hardware](hardware.md) | Restrição Dell 8 GiB e integração física planejada |
+| [Hardware](hardware.md) e [gancho ESP32](esp32-hook.md) | Restrições Dell e integração física experimental |
 | [Plano de benchmark Dell](benchmark-optiplex-7050.md) | Gates do hardware físico, ainda não executados |
-| [Operação](operations.md) | Comandos atuais versus appliance planejado |
+| [Sessão física](esp32-voice-session.md) | Gancho, monofone P3, limites da ligação e ensaios |
+| [Monitor de atendimento](live-monitor.md) | SSE da mesma sessão física e diagnóstico em tempo real |
+| [Intenções de voz](voice-intents.md) | Perguntas guiadas, comandos e regressões |
+| [Memória e Knowledge 03/11](context-and-knowledge-2026-11-03.md) | Corpus ampliado, benchmarks e limites |
+| [Operação](operations.md) | Serviços, acesso seguro e rollback |
 | [Changelog](../CHANGELOG.md) | Histórico versionado, com experimental separado de releases |
 | [Conhecimento](../knowledge/README.md) e [modelos](../models/README.md) | Organização e provisionamento |
 

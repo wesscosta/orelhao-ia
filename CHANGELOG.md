@@ -2,6 +2,17 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — integração física e contexto (03/11/2026)
+
+- ESP32 DevKit GPIO27/GND, protocolo serial do gancho e supervisor de uma sessão por vez no Dell Ubuntu.
+- P3 PipeWire + Whisper local + RAG/LLM com grounding `enforce` + Piper `length_scale: 0.88`; saudação, espera e outras mensagens estáticas em cache.
+- Monitor SSE **da mesma sessão física** em `/monitor` com texto transcrito, resposta, motivo de abstenção e tempos; sem duplicar inferência ou áudio.
+- Roteamento guiado para perguntas gerais do Senac, pedidos de pausa e encerramento; memória curta de referência por ligação; 12 perguntas válidas, 36 capturas, 180 s.
+- Base Senac Piauí ampliada de 18/36 para **21 documentos/43 trechos**, preservando Hit@1, Hit@4, MRR e acurácia de abstenção do conjunto legado de 40 consultas. Novos 11 testes de retrieval derivados dos novos documentos, não independentes.
+- **384 testes aprovados no Dell**, Ruff e Mypy sem erros. Ainda há erros de STT, falsos bloqueios e lacunas documentais. **NO-GO para piloto público; sem tag ou release.**
+
+Documentos: [estado vigente](docs/current-state.md), [monitor](docs/live-monitor.md), [voz física](docs/esp32-voice-session.md), [memória/corpus](docs/context-and-knowledge-2026-11-03.md).
+
 ## Correção de escopo por catálogo indexado (PR-04, 29/10/2026)
 
 O adjudicador da bancada agora usa o catálogo completo de entidades do índice: mesmo quando retrieval não encontra Excel, uma consulta explicitamente nomeada exige fonte daquele curso antes de chamar a LLM, impedindo a mistura com Informática Básica. É requisito reiniciar a bancada após reindexação para atualizar identidades. Não há alteração de ranking.

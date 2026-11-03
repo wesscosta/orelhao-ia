@@ -2,6 +2,19 @@
 
 **Revisão 29/10/2026.** Monólito modular e **offline-first**. Esta página separa a arquitetura existente da arquitetura-alvo; leia [Estado vigente](current-state.md).
 
+## Pipeline físico experimental no Dell — 03/11/2026
+
+```text
+ESP32 GPIO27/GND (gancho) → supervisor USB serial → uma sessão física por ligação
+monofone P3 → PipeWire/VAD → Whisper small CPU → roteamento de intenção
+                                               ├─ aviso guiado / data e hora
+                                               └─ memória curta → retrieval → precheck → LLM → grounding V3 enforce
+texto apresentado → Piper pt-BR (WAV em cache ou síntese dinâmica) → monofone P3
+eventos leves da mesma sessão → tmpfs JSONL → FastAPI SSE → /monitor (localhost)
+```
+
+O [monitor físico](live-monitor.md) não executa STT/LLM/TTS adicional. A [memória curta](context-and-knowledge-2026-11-03.md) mantém no máximo quatro interações na RAM por ligação e acrescenta somente referência temática à consulta; **não utiliza respostas anteriores como evidência factual**. O processo físico foi testado, mas **não está homologado**. Teclado 4×4 e display pelo ESP32 são integrações futuras, não recursos implementados.
+
 ## Política V3 — PR-04 (29/10/2026)
 
 O pipeline registra a decisão grounding legada, as fact_validations e a decisão final grounding_v3. Apenas em enforce esta última determina presented_answer e o texto do Piper. Precedência: pré-gate, recusa de geração, identidade, completude do atributo, valores tipados e NLI. A decisão permanece limitada à precisão das evidências e não é homologada. [Relatório](grounding-v3-pr04-decision-policy-2026-10-29.md).
@@ -46,7 +59,7 @@ O NLI pode apoiar afirmações de outra entidade, especialmente sem `entity_id` 
 ## Arquitetura-alvo do MVP (não implementada ponta a ponta)
 
 ```text
-Gancho / Arduino → sessão de chamada
+Gancho / ESP32 → sessão de chamada (implementação experimental)
 Microfone do monofone → VAD → STT → RAG → gate → LLM → NLI → Piper → monofone
 Teclado 4x4 ──────────→ comandos de sessão / seleção
 systemd, watchdog, métricas, retenção e atualização offline
