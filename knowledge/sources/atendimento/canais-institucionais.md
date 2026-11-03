@@ -1,17 +1,20 @@
 ---
-title: "Canais institucionais básicos"
+title: "Canais institucionais básicos — Senac Piauí"
 category: atendimento
 authority: primary
 temporal: true
-retrieved_at: "2026-08-24"
-source_url: "https://www.pi.senac.br/institucional/sobresenac"
+retrieved_at: "2026-10-29"
+source_url: "https://www.pi.senac.br/contato"
 ---
-# Canais institucionais básicos
+# Contato central do Senac Piauí
 
 ## Administração Regional
-Av. Campos Sales, 1.111, Centro (Sul), Teresina/PI, CEP 64.000-300.
+- Endereço divulgado: Avenida Campos Sales, 1.111, Centro (Sul), Teresina, Piauí, CEP 64.000-300.
+- Telefone geral: (86) 3228-9500.
+- Fale Conosco: formulário disponível no portal institucional https://www.pi.senac.br/contato.
 
-## Telefone geral publicado no portal
-(86) 3228-9500.
+Este endereço e telefone são contatos **centrais da Administração Regional**, não representam necessariamente o atendimento de cada Centro de Educação Profissional.
 
-Para telefone, WhatsApp, horário ou endereço de uma unidade específica, consultar a página atual da unidade ou canal oficial antes de responder.
+## Atendimento das unidades
+
+Não atribuir o contato central como WhatsApp, telefone direto ou horário específico de uma unidade. Para o número local, e-mail, WhatsApp, endereço ou horário de uma unidade, a IA deve consultar fonte oficial individual, com data atualizada; sem isso, informar apenas o contato central e recomendar confirmação com a instituição.

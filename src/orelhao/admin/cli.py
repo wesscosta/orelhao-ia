@@ -23,4 +23,7 @@ def _serve(args: argparse.Namespace) -> None:
             "AVISO: interface sem autenticação. Expor fora do localhost requer "
             "controle de acesso/rede no ambiente."
         )
-    uvicorn.run(create_admin_app(), host=args.host, port=args.port, log_level="info")
+    uvicorn.run(
+        create_admin_app(), host=args.host, port=args.port, log_level="info",
+        timeout_graceful_shutdown=4,
+    )

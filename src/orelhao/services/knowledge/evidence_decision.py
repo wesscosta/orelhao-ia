@@ -9,6 +9,7 @@ class AbstentionReason(StrEnum):
     SPECIFIC_INFORMATION_MISSING = "specific_information_missing"
     TEMPORAL_EVIDENCE_UNAVAILABLE = "temporal_evidence_unavailable"
     ENTITY_MISMATCH = "entity_mismatch"
+    CONFLICTING_EVIDENCE = "conflicting_evidence"
 
 
 _PT_BR_MESSAGES = {
@@ -23,6 +24,9 @@ _PT_BR_MESSAGES = {
     ),
     AbstentionReason.ENTITY_MISMATCH: (
         "Não encontrei essa informação para a unidade ou serviço solicitado."
+    ),
+    AbstentionReason.CONFLICTING_EVIDENCE: (
+        "Encontrei fontes divergentes. Consulte um canal oficial para confirmar."
     ),
 }
 

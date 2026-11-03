@@ -1,0 +1,1107 @@
+[
+  {
+    "id": "holdout-stable_general-01",
+    "query": "O que é o programa prototipo 1?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa prototipo 1 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "holdout-historical-01",
+    "query": "Quais editais foram publicados para o programa prototipo 1 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição prototipo 1 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_course-01",
+    "query": "Qual é a carga horária do curso de prototipo 1?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 1 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_unit-01",
+    "query": "Qual o telefone da unidade de prototipo 1?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de prototipo 1 é 3211-0000.",
+        "metadata": {
+          "unit_id": "prototipo 1",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-verified_current-01",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 1?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para prototipo 1.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-missing_evidence-01",
+    "query": "Qual o endereço do programa prototipo 1?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "holdout-stale_current-01",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 1?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para prototipo 1 em agosto.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-entity_mismatch-01",
+    "query": "Qual a carga horária do curso de prototipo 1?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unit_mismatch-01",
+    "query": "Qual o telefone da unidade de prototipo 1?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-conflicting_sources-01",
+    "query": "Qual a carga horária do curso de prototipo 1?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de prototipo 1 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de prototipo 1 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-specific_missing-01",
+    "query": "Qual a carga horária do curso de prototipo 1?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 1 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:prototipo 1",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unscoped_unit-01",
+    "query": "Qual o telefone da unidade de prototipo 1?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-stable_general-02",
+    "query": "O que é o programa prototipo 2?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa prototipo 2 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "holdout-historical-02",
+    "query": "Quais editais foram publicados para o programa prototipo 2 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição prototipo 2 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_course-02",
+    "query": "Qual é a carga horária do curso de prototipo 2?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 2 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_unit-02",
+    "query": "Qual o telefone da unidade de prototipo 2?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de prototipo 2 é 3211-0000.",
+        "metadata": {
+          "unit_id": "prototipo 2",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-verified_current-02",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 2?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para prototipo 2.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-missing_evidence-02",
+    "query": "Qual o endereço do programa prototipo 2?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "holdout-stale_current-02",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 2?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para prototipo 2 em agosto.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-entity_mismatch-02",
+    "query": "Qual a carga horária do curso de prototipo 2?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unit_mismatch-02",
+    "query": "Qual o telefone da unidade de prototipo 2?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-conflicting_sources-02",
+    "query": "Qual a carga horária do curso de prototipo 2?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de prototipo 2 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de prototipo 2 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-specific_missing-02",
+    "query": "Qual a carga horária do curso de prototipo 2?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 2 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:prototipo 2",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unscoped_unit-02",
+    "query": "Qual o telefone da unidade de prototipo 2?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-stable_general-03",
+    "query": "O que é o programa prototipo 3?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa prototipo 3 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "holdout-historical-03",
+    "query": "Quais editais foram publicados para o programa prototipo 3 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição prototipo 3 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_course-03",
+    "query": "Qual é a carga horária do curso de prototipo 3?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 3 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_unit-03",
+    "query": "Qual o telefone da unidade de prototipo 3?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de prototipo 3 é 3211-0000.",
+        "metadata": {
+          "unit_id": "prototipo 3",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-verified_current-03",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 3?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para prototipo 3.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-missing_evidence-03",
+    "query": "Qual o endereço do programa prototipo 3?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "holdout-stale_current-03",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 3?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para prototipo 3 em agosto.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-entity_mismatch-03",
+    "query": "Qual a carga horária do curso de prototipo 3?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unit_mismatch-03",
+    "query": "Qual o telefone da unidade de prototipo 3?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-conflicting_sources-03",
+    "query": "Qual a carga horária do curso de prototipo 3?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de prototipo 3 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de prototipo 3 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-specific_missing-03",
+    "query": "Qual a carga horária do curso de prototipo 3?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 3 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:prototipo 3",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unscoped_unit-03",
+    "query": "Qual o telefone da unidade de prototipo 3?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-stable_general-04",
+    "query": "O que é o programa prototipo 4?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa prototipo 4 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "holdout-historical-04",
+    "query": "Quais editais foram publicados para o programa prototipo 4 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição prototipo 4 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_course-04",
+    "query": "Qual é a carga horária do curso de prototipo 4?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 4 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_unit-04",
+    "query": "Qual o telefone da unidade de prototipo 4?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de prototipo 4 é 3211-0000.",
+        "metadata": {
+          "unit_id": "prototipo 4",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-verified_current-04",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 4?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para prototipo 4.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-missing_evidence-04",
+    "query": "Qual o endereço do programa prototipo 4?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "holdout-stale_current-04",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 4?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para prototipo 4 em agosto.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-entity_mismatch-04",
+    "query": "Qual a carga horária do curso de prototipo 4?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unit_mismatch-04",
+    "query": "Qual o telefone da unidade de prototipo 4?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-conflicting_sources-04",
+    "query": "Qual a carga horária do curso de prototipo 4?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de prototipo 4 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de prototipo 4 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-specific_missing-04",
+    "query": "Qual a carga horária do curso de prototipo 4?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 4 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:prototipo 4",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unscoped_unit-04",
+    "query": "Qual o telefone da unidade de prototipo 4?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-stable_general-05",
+    "query": "O que é o programa prototipo 5?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa prototipo 5 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "holdout-historical-05",
+    "query": "Quais editais foram publicados para o programa prototipo 5 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição prototipo 5 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_course-05",
+    "query": "Qual é a carga horária do curso de prototipo 5?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 5 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-scoped_unit-05",
+    "query": "Qual o telefone da unidade de prototipo 5?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de prototipo 5 é 3211-0000.",
+        "metadata": {
+          "unit_id": "prototipo 5",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-verified_current-05",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 5?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para prototipo 5.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-missing_evidence-05",
+    "query": "Qual o endereço do programa prototipo 5?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "holdout-stale_current-05",
+    "query": "Há vagas disponíveis hoje no curso de prototipo 5?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para prototipo 5 em agosto.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-entity_mismatch-05",
+    "query": "Qual a carga horária do curso de prototipo 5?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unit_mismatch-05",
+    "query": "Qual o telefone da unidade de prototipo 5?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-conflicting_sources-05",
+    "query": "Qual a carga horária do curso de prototipo 5?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de prototipo 5 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de prototipo 5 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-specific_missing-05",
+    "query": "Qual a carga horária do curso de prototipo 5?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de prototipo 5 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:prototipo 5",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdout-unscoped_unit-05",
+    "query": "Qual o telefone da unidade de prototipo 5?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  }
+]

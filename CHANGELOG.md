@@ -1,3 +1,105 @@
+# Histórico de alterações — releases e desenvolvimento experimental
+
+> **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
+
+## Não lançado — monitoramento da máquina no Admin (03/11/2026)
+
+- Nova página de **Saúde do Servidor** em `/system`, com endpoint de leitura `/system/state` e link “Máquina” na navegação do Knowledge Admin.
+- CPU, RAM, swap, disco raiz, temperaturas de CPU/SSD, uptime, estados dos serviços e RSS agregado de processos essenciais, sem agentes adicionais nem dados sensíveis de processos.
+- Atualização do navegador a cada 5 s, cache de coleta de 4 s e suspensão quando a aba não está visível. Coleta local medida no Dell em aproximadamente 20–22 ms, sem teste de carga real.
+- Admin continua somente em loopback, sem exposição pública, armazenamento de histórico ou alteração da sessão física.
+- Documentação: [Saúde do Servidor](docs/system-monitor.md); testes em `tests/admin/test_system_metrics.py`. **471 testes aprovados**, Ruff/Mypy sem erros. Implementação experimental, sem nova tag/release.
+
+## Não lançado — atualização datada do catálogo de novembro/2026 (03/11/2026)
+
+- Fichas oficiais novas: Introdução à IA (40 h), Business Intelligence com Power BI (40 h) e Procedimentos Técnicos em Sala de Vacina (40 h), com fontes e exemplos de turmas por unidade.
+- Fichas de Informática Básica e Excel complementadas com referências do portal em novembro, sem afirmar disponibilidade ou matrícula aberta em tempo real.
+- Corpus candidato ampliado de **25 documentos / 51 trechos** para **28 / 59**. Regressão do retrieval legado (40), expansão anterior (11) e Saúde/TI (17) sem perdas. Novo conjunto derivado de 11 perguntas com Hit@1 de 1,0.
+- Testes de atualização e temporalidade impediram inferir vagas e preços atuais a partir de fontes estáticas. **O falso positivo de grounding para títulos alterados ainda é P0 e impede homologação.**
+- Documentação: [atualização do catálogo](docs/atualizacao-catalogo-2026-11-03.md). **Sem nova tag ou release**.
+
+## Não lançado — auditoria e ampliação do Knowledge de Saúde/TI (03/11/2026)
+
+- Corpus do Senac PI ampliado de **21 documentos/43 trechos** para **25/51**, com quatro documentos oficiais novos: Saúde técnica, capacitações em Saúde, técnicos de TI por unidade e ficha do Técnico em Enfermagem (1600 h). Datas e fontes preservadas, sem transformar anúncios em vagas atuais.
+- Corrigida a omissão de Programação com Minecraft em Parnaíba (40 h) na fonte de tecnologia e na navegação física do Lumi.
+- Benchmark legado de 40 consultas sem regressão: Hit@1 0,600, Hit@4 0,833, MRR 0,697 e acurácia de abstenção 0,600. Dataset adicional de 17 consultas derivadas dos documentos: Hit@1 1,0; não independente.
+- Teste real Qwen+Grounding confirmou duração de Técnico em Enfermagem e recusa de vagas atuais; **identificou falso positivo de grounding para um nome de curso incorreto**. A LLM não está homologada para orientação factual sem revisão.
+- Documento de links de catálogo por unidade mantido em `docs/`, não indexado: sua inclusão reduziu MRR legado para 0,689. Backup do índice anterior preservado; **460 testes passaram**, Ruff/Mypy sem erros.
+- Auditoria completa: [docs/auditoria-knowledge-2026-11-03.md](docs/auditoria-knowledge-2026-11-03.md). Próximo gate: catálogo estruturado e validação exata de nomes de cursos/unidades.
+
+## Não lançado — respostas de abstenção e consultas genéricas (03/11/2026)
+
+- Tom amigável do Lumi quando o grounding nega uma resposta: brincadeira com o orelhão dos anos 90 uma única vez por ligação; demais abstenções recebem texto curto. Perguntas sobre inscrições, vagas e preços são encaminhadas ao atendimento; questões pedagógicas à supervisão/coordenação responsável.
+- A política modifica somente a **fala da sessão física**, sem mudar retrieval, fatos, precheck, NLI, grounding V3 ou observações brutas da bancada. O monitor mostra exatamente a resposta falada e preserva o motivo técnico da recusa.
+- Consultas “Cursos disponíveis. Alô.” e “Informações vocês tem.” passam por orientação guiada, evitando uma busca genérica sem resultado. Localidades incompreensíveis recebem nova tentativa antes do encaminhamento ao atendimento.
+- Pesquisa na base verificada: a expressão genérica “Cursos disponíveis. Alô.” recuperava zero trechos, enquanto consultas específicas sobre programação recuperavam oito. O índice foi mantido sem mudanças.
+- **453 testes aprovados**, Ruff e Mypy sem erros. Os WAVs novos foram gerados localmente no cache Piper 0.88; qualidade da conversa física permanece pendente de validação.
+
+## Não lançado — navegação por programação e cidade (03/11/2026)
+
+- Corrigida a perda de estado após o menu de Informática: “Programação” e “Cursos na área de programação” passam a ser escolhas válidas, não falas incompreensíveis.
+- Fluxo guiado de referência “segmento de tecnologia → programação → cidade” com exemplos históricos da fonte institucional Senac PI, sem declarar matrículas ou vagas abertas.
+- Consultas de preço, vagas, carga horária e inscrição continuam submetidas ao retrieval e grounding, sem alterar limiares.
+- Novas regressões de intenções, localidades, escopo histórico e worker físico; **439 testes aprovados**, Ruff e Mypy sem erros.
+- Os exemplos guiados ainda são mensagens estáticas vinculadas ao corpus, a serem substituídas futuramente por catálogo estruturado e atualizado.
+
+## Não lançado — robustez de abertura, microfone e intenções (03/11/2026)
+
+- Abertura do Lumi simplificada: “Olá! Eu sou o Lumi. Como posso ajudar?”, com WAV pré-gerado.
+- Escolhas naturais sobre cursos deixam de cair indevidamente no RAG; relógio local aceita prefixos como “Ei” e “Oi, Lumi” sem incorporar o contexto anterior.
+- Perguntas ambíguas sobre configuração e fragmentos curtos recebem esclarecimento, preservando o grounding de dados institucionais.
+- Pré-ativação do PipeWire (2,6 s em paralelo à saudação), áudio temporário descartado, ganho de captura ajustado no Dell; redução de clipping observada, ainda sem WER validado.
+- Glossário inicial do Whisper atualizado no perfil experimental do Dell, sem instrução metalinguística; 439 testes passaram em repetição limpa, Ruff e Mypy sem erros.
+
+## Não lançado — controle de inatividade e pausa (03/11/2026)
+
+- Encerramento automático após duas escutas silenciosas (~14 s mais reprodução), sem percorrer todos os turnos; aviso apenas na primeira ausência.
+- Pedido explícito de pausa aguarda até quatro capturas (~28 s), retomando imediatamente ao reconhecer nova fala; sem repetição de avisos.
+- Capturas vazias ou STT rejeitado não consomem o orçamento de perguntas válidas, mas contam para inatividade.
+- Eventos SSE de pausa/timeout no monitor e novos WAVs de aviso/encerramento no cache local; testes unitários e regressões de voz.
+
+## Não lançado — integração física e contexto (03/11/2026)
+
+- ESP32 DevKit GPIO27/GND, protocolo serial do gancho e supervisor de uma sessão por vez no Dell Ubuntu.
+- P3 PipeWire + Whisper local + RAG/LLM com grounding `enforce` + Piper `length_scale: 0.88`; saudação, espera e outras mensagens estáticas em cache.
+- Monitor SSE **da mesma sessão física** em `/monitor` com texto transcrito, resposta, motivo de abstenção e tempos; sem duplicar inferência ou áudio.
+- Roteamento guiado para perguntas gerais do Senac, pedidos de pausa e encerramento; memória curta de referência por ligação; 12 perguntas válidas, 36 capturas, 180 s.
+- Base Senac Piauí ampliada de 18/36 para **21 documentos/43 trechos**, preservando Hit@1, Hit@4, MRR e acurácia de abstenção do conjunto legado de 40 consultas. Novos 11 testes de retrieval derivados dos novos documentos, não independentes.
+- **391 testes aprovados no Dell**, Ruff e Mypy sem erros (após inclusão da política de inatividade). Ainda há erros de STT, falsos bloqueios e lacunas documentais. **NO-GO para piloto público; sem tag ou release.**
+
+Documentos: [estado vigente](docs/current-state.md), [monitor](docs/live-monitor.md), [voz física](docs/esp32-voice-session.md), [memória/corpus](docs/context-and-knowledge-2026-11-03.md).
+
+## Correção de escopo por catálogo indexado (PR-04, 29/10/2026)
+
+O adjudicador da bancada agora usa o catálogo completo de entidades do índice: mesmo quando retrieval não encontra Excel, uma consulta explicitamente nomeada exige fonte daquele curso antes de chamar a LLM, impedindo a mistura com Informática Básica. É requisito reiniciar a bancada após reindexação para atualizar identidades. Não há alteração de ranking.
+
+## Correção de data/hora e repetição da abstenção (30/10/2026; experimental)
+
+Consultas explícitas ao relógio do terminal são determinísticas, com timezone configurável e proveniência auditável; NLI não é executado nem recebe scores inventados. Corrigida a repetição de `INSUFFICIENT CONTEXT` do Tucano2, inclusive para sintetização de logs antigos. 327 testes aprovados. [Relatório](docs/local-clock-abstention-fix-2026-10-30.md).
+
+## Workbench Cadu/Faber e identidade masculina do Lumi (30/10/2026; experimental)
+
+Seletor de voz por requisição, prévia fixa, alternância da síntese de respostas previamente verificadas e provisionamento Faber separado. Corrigida a referência **o Lumi** no prompt e na saída da LLM antes do Grounding. 285 testes aprovados. [Relatório](docs/workbench-piper-voices-lumi-2026-10-30.md).
+
+## Grounding V3 — PR-04 experimental (29/10/2026; não é release)
+
+Nova decisão conservadora ALLOW/ABSTAIN/CLARIFY, com verificação de completude do atributo solicitado, capacidade e intervalo etário. Em enforce o Piper recebe somente o texto seguro. 277 testes aprovados; avaliação automatizada de 40 casos por modelo: 0/20 falsas permissões em ambos, oito bloqueios positivos Tucano2 e onze Qwen, sem revisão humana independente. [Relatório](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
+
+## Grounding V3 — PR-03 experimental (29/10/2026; não é release)
+
+Nova extração e verificação factual tipada de números, prazos e entidades, com diagnóstico na bancada, regressão preservada e sem alteração de gates de autorização. 250 testes aprovados no Arch. Ver [relatório PR-03](docs/grounding-v3-pr03-fact-validator-2026-10-29.md).
+
+## Unreleased — branch experimental 29/10/2026 (NÃO é v0.6.0-alpha.14 lançada)
+
+- `2c0495a`: 40 perguntas naturalísticas, Tucano2 × Qwen3.5 com resultados rastreáveis; filtro de entidades sobrepostas, proteção contra mistura Excel/Excel Avançado e revisão factual de ofertas de Informática Básica; **NO-GO** para operação física, com 216 testes Pytest aprovados.
+- `f98e6d2`: answerability pré-geração, conflito de fatos estruturados, restrições temporais e 120 casos sintéticos de contrato; experimental.
+- `547a936`: ampliação da base Senac PI, 18 documentos e 35 chunks naquele checkpoint; depois 18/36 com correção factual.
+- `28a36f2`: saída Piper restaurada na bancada, com controle explícito de voz.
+- `3867df6` e `a8396d2`: comparação inicial pt-BR, abstenção e respostas completas.
+- A `main` não foi alterada por essa sequência de branches. Falta revisão humana independente, teste de ponta a ponta com áudio real e medição no Dell.
+
+## Histórico das alphas anteriores — preservado abaixo
+
 ## 0.6.0-alpha.13
 
 - adiciona configuração própria para uma LLM local, com temperatura, limite de tokens, contexto e timeout;

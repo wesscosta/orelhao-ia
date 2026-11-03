@@ -1,0 +1,459 @@
+{
+  "version": "1",
+  "as_of": "2026-10-29",
+  "status": "model-curated-not-human-adjudicated",
+  "description": "40 questões adversariais reais em linguagem natural, baseadas em documentos oficiais e lacunas do corpus; requer revisão humana independente antes de go/no-go",
+  "cases": [
+    {
+      "id": "P01",
+      "query": "Qual é a missão oficial do Senac?",
+      "expected_abstain": false,
+      "source": "institucional/missao-visao-valores.md",
+      "required_terms": [
+        "educar",
+        "trabalho"
+      ],
+      "category": "missao",
+      "reference_url": "https://www.pi.senac.br/institucional/sobresenac",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P02",
+      "query": "Em que ano o Senac Piauí iniciou atividades em Teresina?",
+      "expected_abstain": false,
+      "source": "institucional/sobre-o-senac-piaui.md",
+      "required_terms": [
+        "1947"
+      ],
+      "category": "historia",
+      "reference_url": "https://www.pi.senac.br/institucional/sobresenac",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P03",
+      "query": "Em que ano o Departamento Regional do Senac no Piauí foi oficialmente instalado?",
+      "expected_abstain": false,
+      "source": "institucional/sobre-o-senac-piaui.md",
+      "required_terms": [
+        "1954"
+      ],
+      "category": "historia",
+      "reference_url": "https://www.pi.senac.br/institucional/sobresenac",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P04",
+      "query": "Qual é o limite de renda por pessoa para o PSG?",
+      "expected_abstain": false,
+      "source": "psg/programa-senac-gratuidade.md",
+      "required_terms": [
+        "dois",
+        "salarios"
+      ],
+      "category": "programa",
+      "reference_url": "https://psg.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P05",
+      "query": "Quem realiza a inscrição do jovem aprendiz no Senac?",
+      "expected_abstain": false,
+      "source": "aprendizagem/jovem-aprendiz.md",
+      "required_terms": [
+        "empresa"
+      ],
+      "category": "aprendizagem",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P06",
+      "query": "Qual a faixa etária informada para jovens no Senac Aprendiz?",
+      "expected_abstain": false,
+      "source": "aprendizagem/jovem-aprendiz.md",
+      "required_terms": [
+        "14",
+        "24"
+      ],
+      "category": "aprendizagem",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P07",
+      "query": "Uma denúncia à Ouvidoria do Senac pode ser anônima?",
+      "expected_abstain": false,
+      "source": "atendimento/ouvidoria.md",
+      "required_terms": [
+        "anonim"
+      ],
+      "category": "ouvidoria",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P08",
+      "query": "Qual é o prazo padrão para resposta da Ouvidoria?",
+      "expected_abstain": false,
+      "source": "atendimento/ouvidoria.md",
+      "required_terms": [
+        "15",
+        "dias"
+      ],
+      "category": "ouvidoria",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P09",
+      "query": "Qual plataforma de biblioteca virtual é mencionada pelo Senac Piauí?",
+      "expected_abstain": false,
+      "source": "biblioteca/bibliotecas-e-cachola.md",
+      "required_terms": [
+        "cachola"
+      ],
+      "category": "biblioteca",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P10",
+      "query": "Em quais três cidades há bibliotecas físicas segundo a página consultada?",
+      "expected_abstain": false,
+      "source": "biblioteca/bibliotecas-e-cachola.md",
+      "required_terms": [
+        "teresina",
+        "parnaiba",
+        "picos"
+      ],
+      "category": "biblioteca",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P11",
+      "query": "Qual carga horária estava informada para Excel na consulta de outubro de 2026?",
+      "expected_abstain": false,
+      "source": "cursos/excel-2026.md",
+      "required_terms": [
+        "30",
+        "horas"
+      ],
+      "category": "curso",
+      "reference_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P12",
+      "query": "Quantas horas tem o Excel Avançado segundo a página de referência?",
+      "expected_abstain": false,
+      "source": "cursos/excel-avancado-2026.md",
+      "required_terms": [
+        "60",
+        "horas"
+      ],
+      "category": "curso",
+      "reference_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel-avancado",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P13",
+      "query": "A partir de qual idade é possível acessar o Excel Avançado?",
+      "expected_abstain": false,
+      "source": "cursos/excel-avancado-2026.md",
+      "required_terms": [
+        "14"
+      ],
+      "category": "curso",
+      "reference_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel-avancado",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P14",
+      "query": "Qual idade mínima foi informada para Informática Básica?",
+      "expected_abstain": false,
+      "source": "cursos/informatica-basica-2026.md",
+      "required_terms": [
+        "12"
+      ],
+      "category": "curso",
+      "reference_url": "https://pi.senac.br/tecnologia-da-informacao-ti/informatica-basica",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P15",
+      "query": "Qual o telefone geral da Administração Regional do Senac PI?",
+      "expected_abstain": false,
+      "source": "atendimento/canais-institucionais.md",
+      "required_terms": [
+        "3228",
+        "9500"
+      ],
+      "category": "contato",
+      "reference_url": "https://www.pi.senac.br/contato",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P16",
+      "query": "Quantas entradas de unidades apareciam na seção de unidades do portal?",
+      "expected_abstain": false,
+      "source": "unidades/rede-senac-piaui.md",
+      "required_terms": [
+        "13"
+      ],
+      "category": "unidades",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P17",
+      "query": "Quantas vagas foram previstas na publicação do edital 006/2026 do PSG?",
+      "expected_abstain": false,
+      "source": "psg/vagas-e-editais.md",
+      "required_terms": [
+        "437"
+      ],
+      "category": "psg_historico",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P18",
+      "query": "Qual quantitativo estava previsto no edital 007/2026 do PSG?",
+      "expected_abstain": false,
+      "source": "psg/vagas-e-editais.md",
+      "required_terms": [
+        "25"
+      ],
+      "category": "psg_historico",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P19",
+      "query": "Em qual data foi firmado o Programa Senac de Gratuidade?",
+      "expected_abstain": false,
+      "source": "psg/programa-senac-gratuidade.md",
+      "required_terms": [
+        "22",
+        "julho",
+        "2008"
+      ],
+      "category": "programa",
+      "reference_url": "https://psg.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "P20",
+      "query": "O Banco de Oportunidades é um serviço gratuito?",
+      "expected_abstain": false,
+      "source": "empregabilidade/banco-de-oportunidades.md",
+      "required_terms": [
+        "gratuito"
+      ],
+      "category": "empregabilidade",
+      "reference_url": "https://www.pi.senac.br/",
+      "reference_basis": "corpus institucional versionado"
+    },
+    {
+      "id": "N01",
+      "query": "Ainda existe vaga disponível hoje para Excel Avançado?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "temporal",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N02",
+      "query": "Posso me matricular agora numa turma de Informática Básica em Picos?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "temporal",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N03",
+      "query": "Quantas vagas restam hoje no edital PSG 006/2026?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "temporal",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N04",
+      "query": "O edital PSG 007/2026 continua com inscrições abertas agora?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "temporal",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N05",
+      "query": "O preço atual do Excel Avançado é exatamente o mesmo divulgado em outubro?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "temporal",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N06",
+      "query": "Qual telefone da unidade do Senac de Parnaíba?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "unidade",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N07",
+      "query": "Qual WhatsApp da unidade de Picos?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "unidade",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N08",
+      "query": "Qual horário de funcionamento da unidade de Santa Filomena hoje?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "unidade_temporal",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N09",
+      "query": "Qual o endereço da unidade de Floriano?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "unidade",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N10",
+      "query": "Em que rua fica a unidade de Piripiri?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "unidade",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N11",
+      "query": "Qual a senha da rede Wi-Fi do Senac Piauí?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N12",
+      "query": "Qual o telefone privado do diretor do Senac PI?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N13",
+      "query": "Qual é o valor de inscrição cobrado no PSG 007/2026?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N14",
+      "query": "Qual é o horário exato da próxima turma de Excel em Parnaíba?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "turma_especifica",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N15",
+      "query": "Qual foi o número de inscritos no edital PSG 006/2026?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N16",
+      "query": "Qual o número de participantes do Senac Aprendiz em 2026?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N17",
+      "query": "Qual a lotação máxima da biblioteca do Senac de Picos?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N18",
+      "query": "Qual dia preciso ir à unidade para retirar meu certificado de Excel?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "dado_ausente",
+      "reference_url": null,
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N19",
+      "query": "Existe uma turma de 80 horas de Informática Básica em Picos ofertada hoje?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "oferta_atual",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    },
+    {
+      "id": "N20",
+      "query": "Quanto custa agora a matrícula de Excel em Teresina?",
+      "expected_abstain": true,
+      "source": null,
+      "required_terms": [],
+      "category": "preco_atual",
+      "reference_url": "https://psg.pi.senac.br/vagas/",
+      "reference_basis": "ausência de evidência suficiente no corpus estático; não equivale a fato negativo sobre o mundo real"
+    }
+  ]
+}

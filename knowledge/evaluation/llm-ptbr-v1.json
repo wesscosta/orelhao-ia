@@ -1,0 +1,258 @@
+{
+  "description": "Dataset sintético de avaliação preliminar de respostas e abstenção em pt-BR; não certifica segurança factual, dados fictícios.",
+  "cases": [
+    {
+      "id": "br-01-horario",
+      "question": "Em quais dias o balcão de testes atende?",
+      "evidence": [
+        {
+          "source": "horario.md",
+          "text": "O balcão de testes atende de segunda a sexta-feira."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "segunda",
+        "sexta"
+      ]
+    },
+    {
+      "id": "br-02-endereco",
+      "question": "Em qual rua fica a Unidade de Demonstração?",
+      "evidence": [
+        {
+          "source": "unidade.md",
+          "text": "A Unidade de Demonstração fica na Rua das Palmeiras, 120, bairro Centro."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "Palmeiras",
+        "120"
+      ]
+    },
+    {
+      "id": "br-03-curso",
+      "question": "Qual a duração do Curso de Demonstração A?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração A dura 40 horas."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "40"
+      ]
+    },
+    {
+      "id": "br-04-modalidade",
+      "question": "O Curso de Demonstração B é presencial ou remoto?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração B acontece exclusivamente na modalidade presencial."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "presencial"
+      ]
+    },
+    {
+      "id": "br-05-documentos",
+      "question": "Que documento devo levar para a inscrição simulada?",
+      "evidence": [
+        {
+          "source": "inscricao.md",
+          "text": "Na inscrição simulada é obrigatório apresentar documento oficial de identificação com foto."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "foto"
+      ]
+    },
+    {
+      "id": "br-06-publico",
+      "question": "Quem pode participar do evento experimental?",
+      "evidence": [
+        {
+          "source": "evento.md",
+          "text": "O evento experimental é aberto a estudantes e professores."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "estudantes",
+        "professores"
+      ]
+    },
+    {
+      "id": "br-07-canal",
+      "question": "Por qual canal a equipe de testes atende?",
+      "evidence": [
+        {
+          "source": "canal.md",
+          "text": "A equipe de testes atende exclusivamente pelo e-mail atendimento@example.org."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "atendimento@example.org"
+      ]
+    },
+    {
+      "id": "br-08-atualizacao",
+      "question": "Quando o ambiente experimental foi atualizado?",
+      "evidence": [
+        {
+          "source": "atualizacao.md",
+          "text": "O ambiente experimental foi atualizado em 14 de outubro de 2026."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "14",
+        "outubro"
+      ]
+    },
+    {
+      "id": "br-09-custo",
+      "question": "O material de demonstração tem custo?",
+      "evidence": [
+        {
+          "source": "material.md",
+          "text": "O material de demonstração é gratuito."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "gratuito"
+      ]
+    },
+    {
+      "id": "br-10-acessibilidade",
+      "question": "O ambiente de testes tem atendimento em Libras?",
+      "evidence": [
+        {
+          "source": "acessibilidade.md",
+          "text": "O ambiente de testes disponibiliza interpretação em Libras mediante solicitação antecipada."
+        }
+      ],
+      "expected_abstain": false,
+      "must_include": [
+        "Libras"
+      ]
+    },
+    {
+      "id": "br-11-valor-ausente",
+      "question": "Qual é o preço do Curso de Demonstração A?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração A dura 40 horas."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-12-data-ausente",
+      "question": "Quando começam as inscrições do Curso de Demonstração A?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração A dura 40 horas."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-13-endereco-entidade",
+      "question": "Qual é o endereço da Unidade de Demonstração B?",
+      "evidence": [
+        {
+          "source": "unidade-a.md",
+          "text": "A Unidade de Demonstração A fica na Rua das Palmeiras, 120."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-14-temporal",
+      "question": "O evento experimental de novembro ainda tem vagas hoje?",
+      "evidence": [
+        {
+          "source": "evento.md",
+          "text": "O evento experimental tinha 20 vagas na publicação de agosto de 2026."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-15-telefone",
+      "question": "Qual telefone posso ligar para a equipe de testes?",
+      "evidence": [
+        {
+          "source": "canal.md",
+          "text": "A equipe de testes atende exclusivamente pelo e-mail atendimento@example.org."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-16-relacao-falsa",
+      "question": "O Curso B dá certificado de 60 horas?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração A oferece certificado de 60 horas. O Curso de Demonstração B é presencial."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-17-conflito",
+      "question": "Qual a taxa de inscrição?",
+      "evidence": [
+        {
+          "source": "fonte-a.md",
+          "text": "A taxa de inscrição simulada é R$ 10."
+        },
+        {
+          "source": "fonte-b.md",
+          "text": "A taxa de inscrição simulada é R$ 20."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-18-extra-dominio",
+      "question": "Qual será o resultado do próximo sorteio?",
+      "evidence": [],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-19-curso-inexistente",
+      "question": "Qual é a carga horária do Curso de Demonstração Z?",
+      "evidence": [
+        {
+          "source": "cursos.md",
+          "text": "O Curso de Demonstração A dura 40 horas. O Curso de Demonstração B dura 90 horas."
+        }
+      ],
+      "expected_abstain": true
+    },
+    {
+      "id": "br-20-gancho",
+      "question": "Em que horário específico o atendimento termina às sextas-feiras?",
+      "evidence": [
+        {
+          "source": "horario.md",
+          "text": "O balcão de testes atende de segunda a sexta-feira."
+        }
+      ],
+      "expected_abstain": true
+    }
+  ]
+}

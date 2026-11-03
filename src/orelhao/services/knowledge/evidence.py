@@ -4,7 +4,7 @@ import hashlib
 import json
 import math
 import shutil
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Protocol, TypedDict
 
@@ -125,6 +125,8 @@ def provision_evidence_model(
         model_filename: variants[variant]["remote"],
         "tokenizer.json": "tokenizer.json",
     }
+    if model_spec["task"] == "nli":
+        files["config.json"] = "config.json"
     for local_name, remote_name in files.items():
         downloaded = hf_hub_download(
             repo_id=model_spec["model_id"],
@@ -184,6 +186,7 @@ class OnnxExtractiveQaEvidenceVerifier:
                 f"orelhao knowledge evidence-provision --model {model} --variant {variant}"
             )
 
+        _check_nli_labels(model_dir)
         self._tokenizer = Tokenizer.from_file(str(tokenizer_path))
         self._tokenizer.enable_truncation(max_length=max_length, strategy="only_second")
         self._session = ort.InferenceSession(
@@ -241,6 +244,54 @@ class OnnxExtractiveQaEvidenceVerifier:
         return _sigmoid(best_span_score - null_score)
 
 
+
+# Verificado contra config.json do modelo na revisão pinada no manifesto:
+# https://huggingface.co/MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli
+# /blob/0a71e92a985b6e1ad1828cf67ce9c459639c1dca/config.json
+NLI_LABELS = ("entailment", "neutral", "contradiction")
+
+
+@dataclass(frozen=True, slots=True)
+class NliProbabilities:
+    """Distribuição completa, distinta do threshold de suporte do grounding."""
+
+    entailment: float
+    neutral: float
+    contradiction: float
+
+    def __post_init__(self) -> None:
+        values = (self.entailment, self.neutral, self.contradiction)
+        if not all(math.isfinite(value) and 0.0 <= value <= 1.0 for value in values):
+            raise ValueError("probabilidades NLI inválidas")
+        if not math.isclose(sum(values), 1.0, abs_tol=1e-5):
+            raise ValueError("probabilidades NLI devem somar 1")
+
+    def as_dict(self) -> dict[str, float]:
+        return {
+            "entailment": self.entailment,
+            "neutral": self.neutral,
+            "contradiction": self.contradiction,
+        }
+
+
+def _check_nli_labels(model_dir: Path) -> None:
+    """Exige mapeamento esperado quando config.json acompanha o modelo.
+
+    Nas instalações legadas o manifesto fixa a revisão e o mapeamento
+    conhecido é NLI_LABELS; nunca reinterpretar logits silenciosamente.
+    """
+    config_path = model_dir / "config.json"
+    if not config_path.exists():
+        return
+    payload = json.loads(config_path.read_text(encoding="utf-8"))
+    labels = payload.get("id2label")
+    if not isinstance(labels, dict) or tuple(
+        labels.get(str(i)) for i in range(3)
+    ) != NLI_LABELS:
+        raise RuntimeError("labels do NLI não correspondem à revisão pinada")
+
+
+
 class OnnxNliEvidenceVerifier:
     """Mede se a passagem implica uma afirmação usando NLI multilíngue."""
 
@@ -284,9 +335,17 @@ class OnnxNliEvidenceVerifier:
         self.model_path = model_path
 
     def support_score(self, query: str, passage: str) -> float:
-        """Interpreta query como afirmação e passage como premissa."""
+        """Mantém compatibilidade com o gate anterior (entailment)."""
+        return self.classify(query, passage).entailment
+
+    def classify(self, query: str, passage: str) -> NliProbabilities:
+        """Retorna entailment/neutral/contradiction com a ordem pinada.
+
+        A evidência é a premissa e a afirmação gerada é a hipótese.
+        Uma entrada vazia não pode produzir entailment ou contradiction.
+        """
         if not query.strip() or not passage.strip():
-            return 0.0
+            return NliProbabilities(0.0, 1.0, 0.0)
         encoding = self._tokenizer.encode(passage, query)
         feeds: dict[str, np.ndarray] = {
             "input_ids": np.asarray([encoding.ids], dtype=np.int64),
@@ -301,7 +360,11 @@ class OnnxNliEvidenceVerifier:
         if logits.shape != (1, 3):
             raise RuntimeError("Modelo NLI deve produzir três logits")
         probabilities = _softmax(logits[0])
-        return float(probabilities[0])
+        return NliProbabilities(
+            entailment=float(probabilities[0]),
+            neutral=float(probabilities[1]),
+            contradiction=float(probabilities[2]),
+        )
 
 
 class EvidenceFilteredRetriever:

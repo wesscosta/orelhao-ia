@@ -1,0 +1,95 @@
+[
+  {
+    "query": "Quais municípios aparecem na lista de unidades do Senac Piauí em outubro de 2026?",
+    "expected_sources": [
+      "unidades/rede-senac-piaui.md"
+    ]
+  },
+  {
+    "query": "O Senac Piauí apresenta unidade em Esperantina?",
+    "expected_sources": [
+      "unidades/rede-senac-piaui.md"
+    ]
+  },
+  {
+    "query": "O Senac tem unidade em Santa Filomena?",
+    "expected_sources": [
+      "unidades/rede-senac-piaui.md"
+    ]
+  },
+  {
+    "query": "Quais são as unidades do Senac em Teresina?",
+    "expected_sources": [
+      "unidades/rede-senac-piaui.md",
+      "cursos/agenda-e-unidades.md"
+    ]
+  },
+  {
+    "query": "Qual é o telefone geral da Administração Regional do Senac?",
+    "expected_sources": [
+      "atendimento/canais-institucionais.md"
+    ]
+  },
+  {
+    "query": "Qual o endereço da Administração Regional do Senac Piauí?",
+    "expected_sources": [
+      "atendimento/canais-institucionais.md"
+    ]
+  },
+  {
+    "query": "Qual a carga horária do curso de Informática Básica?",
+    "expected_sources": [
+      "cursos/informatica-basica-2026.md"
+    ]
+  },
+  {
+    "query": "Qual é a idade mínima para o curso de Informática Básica?",
+    "expected_sources": [
+      "cursos/informatica-basica-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cidades apareceram na oferta de Excel?",
+    "expected_sources": [
+      "cursos/excel-2026.md"
+    ]
+  },
+  {
+    "query": "Qual a carga horária do curso Excel Avançado?",
+    "expected_sources": [
+      "cursos/excel-avancado-2026.md"
+    ]
+  },
+  {
+    "query": "Quais editais PSG constavam no portal em outubro de 2026?",
+    "expected_sources": [
+      "psg/vagas-e-editais.md"
+    ]
+  },
+  {
+    "query": "Qual diferença entre o número anunciado e as vagas disponíveis do edital PSG?",
+    "expected_sources": [
+      "psg/vagas-e-editais.md"
+    ]
+  },
+  {
+    "query": "Qual telefone individual da unidade Senac Santa Filomena?",
+    "abstain": true
+  },
+  {
+    "query": "Qual o horário de funcionamento da unidade Senac Picos neste momento?",
+    "abstain": true
+  },
+  {
+    "query": "Ainda há vagas abertas hoje para o curso de Excel Avançado?",
+    "abstain": true
+  },
+  {
+    "query": "Ainda posso me inscrever hoje no edital PSG 007/2026?",
+    "abstain": true
+  },
+  {
+    "query": "Qual é a população atual de Marte?",
+    "abstain": true
+  }
+]

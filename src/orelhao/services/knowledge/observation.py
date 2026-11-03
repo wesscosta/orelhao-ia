@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import unicodedata
@@ -10,18 +11,37 @@ from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 from typing import ClassVar, Protocol
+from zoneinfo import ZoneInfo
 
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.llm.abstention import normalize_abstention
 from orelhao.services.llm.service import INSUFFICIENT_CONTEXT, LLMService
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .answer_requirements import missing_requested_fact
+from .answerability import EvidenceAdjudicator, EvidenceAssessment
+from .claim_grounding import ClaimAssessment, assess_answer
 from .evidence import (
     EvidenceVerifier,
     OnnxNliEvidenceVerifier,
     evidence_model_directory,
 )
-from .grounding_decision import GroundingDecision, GroundingPolicy
+from .fact_validation import FactValidation, validate_claim_facts
+from .grounding_decision import (
+    GroundingDecision,
+    GroundingPolicy,
+    GroundingStatus,
+)
+from .grounding_v3 import (
+    GroundingV3Decision,
+    V3Disposition,
+    V3Reason,
+    decide_grounding_v3,
+)
+from .index import load_chunks
+from .local_clock import LocalClockAnswer, answer_local_clock
 from .models import SearchResult
+from .query_constraints import explicitly_named_entities
 from .retriever import Retriever
 from .vector_retriever import PersistentVectorRetriever
 
@@ -82,13 +102,23 @@ class LocalLLMAnswerGenerator:
             RetrievedContext(text=result.chunk.text, source=result.chunk.source)
             for result in evidence
         ]
-        answer = self._service.generate(question, context).strip()
+        answer = normalize_abstention(self._service.generate(question, context))
         if answer == INSUFFICIENT_CONTEXT:
             return GENERATION_ABSTENTION_MESSAGE
         clean = _plain_text(answer)
         if not clean:
             raise RuntimeError("LLM local produziu resposta vazia após normalização")
-        return clean[:600].rstrip()
+        sentences = _sentences(clean)
+        if len(sentences) > 1 and not sentences[-1].endswith((".", "!", "?")):
+            # A saída pode ter sido interrompida pelo limite de tokens.
+            sentences.pop()
+        selected: list[str] = []
+        for sentence in sentences[:3]:
+            proposed = " ".join([*selected, sentence])
+            if len(proposed) > 360:
+                break
+            selected.append(sentence)
+        return " ".join(selected) if selected else GENERATION_ABSTENTION_MESSAGE
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,6 +136,7 @@ class ObservationLatency:
     generation_ms: float
     grounding_ms: float
     total_ms: float
+    adjudication_ms: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,14 +148,40 @@ class GroundingObservation:
     presented_answer: str
     evidence: tuple[ObservedEvidence, ...]
     grounding: GroundingDecision
+    claims: tuple[ClaimAssessment, ...]
     latency: ObservationLatency
     generator: str
     generation_abstained: bool
     mode: str = "observe"
+    answerability: EvidenceAssessment | None = None
+    generation_skipped: bool = False
+    answer_entity_mismatch: bool = False
+    fact_validations: tuple[FactValidation, ...] = ()
+    grounding_v3: GroundingV3Decision | None = None
+    answer_origin: str = "rag"
+    local_clock: dict[str, str] | None = None
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = asdict(self)
         payload["grounding"] = self.grounding.as_dict()
+        payload["grounding_v3"] = (
+            self.grounding_v3.as_dict() if self.grounding_v3 is not None else None
+        )
+        payload["fact_validations"] = [
+            result.as_dict() for result in self.fact_validations
+        ]
+        payload["claims"] = [
+            {
+                **asdict(claim),
+                "span_selection": (
+                    claim.span_selection.as_dict()
+                    if claim.span_selection is not None else None
+                ),
+            }
+            for claim in self.claims
+        ]
+        if self.answerability is not None:
+            payload["answerability"] = self.answerability.as_dict()
         return payload
 
 
@@ -139,6 +196,31 @@ class ObservationLog:
 
     def append_observation(self, observation: GroundingObservation) -> None:
         self._append({"event": "observation", **observation.as_dict()})
+
+    def presented_answer_for(self, observation_id: str) -> str | None:
+        """Resolve áudio somente de uma observação legítima já registrada."""
+        if re.fullmatch(r"[0-9a-f]{32}", observation_id) is None:
+            return None
+        try:
+            with self.path.open(encoding="utf-8") as stream:
+                for line in stream:
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if (
+                        payload.get("event") == "observation"
+                        and payload.get("observation_id") == observation_id
+                    ):
+                        answer = payload.get("presented_answer")
+                        if not isinstance(answer, str) or not answer:
+                            return None
+                        if normalize_abstention(answer) == INSUFFICIENT_CONTEXT:
+                            return GENERATION_ABSTENTION_MESSAGE
+                        return answer
+        except FileNotFoundError:
+            return None
+        return None
 
     def append_rating(
         self,
@@ -180,14 +262,71 @@ class ObservationWorkbench:
         log: ObservationLog,
         *,
         policy: GroundingPolicy | None = None,
+        mode: str = "observe",
+        adjudicator: EvidenceAdjudicator | None = None,
     ) -> None:
+        if mode not in {"observe", "enforce"}:
+            raise ValueError("mode deve ser observe ou enforce")
+        self._mode = mode
         self._retriever = retriever
         self._answer_generator = answer_generator
         self._verifier = verifier
         self.log = log
         self._policy = policy or GroundingPolicy()
+        self._adjudicator = adjudicator
 
-    def observe(self, question: str, *, limit: int = 8) -> GroundingObservation:
+    def _observe_local_clock(
+        self,
+        question: str,
+        resolved: LocalClockAnswer,
+        mode: str,
+        started: float,
+    ) -> GroundingObservation:
+        # A fonte é o relógio local do servidor; NLI/RAG/LLM não são executados.
+        nli = GroundingDecision(GroundingStatus.NOT_APPLICABLE, 0.0)
+        v3 = GroundingV3Decision(
+            disposition=V3Disposition.ALLOW,
+            reason=V3Reason.LOCAL_CLOCK,
+            nli_status=GroundingStatus.NOT_APPLICABLE,
+            nli_score=0.0,
+            enforced=mode == "enforce",
+        )
+        observation = GroundingObservation(
+            observation_id=uuid.uuid4().hex,
+            created_at=datetime.now(UTC).isoformat(),
+            question=question,
+            answer=resolved.text,
+            presented_answer=resolved.text,
+            evidence=(),
+            grounding=nli,
+            claims=(),
+            latency=ObservationLatency(
+                retrieval_ms=0.0,
+                generation_ms=0.0,
+                grounding_ms=0.0,
+                total_ms=_elapsed_ms(started),
+            ),
+            generator="LocalClockService",
+            generation_abstained=False,
+            mode=mode,
+            generation_skipped=True,
+            grounding_v3=v3,
+            answer_origin="local_clock",
+            local_clock={
+                "kind": resolved.kind,
+                "timezone": resolved.timezone,
+                "timestamp": resolved.timestamp,
+            },
+        )
+        self.log.append_observation(observation)
+        return observation
+
+    def observe(
+        self, question: str, *, limit: int = 8, mode: str | None = None
+    ) -> GroundingObservation:
+        effective_mode = mode or self._mode
+        if effective_mode not in {"observe", "enforce"}:
+            raise ValueError("mode deve ser observe ou enforce")
         clean_question = question.strip()
         if not clean_question:
             raise ValueError("pergunta não pode ser vazia")
@@ -195,35 +334,109 @@ class ObservationWorkbench:
             raise ValueError("limit deve ser maior que zero")
 
         total_started = perf_counter()
+        timezone = os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza")
+        clock_answer = answer_local_clock(clean_question, timezone=timezone)
+        if clock_answer is not None:
+            return self._observe_local_clock(
+                clean_question, clock_answer, effective_mode, total_started
+            )
+        as_of = datetime.now(
+            ZoneInfo(os.getenv("ORELHAO_TIMEZONE", "America/Fortaleza"))
+        ).date()
         started = perf_counter()
         results = self._retriever.search(clean_question, limit=limit)
         retrieval_ms = _elapsed_ms(started)
 
         started = perf_counter()
-        answer = self._answer_generator.generate(clean_question, results).strip()
+        precheck = (
+            self._adjudicator.assess(clean_question, results, as_of=as_of)
+            if self._adjudicator is not None else None
+        )
+        adjudication_ms = _elapsed_ms(started)
+        blocked_before_generation = bool(
+            precheck is not None and not precheck.decision.answerable
+            and effective_mode == "enforce"
+        )
+
+        started = perf_counter()
+        if blocked_before_generation:
+            assert precheck is not None
+            answer = precheck.decision.message_pt_br() or GENERATION_ABSTENTION_MESSAGE
+        else:
+            eligible = (
+                [r for r in results if r.chunk.id in precheck.admissible_chunk_ids]
+                if precheck is not None and precheck.decision.answerable
+                and effective_mode == "enforce" else results
+            )
+            answer = self._answer_generator.generate(clean_question, eligible).strip()
         generation_ms = _elapsed_ms(started)
         if not answer:
             raise RuntimeError("gerador produziu resposta vazia")
 
-        generation_abstained = answer == GENERATION_ABSTENTION_MESSAGE
+        generation_abstained = blocked_before_generation or answer == GENERATION_ABSTENTION_MESSAGE
         started = perf_counter()
-        support = (
-            0.0
+        eligible_evidence = (
+            [r for r in results if r.chunk.id in precheck.admissible_chunk_ids]
+            if precheck is not None and precheck.decision.answerable else results
+        )
+        assessment = (
+            assess_answer("", eligible_evidence, self._verifier, self._policy)
             if generation_abstained
-            else max(
-                (self._verifier.support_score(answer, result.chunk.text) for result in results),
-                default=0.0,
+            else assess_answer(answer, eligible_evidence, self._verifier, self._policy)
+        )
+        fact_validations = tuple(
+            validate_claim_facts(
+                item.claim, eligible_evidence, as_of=as_of,
+                entity_id=precheck.constraints.entity_id if precheck else None,
+                unit_id=precheck.constraints.unit_id if precheck else None,
+                requires_current_state=(
+                    precheck.constraints.requires_current_state if precheck else False
+                ),
             )
+            for item in assessment.claims
         )
         grounding_ms = _elapsed_ms(started)
-        decision = self._policy.decide(support)
+        decision = assessment.decision
+        answer_entities = explicitly_named_entities(
+            answer,
+            [
+                str(result.chunk.metadata["entity_id"])
+                for result in results
+                if result.chunk.metadata.get("entity_id")
+            ],
+        )
+        answer_entity_mismatch = bool(
+            precheck is not None and precheck.constraints.entity_id
+            and any(entity != precheck.constraints.entity_id for entity in answer_entities)
+        )
+        if answer_entity_mismatch:
+            decision = self._policy.decide(0.0)
+        v3 = decide_grounding_v3(
+            decision, fact_validations,
+            precheck_blocked=blocked_before_generation or bool(
+                precheck is not None and not precheck.decision.answerable
+            ),
+            generation_abstained=generation_abstained,
+            entity_mismatch=answer_entity_mismatch,
+            requested_attribute_missing=(
+                not generation_abstained
+                and missing_requested_fact(clean_question, answer)
+            ),
+            enforce=effective_mode == "enforce",
+        )
+        # Em observe, resposta bruta é preservada para revisão.
+        # Em enforce, o texto (inclusive o áudio subsequente) passa pelo V3.
+        presented = answer
+        if effective_mode == "enforce" and v3.should_abstain and not blocked_before_generation:
+            presented = v3.safe_message or GENERATION_ABSTENTION_MESSAGE
 
         observation = GroundingObservation(
             observation_id=uuid.uuid4().hex,
             created_at=datetime.now(UTC).isoformat(),
             question=clean_question,
             answer=answer,
-            presented_answer=answer,
+            presented_answer=presented,
+            claims=assessment.claims,
             evidence=tuple(
                 ObservedEvidence(
                     chunk_id=result.chunk.id,
@@ -240,9 +453,16 @@ class ObservationWorkbench:
                 generation_ms=generation_ms,
                 grounding_ms=grounding_ms,
                 total_ms=_elapsed_ms(total_started),
+                adjudication_ms=adjudication_ms,
             ),
             generator=type(self._answer_generator).__name__,
             generation_abstained=generation_abstained,
+            mode=effective_mode,
+            answerability=precheck,
+            generation_skipped=blocked_before_generation,
+            answer_entity_mismatch=answer_entity_mismatch,
+            fact_validations=fact_validations,
+            grounding_v3=v3,
         )
         self.log.append_observation(observation)
         return observation
@@ -253,6 +473,7 @@ def build_default_observation_workbench(
     *,
     log_path: Path | None = None,
     answer_generator: AnswerGenerator | None = None,
+    mode: str = "observe",
 ) -> ObservationWorkbench:
     model_dir = resolve_project_path(
         f"models/evidence/{evidence_model_directory('nli-minilm')}"
@@ -262,6 +483,14 @@ def build_default_observation_workbench(
         answer_generator or ExtractivePreviewAnswerGenerator(),
         OnnxNliEvidenceVerifier(model_dir),
         ObservationLog(log_path or index_dir.parent / "observations" / "grounding.jsonl"),
+        mode=mode,
+        adjudicator=EvidenceAdjudicator(
+            known_entities=[
+                str(chunk.metadata["entity_id"])
+                for chunk in load_chunks(index_dir)
+                if chunk.metadata.get("entity_id")
+            ],
+        ),
     )
 
 

@@ -1,0 +1,3025 @@
+{
+  "meta": {
+    "created_at": "2026-10-30T02:42:02.914498+00:00",
+    "dataset": "knowledge/evaluation/grounding-real-senac-pi-v1.json",
+    "as_of": "2026-10-29",
+    "model": "tucano-ptbr",
+    "base_url": "http://127.0.0.1:8081/v1",
+    "mode": "enforce",
+    "evaluation_status": "provisional; requires independent human adjudication",
+    "completed": true,
+    "total_cases": 40
+  },
+  "summary": {
+    "cases": 40,
+    "positive_cases": 20,
+    "negative_cases": 20,
+    "false_allow_cases": 0,
+    "false_block_cases": 8,
+    "false_allow_rate": 0.0,
+    "false_block_rate": 0.4,
+    "positive_anchor_pass": 12,
+    "positive_source_hit": 18,
+    "grounding_supported_with_bad_anchor": 0,
+    "latency_p50_ms": 713.5630684999796,
+    "latency_p95_ms": 1298.737459999984,
+    "human_review_complete": false,
+    "label_source": "model-curated, source-anchored; not independently human adjudicated",
+    "execution_errors": 0,
+    "not_completed": 0
+  },
+  "results": [
+    {
+      "id": "P01",
+      "category": "missao",
+      "query": "Qual é a missão oficial do Senac?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": false,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.3794887959957123,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.3794887959957123,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "A missão oficial do Senac é ampliar o acesso à educação profissional para pessoas de baixa renda.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "aprendizagem/jovem-aprendiz.md",
+        "cursos/agenda-e-unidades.md",
+        "psg/programa-senac-gratuidade.md",
+        "unidades/rede-senac-piaui.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "biblioteca/bibliotecas-e-cachola.md",
+        "atendimento/canais-institucionais.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A missão oficial do Senac é ampliar o acesso à educação profissional para pessoas de baixa renda.",
+          "score": 0.3794887959957123,
+          "source": "psg/programa-senac-gratuidade.md",
+          "chunk_id": "psg/programa-senac-gratuidade.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/programa-senac-gratuidade.md:0",
+              "source": "psg/programa-senac-gratuidade.md",
+              "start": 171,
+              "end": 255,
+              "text": "Seu objetivo é ampliar o acesso à educação profissional para pessoas de baixa renda.",
+              "source_url": "https://psg.pi.senac.br/programa/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "acesso",
+              "ampliar",
+              "baixa",
+              "educacao",
+              "pessoas",
+              "profissional",
+              "renda"
+            ],
+            "lexical_coverage": 0.7,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 908.630162999998,
+        "retrieval_ms": 3.0143270000735356,
+        "adjudication_ms": 0.6707330001063383,
+        "generation_ms": 801.0462260001532,
+        "grounding_ms": 102.94642400003795
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P02",
+      "category": "historia",
+      "query": "Em que ano o Senac Piauí iniciou atividades em Teresina?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9842121005058289,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9842121005058289,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O Senac Piauí iniciou atividades em Teresina em 1º de agosto de 1947.",
+      "presented_answer": "O Senac Piauí iniciou atividades em Teresina em 1º de agosto de 1947.",
+      "evidence_sources": [
+        "institucional/sobre-o-senac-piaui.md",
+        "biblioteca/bibliotecas-e-cachola.md",
+        "unidades/rede-senac-piaui.md",
+        "atendimento/ouvidoria.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/agenda-e-unidades.md",
+        "atendimento/canais-institucionais.md",
+        "cursos/excel-2026.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O Senac Piauí iniciou atividades em Teresina em 1º de agosto de 1947.",
+          "score": 0.9842121005058289,
+          "source": "institucional/sobre-o-senac-piaui.md",
+          "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+              "source": "institucional/sobre-o-senac-piaui.md",
+              "start": 272,
+              "end": 478,
+              "text": "## História no Piauí O Senac Piauí iniciou atividades em Teresina em 1º de agosto de 1947, inicialmente como Delegacia Estadual da Administração Nacional, nas dependências da Associação Comercial Piauiense.",
+              "source_url": "https://www.pi.senac.br/institucional/sobresenac",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "1947",
+              "1o",
+              "agosto",
+              "atividades",
+              "iniciou",
+              "piaui",
+              "senac",
+              "teresina"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 834.1939530000673,
+        "retrieval_ms": 3.0430219999288965,
+        "adjudication_ms": 0.1023990000703634,
+        "generation_ms": 731.7451090000304,
+        "grounding_ms": 99.1591580000204
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P03",
+      "category": "historia",
+      "query": "Em que ano o Departamento Regional do Senac no Piauí foi oficialmente instalado?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9778528809547424,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9778528809547424,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O Departamento Regional do Senac no Piauí foi oficialmente instalado em 17 de novembro de 1954.",
+      "presented_answer": "O Departamento Regional do Senac no Piauí foi oficialmente instalado em 17 de novembro de 1954.",
+      "evidence_sources": [
+        "institucional/sobre-o-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "atendimento/canais-institucionais.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O Departamento Regional do Senac no Piauí foi oficialmente instalado em 17 de novembro de 1954.",
+          "score": 0.9778528809547424,
+          "source": "institucional/sobre-o-senac-piaui.md",
+          "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "institucional/sobre-o-senac-piaui.md:0",
+              "source": "institucional/sobre-o-senac-piaui.md",
+              "start": 479,
+              "end": 574,
+              "text": "O Departamento Regional do Senac no Piauí foi oficialmente instalado em 17 de novembro de 1954.",
+              "source_url": "https://www.pi.senac.br/institucional/sobresenac",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "17",
+              "1954",
+              "departamento",
+              "instalado",
+              "novembro",
+              "oficialmente",
+              "piaui",
+              "regional",
+              "senac"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 759.7588520000045,
+        "retrieval_ms": 3.149305000079039,
+        "adjudication_ms": 0.10324899994884618,
+        "generation_ms": 718.0583119998118,
+        "grounding_ms": 38.33001599991803
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P04",
+      "category": "programa",
+      "query": "Qual é o limite de renda por pessoa para o PSG?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.8427045345306396,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.8427045345306396,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O limite de renda por pessoa para o Programa Senac de Gratuidade (PSG) é de dois salários mínimos federais.",
+      "presented_answer": "O limite de renda por pessoa para o Programa Senac de Gratuidade (PSG) é de dois salários mínimos federais.",
+      "evidence_sources": [
+        "psg/programa-senac-gratuidade.md",
+        "aprendizagem/jovem-aprendiz.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O limite de renda por pessoa para o Programa Senac de Gratuidade (PSG) é de dois salários mínimos federais.",
+          "score": 0.8427045345306396,
+          "source": "psg/programa-senac-gratuidade.md",
+          "chunk_id": "psg/programa-senac-gratuidade.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/programa-senac-gratuidade.md:0",
+              "source": "psg/programa-senac-gratuidade.md",
+              "start": 256,
+              "end": 414,
+              "text": "## Critério de renda A renda familiar mensal per capita do candidato não pode ultrapassar dois salários mínimos federais, conforme a fonte oficial consultada.",
+              "source_url": "https://psg.pi.senac.br/programa/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "dois",
+              "federais",
+              "minimos",
+              "renda",
+              "salarios"
+            ],
+            "lexical_coverage": 0.45454545454545453,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1033.8071419998869,
+        "retrieval_ms": 2.895267999974749,
+        "adjudication_ms": 0.08973900003184099,
+        "generation_ms": 1005.3938420001032,
+        "grounding_ms": 25.318430999959673
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P05",
+      "category": "aprendizagem",
+      "query": "Quem realiza a inscrição do jovem aprendiz no Senac?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.794077455997467,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.794077455997467,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "A empresa que contrata o jovem aprendiz realiza sua inscrição no Senac.",
+      "presented_answer": "A empresa que contrata o jovem aprendiz realiza sua inscrição no Senac.",
+      "evidence_sources": [
+        "aprendizagem/jovem-aprendiz.md",
+        "aprendizagem/jovem-aprendiz.md",
+        "psg/vagas-e-editais.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "aluno/contrato-do-aluno.md",
+        "cursos/informatica-basica-2026.md",
+        "cursos/excel-avancado-2026.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A empresa que contrata o jovem aprendiz realiza sua inscrição no Senac.",
+          "score": 0.794077455997467,
+          "source": "aprendizagem/jovem-aprendiz.md",
+          "chunk_id": "aprendizagem/jovem-aprendiz.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "aprendizagem/jovem-aprendiz.md:1",
+              "source": "aprendizagem/jovem-aprendiz.md",
+              "start": 64,
+              "end": 102,
+              "text": "A empresa cuida da inscrição no Senac.",
+              "source_url": "https://psg.pi.senac.br/aprendizagem/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "empresa",
+              "inscricao",
+              "senac"
+            ],
+            "lexical_coverage": 0.375,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 738.5668160000023,
+        "retrieval_ms": 3.031891999853542,
+        "adjudication_ms": 0.1863919999323116,
+        "generation_ms": 652.1288370001912,
+        "grounding_ms": 83.08367900008307
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P06",
+      "category": "aprendizagem",
+      "query": "Qual a faixa etária informada para jovens no Senac Aprendiz?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9034661054611206,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "age_range_years",
+                "value": "14-24",
+                "unit": "years_range",
+                "start": 60,
+                "end": 72,
+                "literal": "14 a 24 anos",
+                "qualifier": "range",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "aprendizagem/jovem-aprendiz.md",
+              "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
+              "supporting_literal": "14 a 24 anos",
+              "source_start": 233,
+              "source_end": 245,
+              "source_url": "https://psg.pi.senac.br/aprendizagem/",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9034661054611206,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "aprendizagem/jovem-aprendiz.md:0"
+        ],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "A faixa etária informada para jovens no Senac Aprendiz é de 14 a 24 anos.",
+      "presented_answer": "A faixa etária informada para jovens no Senac Aprendiz é de 14 a 24 anos.",
+      "evidence_sources": [
+        "aprendizagem/jovem-aprendiz.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A faixa etária informada para jovens no Senac Aprendiz é de 14 a 24 anos.",
+          "score": 0.9034661054611206,
+          "source": "aprendizagem/jovem-aprendiz.md",
+          "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "aprendizagem/jovem-aprendiz.md:0",
+              "source": "aprendizagem/jovem-aprendiz.md",
+              "start": 175,
+              "end": 246,
+              "text": "## Público A página oficial informa inserção de jovens de 14 a 24 anos.",
+              "source_url": "https://psg.pi.senac.br/aprendizagem/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "14",
+              "24",
+              "anos",
+              "jovens"
+            ],
+            "lexical_coverage": 0.4444444444444444,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1007.4800830000186,
+        "retrieval_ms": 2.9914050001025316,
+        "adjudication_ms": 0.08757499995226681,
+        "generation_ms": 991.5570050000042,
+        "grounding_ms": 12.720430999934251
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P07",
+      "category": "ouvidoria",
+      "query": "Uma denúncia à Ouvidoria do Senac pode ser anônima?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.7374606728553772,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        },
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.7374606728553772,
+        "fact_statuses": [
+          "not_applicable",
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Sim, uma denúncia à Ouvidoria do Senac pode ser anônima. A página menciona que as denúncias podem ser anônimas, e quando há identificação, a instituição informa tratamento sigiloso, sujeito às hipóteses legais aplicáveis.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "atendimento/ouvidoria.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "Sim, uma denúncia à Ouvidoria do Senac pode ser anônima.",
+          "score": 0.7374606728553772,
+          "source": "atendimento/ouvidoria.md",
+          "chunk_id": "atendimento/ouvidoria.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "atendimento/ouvidoria.md:0",
+              "source": "atendimento/ouvidoria.md",
+              "start": 158,
+              "end": 228,
+              "text": "## Denúncia anônima A página informa que denúncias podem ser anônimas.",
+              "source_url": "https://www.pi.senac.br/governanca-corporativa/ouvidoria",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "anonima",
+              "denuncia"
+            ],
+            "lexical_coverage": 0.3333333333333333,
+            "support_verified": false
+          }
+        },
+        {
+          "claim": "A página menciona que as denúncias podem ser anônimas, e quando há identificação, a instituição informa tratamento sigiloso, sujeito às hipóteses legais aplicáveis.",
+          "score": 0.8792945146560669,
+          "source": "atendimento/ouvidoria.md",
+          "chunk_id": "atendimento/ouvidoria.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "atendimento/ouvidoria.md:0",
+              "source": "atendimento/ouvidoria.md",
+              "start": 229,
+              "end": 336,
+              "text": "Quando há identificação, a instituição informa tratamento sigiloso, sujeito às hipóteses legais aplicáveis.",
+              "source_url": "https://www.pi.senac.br/governanca-corporativa/ouvidoria",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "aplicaveis",
+              "ha",
+              "hipoteses",
+              "identificacao",
+              "informa",
+              "instituicao",
+              "legais",
+              "quando",
+              "sigiloso",
+              "sujeito",
+              "tratamento"
+            ],
+            "lexical_coverage": 0.6875,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1789.0121200000522,
+        "retrieval_ms": 2.933409999968717,
+        "adjudication_ms": 0.0856920000842365,
+        "generation_ms": 1759.238613999969,
+        "grounding_ms": 26.6331820000687
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P08",
+      "category": "ouvidoria",
+      "query": "Qual é o prazo padrão para resposta da Ouvidoria?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.7266048789024353,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "deadline_days",
+                "value": "15",
+                "unit": "business_days",
+                "start": 51,
+                "end": 64,
+                "literal": "15 dias úteis",
+                "qualifier": "base",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "atendimento/ouvidoria.md",
+              "chunk_id": "atendimento/ouvidoria.md:0",
+              "supporting_literal": "15 dias úteis",
+              "source_start": 387,
+              "source_end": 400,
+              "source_url": "https://www.pi.senac.br/governanca-corporativa/ouvidoria",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            },
+            {
+              "fact": {
+                "kind": "deadline_days",
+                "value": "15",
+                "unit": "unspecified_days",
+                "start": 87,
+                "end": 95,
+                "literal": "15 dias ",
+                "qualifier": "extension",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "atendimento/ouvidoria.md",
+              "chunk_id": "atendimento/ouvidoria.md:0",
+              "supporting_literal": "15 dias ",
+              "source_start": 423,
+              "source_end": 431,
+              "source_url": "https://www.pi.senac.br/governanca-corporativa/ouvidoria",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.7266048789024353,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "atendimento/ouvidoria.md:0"
+        ],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O prazo padrão para resposta da Ouvidoria é de até 15 dias úteis, prorrogável por mais 15 dias mediante justificativa.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "atendimento/ouvidoria.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O prazo padrão para resposta da Ouvidoria é de até 15 dias úteis, prorrogável por mais 15 dias mediante justificativa.",
+          "score": 0.7266048789024353,
+          "source": "atendimento/ouvidoria.md",
+          "chunk_id": "atendimento/ouvidoria.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "atendimento/ouvidoria.md:0",
+              "source": "atendimento/ouvidoria.md",
+              "start": 337,
+              "end": 454,
+              "text": "## Prazo O prazo publicado para resposta é de até 15 dias úteis, prorrogável por mais 15 dias mediante justificativa.",
+              "source_url": "https://www.pi.senac.br/governanca-corporativa/ouvidoria",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "15",
+              "ate",
+              "dias",
+              "justificativa",
+              "mais",
+              "mediante",
+              "prazo",
+              "prorrogavel",
+              "resposta",
+              "uteis"
+            ],
+            "lexical_coverage": 0.8333333333333334,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1273.389570000063,
+        "retrieval_ms": 2.8913500000271597,
+        "adjudication_ms": 0.08571300008952676,
+        "generation_ms": 1256.7639139999756,
+        "grounding_ms": 13.54887599995891
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P09",
+      "category": "biblioteca",
+      "query": "Qual plataforma de biblioteca virtual é mencionada pelo Senac Piauí?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9911602139472961,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9911602139472961,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a Cachola.",
+      "presented_answer": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a Cachola.",
+      "evidence_sources": [
+        "biblioteca/bibliotecas-e-cachola.md",
+        "biblioteca/bibliotecas-e-cachola.md",
+        "empregabilidade/banco-de-oportunidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A plataforma de biblioteca virtual mencionada pelo Senac Piauí é a Cachola.",
+          "score": 0.9911602139472961,
+          "source": "biblioteca/bibliotecas-e-cachola.md",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
+              "source": "biblioteca/bibliotecas-e-cachola.md",
+              "start": 226,
+              "end": 362,
+              "text": "## Cachola A Cachola é a biblioteca virtual especializada do Senac, com e-books, materiais didáticos, vídeos, artigos e outros recursos.",
+              "source_url": "https://www.pi.senac.br/institucional/biblioteca",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "biblioteca",
+              "cachola",
+              "senac",
+              "virtual"
+            ],
+            "lexical_coverage": 0.5,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 688.559320999957,
+        "retrieval_ms": 3.0254180001065833,
+        "adjudication_ms": 0.09272400006921089,
+        "generation_ms": 651.3321010002073,
+        "grounding_ms": 33.99743199997829
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P10",
+      "category": "biblioteca",
+      "query": "Em quais três cidades há bibliotecas físicas segundo a página consultada?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9685210585594177,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9685210585594177,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "De acordo com a página consultada, as três cidades que possuem bibliotecas físicas são: Teresina, Centro, Parnaíba e Picos.",
+      "presented_answer": "De acordo com a página consultada, as três cidades que possuem bibliotecas físicas são: Teresina, Centro, Parnaíba e Picos.",
+      "evidence_sources": [
+        "biblioteca/bibliotecas-e-cachola.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "De acordo com a página consultada, as três cidades que possuem bibliotecas físicas são: Teresina, Centro, Parnaíba e Picos.",
+          "score": 0.9685210585594177,
+          "source": "biblioteca/bibliotecas-e-cachola.md",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+              "source": "biblioteca/bibliotecas-e-cachola.md",
+              "start": 0,
+              "end": 139,
+              "text": "# Bibliotecas do Senac Piauí A página oficial consultada informa bibliotecas físicas em funcionamento em Teresina Centro, Parnaíba e Picos.",
+              "source_url": "https://www.pi.senac.br/institucional/biblioteca",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "bibliotecas",
+              "centro",
+              "consultada",
+              "fisicas",
+              "pagina",
+              "parnaiba",
+              "picos",
+              "teresina"
+            ],
+            "lexical_coverage": 0.6666666666666666,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1298.737459999984,
+        "retrieval_ms": 3.0717409999851952,
+        "adjudication_ms": 0.09478499987380928,
+        "generation_ms": 1282.66855999982,
+        "grounding_ms": 12.804004000145142
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P11",
+      "category": "curso",
+      "query": "Qual carga horária estava informada para Excel na consulta de outubro de 2026?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9619300365447998,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "duration_hours",
+                "value": "30",
+                "unit": "hours",
+                "start": 83,
+                "end": 91,
+                "literal": "30 horas",
+                "qualifier": "unspecified",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "cursos/excel-2026.md",
+              "chunk_id": "cursos/excel-2026.md:0",
+              "supporting_literal": "30 horas",
+              "source_start": 129,
+              "source_end": 137,
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.9619300365447998,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "cursos/excel-2026.md:0"
+        ],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "A carga horária informada para o curso Excel na consulta de outubro de 2026 era de 30 horas .",
+      "presented_answer": "A carga horária informada para o curso Excel na consulta de outubro de 2026 era de 30 horas .",
+      "evidence_sources": [
+        "cursos/excel-avancado-2026.md",
+        "cursos/excel-2026.md",
+        "cursos/informatica-basica-2026.md",
+        "unidades/rede-senac-piaui.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A carga horária informada para o curso Excel na consulta de outubro de 2026 era de 30 horas .",
+          "score": 0.9619300365447998,
+          "source": "cursos/excel-2026.md",
+          "chunk_id": "cursos/excel-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/excel-2026.md:0",
+              "source": "cursos/excel-2026.md",
+              "start": 0,
+              "end": 167,
+              "text": "# Curso de Excel — Senac Piauí Na consulta à página oficial em 29 de outubro de 2026, as turmas listadas do curso Excel tinham **30 horas**, com modalidade presencial.",
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "entity_id": "curso:excel",
+              "attribute": null
+            },
+            "matched_terms": [
+              "2026",
+              "30",
+              "consulta",
+              "curso",
+              "excel",
+              "horas",
+              "outubro"
+            ],
+            "lexical_coverage": 0.7,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1055.5994730000293,
+        "retrieval_ms": 2.4140499999703025,
+        "adjudication_ms": 0.1019629999063909,
+        "generation_ms": 1039.3924269999388,
+        "grounding_ms": 13.545558000032543
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P12",
+      "category": "curso",
+      "query": "Quantas horas tem o Excel Avançado segundo a página de referência?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.8141714334487915,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "duration_hours",
+                "value": "60",
+                "unit": "hours",
+                "start": 29,
+                "end": 37,
+                "literal": "60 horas",
+                "qualifier": "unspecified",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "cursos/excel-avancado-2026.md",
+              "chunk_id": "cursos/excel-avancado-2026.md:0",
+              "supporting_literal": "60 horas",
+              "source_start": 134,
+              "source_end": 142,
+              "source_url": "https://www.pi.senac.br/tecnologia-da-informacao-ti/excel-avancado?unidade_operativa_id=19",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.8141714334487915,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "cursos/excel-avancado-2026.md:0"
+        ],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O curso Excel Avançado tinha 60 horas conforme a página de referência.",
+      "presented_answer": "O curso Excel Avançado tinha 60 horas conforme a página de referência.",
+      "evidence_sources": [
+        "cursos/excel-avancado-2026.md",
+        "cursos/excel-2026.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O curso Excel Avançado tinha 60 horas conforme a página de referência.",
+          "score": 0.8141714334487915,
+          "source": "cursos/excel-avancado-2026.md",
+          "chunk_id": "cursos/excel-avancado-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/excel-avancado-2026.md:0",
+              "source": "cursos/excel-avancado-2026.md",
+              "start": 0,
+              "end": 169,
+              "text": "# Curso de Excel Avançado — Senac Piauí Na consulta ao portal oficial em 29 de outubro de 2026, o curso Excel Avançado aparecia com **60 horas** e modalidade presencial.",
+              "source_url": "https://www.pi.senac.br/tecnologia-da-informacao-ti/excel-avancado?unidade_operativa_id=19",
+              "entity_id": "curso:excel avancado",
+              "attribute": null
+            },
+            "matched_terms": [
+              "60",
+              "avancado",
+              "curso",
+              "excel",
+              "horas"
+            ],
+            "lexical_coverage": 0.5555555555555556,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 585.3355909998754,
+        "retrieval_ms": 2.289787999870896,
+        "adjudication_ms": 0.0895179998678941,
+        "generation_ms": 569.7366059998785,
+        "grounding_ms": 13.0752569998549
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P13",
+      "category": "curso",
+      "query": "A partir de qual idade é possível acessar o Excel Avançado?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": false,
+      "text_anchor_pass": false,
+      "answerability_reason": "no_relevant_evidence",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação na minha base no momento.",
+      "presented_answer": "Não encontrei essa informação na minha base no momento.",
+      "evidence_sources": [],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.0745490000754216,
+        "retrieval_ms": 2.9225949999727163,
+        "adjudication_ms": 0.0859209999362065,
+        "generation_ms": 0.0018539999473432545,
+        "grounding_ms": 0.018444000033923658
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P14",
+      "category": "curso",
+      "query": "Qual idade mínima foi informada para Informática Básica?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.8141764402389526,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "minimum_age_years",
+                "value": "12",
+                "unit": "years",
+                "start": 67,
+                "end": 74,
+                "literal": "12 anos",
+                "qualifier": "unspecified",
+                "reference_id": null
+              },
+              "status": "value_match",
+              "source": "cursos/informatica-basica-2026.md",
+              "chunk_id": "cursos/informatica-basica-2026.md:0",
+              "supporting_literal": "12 anos",
+              "source_start": 402,
+              "source_end": 409,
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/informatica-basica",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.8141764402389526,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "cursos/informatica-basica-2026.md:0"
+        ],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "A idade mínima informada para o curso de Informática Básica era de 12 anos ou mais .",
+      "presented_answer": "A idade mínima informada para o curso de Informática Básica era de 12 anos ou mais .",
+      "evidence_sources": [
+        "cursos/informatica-basica-2026.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A idade mínima informada para o curso de Informática Básica era de 12 anos ou mais .",
+          "score": 0.8141764402389526,
+          "source": "cursos/informatica-basica-2026.md",
+          "chunk_id": "cursos/informatica-basica-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/informatica-basica-2026.md:0",
+              "source": "cursos/informatica-basica-2026.md",
+              "start": 312,
+              "end": 420,
+              "text": "Como requisitos de acesso, a página mencionava ensino fundamental incompleto e idade de **12 anos ou mais**.",
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/informatica-basica",
+              "entity_id": "curso:informatica basica",
+              "attribute": null
+            },
+            "matched_terms": [
+              "12",
+              "anos",
+              "idade",
+              "mais",
+              "ou"
+            ],
+            "lexical_coverage": 0.5,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 661.8018429999211,
+        "retrieval_ms": 2.8316699999777484,
+        "adjudication_ms": 0.0866850000420527,
+        "generation_ms": 643.2954409999638,
+        "grounding_ms": 15.449237999973775
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P15",
+      "category": "contato",
+      "query": "Qual o telefone geral da Administração Regional do Senac PI?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.517021656036377,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "ambiguous",
+          "checks": [
+            {
+              "fact": {
+                "kind": "phone",
+                "value": "8632289500",
+                "unit": "br_phone",
+                "start": 57,
+                "end": 71,
+                "literal": "(86) 3228-9500",
+                "qualifier": "unspecified",
+                "reference_id": null
+              },
+              "status": "ambiguous",
+              "source": null,
+              "chunk_id": null,
+              "supporting_literal": null,
+              "source_start": null,
+              "source_end": null,
+              "source_url": null,
+              "explanation": "Valores distintos no mesmo escopo: turma, unidade ou data não resolvida"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "clarify",
+        "reason": "fact_ambiguous",
+        "nli_status": "uncertain",
+        "nli_score": 0.517021656036377,
+        "fact_statuses": [
+          "ambiguous"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O telefone geral da Administração Regional do Senac PI é (86) 3228-9500.",
+      "presented_answer": "Encontrei informações de ofertas diferentes. Informe a unidade ou turma para esclarecer.",
+      "evidence_sources": [
+        "atendimento/canais-institucionais.md",
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "atendimento/ouvidoria.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O telefone geral da Administração Regional do Senac PI é (86) 3228-9500.",
+          "score": 0.517021656036377,
+          "source": "unidades/rede-senac-piaui.md",
+          "chunk_id": "unidades/rede-senac-piaui.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "unidades/rede-senac-piaui.md:1",
+              "source": "unidades/rede-senac-piaui.md",
+              "start": 110,
+              "end": 154,
+              "text": "O telefone geral publicado é (86) 3228-9500.",
+              "source_url": "https://www.pi.senac.br/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "3228",
+              "86",
+              "9500",
+              "geral",
+              "telefone"
+            ],
+            "lexical_coverage": 0.5555555555555556,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 673.2744959999764,
+        "retrieval_ms": 2.924580000126298,
+        "adjudication_ms": 0.086316999841074,
+        "generation_ms": 612.6870970001619,
+        "grounding_ms": 57.44724300006965
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P16",
+      "category": "unidades",
+      "query": "Quantas entradas de unidades apareciam na seção de unidades do portal?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.6035906672477722,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.6035906672477722,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "A seção \"Conheça Nossas Unidades\" do portal oficial do Senac Piauí em 29 de outubro de 2026 apresentava 13 entradas .",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A seção \"Conheça Nossas Unidades\" do portal oficial do Senac Piauí em 29 de outubro de 2026 apresentava 13 entradas .",
+          "score": 0.6035906672477722,
+          "source": "unidades/rede-senac-piaui.md",
+          "chunk_id": "unidades/rede-senac-piaui.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "unidades/rede-senac-piaui.md:0",
+              "source": "unidades/rede-senac-piaui.md",
+              "start": 0,
+              "end": 194,
+              "text": "# Unidades do Senac Piauí Na consulta ao portal oficial do Senac Piauí em 29 de outubro de 2026, a seção \"Conheça Nossas Unidades\" apresentava **13 entradas**, distribuídas em **10 municípios**.",
+              "source_url": "https://www.pi.senac.br/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "13",
+              "2026",
+              "29",
+              "apresentava",
+              "conheca",
+              "entradas",
+              "nossas",
+              "oficial",
+              "outubro",
+              "piaui",
+              "portal",
+              "secao",
+              "senac",
+              "unidades"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1093.4504389999802,
+        "retrieval_ms": 3.0363719999968453,
+        "adjudication_ms": 0.09442200007470092,
+        "generation_ms": 1048.959547999857,
+        "grounding_ms": 41.23709000009512
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P17",
+      "category": "psg_historico",
+      "query": "Quantas vagas foram previstas na publicação do edital 006/2026 do PSG?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.47043806314468384,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "vacancies",
+                "value": "437",
+                "unit": "vacancies",
+                "start": 71,
+                "end": 80,
+                "literal": "437 vagas",
+                "qualifier": "published",
+                "reference_id": "006/2026"
+              },
+              "status": "value_match",
+              "source": "psg/vagas-e-editais.md",
+              "chunk_id": "psg/vagas-e-editais.md:0",
+              "supporting_literal": "437 vagas",
+              "source_start": 338,
+              "source_end": 347,
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.47043806314468384,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "psg/vagas-e-editais.md:0"
+        ],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O edital do Programa Senac de Gratuidade nº 006/2026 — PSG apresentava 437 vagas previstas na publicação .",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O edital do Programa Senac de Gratuidade nº 006/2026 — PSG apresentava 437 vagas previstas na publicação .",
+          "score": 0.47043806314468384,
+          "source": "psg/vagas-e-editais.md",
+          "chunk_id": "psg/vagas-e-editais.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/vagas-e-editais.md:0",
+              "source": "psg/vagas-e-editais.md",
+              "start": 176,
+              "end": 412,
+              "text": "## Publicações que apareciam na consulta de 29/10/2026 - **Edital do Programa Senac de Gratuidade nº 006/2026 — PSG**: a listagem apresentava o quantitativo de **437 vagas previsto na publicação**, não um contador de vagas ainda livres.",
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "006",
+              "2026",
+              "437",
+              "apresentava",
+              "edital",
+              "gratuidade",
+              "programa",
+              "psg",
+              "publicacao",
+              "senac",
+              "vagas"
+            ],
+            "lexical_coverage": 0.9166666666666666,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1113.899728999968,
+        "retrieval_ms": 3.0716989999746147,
+        "adjudication_ms": 0.09008000006360817,
+        "generation_ms": 1072.822696000003,
+        "grounding_ms": 37.756343999944875
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P18",
+      "category": "psg_historico",
+      "query": "Qual quantitativo estava previsto no edital 007/2026 do PSG?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.7609272599220276,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "value_match",
+          "checks": [
+            {
+              "fact": {
+                "kind": "vacancies",
+                "value": "25",
+                "unit": "vacancies",
+                "start": 57,
+                "end": 65,
+                "literal": "25 vagas",
+                "qualifier": "published",
+                "reference_id": "007/2026"
+              },
+              "status": "value_match",
+              "source": "psg/vagas-e-editais.md",
+              "chunk_id": "psg/vagas-e-editais.md:0",
+              "supporting_literal": "25 vagas",
+              "source_start": 502,
+              "source_end": 510,
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "explanation": "Valor tipado coincide; não comprova toda a frase"
+            }
+          ],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.7609272599220276,
+        "fact_statuses": [
+          "value_match"
+        ],
+        "supporting_chunk_ids": [
+          "psg/vagas-e-editais.md:0"
+        ],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O quantitativo previsto no edital 007/2026 do PSG era de 25 vagas.",
+      "presented_answer": "O quantitativo previsto no edital 007/2026 do PSG era de 25 vagas.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O quantitativo previsto no edital 007/2026 do PSG era de 25 vagas.",
+          "score": 0.7609272599220276,
+          "source": "psg/vagas-e-editais.md",
+          "chunk_id": "psg/vagas-e-editais.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/vagas-e-editais.md:0",
+              "source": "psg/vagas-e-editais.md",
+              "start": 413,
+              "end": 591,
+              "text": "- **Edital do Programa Senac de Gratuidade nº 007/2026 — PSG**: a listagem apresentava **25 vagas previstas na publicação**, não garantia de vagas abertas no momento da pergunta.",
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "007",
+              "2026",
+              "25",
+              "edital",
+              "psg",
+              "vagas"
+            ],
+            "lexical_coverage": 0.75,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1105.0683849998677,
+        "retrieval_ms": 2.9066330000659946,
+        "adjudication_ms": 0.08831600007397356,
+        "generation_ms": 1074.754134999921,
+        "grounding_ms": 27.22793700013426
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P19",
+      "category": "programa",
+      "query": "Em qual data foi firmado o Programa Senac de Gratuidade?",
+      "expected_abstain": false,
+      "predicted_abstain": false,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": true,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.8262037634849548,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "allow",
+        "reason": "supported",
+        "nli_status": "supported",
+        "nli_score": 0.8262037634849548,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": true,
+        "should_abstain": false,
+        "enforced": true
+      },
+      "answer": "O Programa Senac de Gratuidade foi firmado em 22 de julho de 2008.",
+      "presented_answer": "O Programa Senac de Gratuidade foi firmado em 22 de julho de 2008.",
+      "evidence_sources": [
+        "psg/programa-senac-gratuidade.md",
+        "psg/vagas-e-editais.md",
+        "aprendizagem/jovem-aprendiz.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O Programa Senac de Gratuidade foi firmado em 22 de julho de 2008.",
+          "score": 0.8262037634849548,
+          "source": "psg/programa-senac-gratuidade.md",
+          "chunk_id": "psg/programa-senac-gratuidade.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/programa-senac-gratuidade.md:0",
+              "source": "psg/programa-senac-gratuidade.md",
+              "start": 0,
+              "end": 170,
+              "text": "# Programa Senac de Gratuidade — PSG O Programa Senac de Gratuidade (PSG) foi firmado em 22 de julho de 2008 e ratificado pelo Decreto nº 6.633, de 5 de novembro de 2008.",
+              "source_url": "https://psg.pi.senac.br/programa/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "2008",
+              "22",
+              "firmado",
+              "gratuidade",
+              "julho",
+              "programa",
+              "senac"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 773.6897620000036,
+        "retrieval_ms": 2.9175889999351057,
+        "adjudication_ms": 0.08959399997365836,
+        "generation_ms": 700.9313899998233,
+        "grounding_ms": 69.63691100008873
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "P20",
+      "category": "empregabilidade",
+      "query": "O Banco de Oportunidades é um serviço gratuito?",
+      "expected_abstain": false,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": true,
+      "source_hit": true,
+      "text_anchor_pass": false,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.6343965530395508,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.6343965530395508,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O Banco de Oportunidades é um serviço gratuito.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "empregabilidade/banco-de-oportunidades.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "institucional/sobre-o-senac-piaui.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O Banco de Oportunidades é um serviço gratuito.",
+          "score": 0.6343965530395508,
+          "source": "empregabilidade/banco-de-oportunidades.md",
+          "chunk_id": "empregabilidade/banco-de-oportunidades.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "empregabilidade/banco-de-oportunidades.md:0",
+              "source": "empregabilidade/banco-de-oportunidades.md",
+              "start": 0,
+              "end": 172,
+              "text": "# Banco de Oportunidades Serviço gratuito do Senac Piauí destinado a conectar profissionais qualificados e empresas, com orientação e encaminhamento ao mercado de trabalho.",
+              "source_url": "https://www.pi.senac.br/institucional/bo",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "banco",
+              "gratuito",
+              "oportunidades",
+              "servico"
+            ],
+            "lexical_coverage": 1.0,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 447.0972880001227,
+        "retrieval_ms": 2.8734459999668616,
+        "adjudication_ms": 0.08603100013715448,
+        "generation_ms": 415.1560170000721,
+        "grounding_ms": 28.8756929999181
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N01",
+      "category": "temporal",
+      "query": "Ainda existe vaga disponível hoje para Excel Avançado?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "cursos/excel-2026.md",
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.1394980001095973,
+        "retrieval_ms": 2.973614999973506,
+        "adjudication_ms": 0.08202699996218143,
+        "generation_ms": 0.0025699998786876677,
+        "grounding_ms": 0.01950199998645985
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N02",
+      "category": "temporal",
+      "query": "Posso me matricular agora numa turma de Informática Básica em Picos?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "cursos/informatica-basica-2026.md",
+        "cursos/excel-2026.md",
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/excel-2026.md",
+        "aprendizagem/jovem-aprendiz.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.2754250000834872,
+        "retrieval_ms": 3.1002129999251338,
+        "adjudication_ms": 0.09846700004345621,
+        "generation_ms": 0.0008580000212532468,
+        "grounding_ms": 0.013179999996282277
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N03",
+      "category": "temporal",
+      "query": "Quantas vagas restam hoje no edital PSG 006/2026?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.001662999849941,
+        "retrieval_ms": 2.885213000126896,
+        "adjudication_ms": 0.05883699986952706,
+        "generation_ms": 0.0007520000053773401,
+        "grounding_ms": 0.012327999911576626
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N04",
+      "category": "temporal",
+      "query": "O edital PSG 007/2026 continua com inscrições abertas agora?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.1050380000579025,
+        "retrieval_ms": 2.984015000038198,
+        "adjudication_ms": 0.06386200016095245,
+        "generation_ms": 0.0008080000952759292,
+        "grounding_ms": 0.012479999895731453
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N05",
+      "category": "temporal",
+      "query": "O preço atual do Excel Avançado é exatamente o mesmo divulgado em outubro?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "cursos/excel-avancado-2026.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.188183000020217,
+        "retrieval_ms": 3.045625999902768,
+        "adjudication_ms": 0.08136299993566354,
+        "generation_ms": 0.0006079999366193078,
+        "grounding_ms": 0.012071999890395091
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N06",
+      "category": "unidade",
+      "query": "Qual telefone da unidade do Senac de Parnaíba?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/agenda-e-unidades.md",
+        "atendimento/canais-institucionais.md",
+        "cursos/informatica-basica-2026.md",
+        "atendimento/ouvidoria.md",
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.127119000055245,
+        "retrieval_ms": 2.86998899991886,
+        "adjudication_ms": 0.18973900000673893,
+        "generation_ms": 0.000687000010657357,
+        "grounding_ms": 0.011761999985537841
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N07",
+      "category": "unidade",
+      "query": "Qual WhatsApp da unidade de Picos?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/informatica-basica-2026.md",
+        "cursos/informatica-basica-2026.md",
+        "atendimento/canais-institucionais.md",
+        "atendimento/canais-institucionais.md",
+        "empregabilidade/banco-de-oportunidades.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 2.8979640001125517,
+        "retrieval_ms": 2.7649539999856643,
+        "adjudication_ms": 0.0624619999598508,
+        "generation_ms": 0.0006899999789311551,
+        "grounding_ms": 0.011712000059560523
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N08",
+      "category": "unidade_temporal",
+      "query": "Qual horário de funcionamento da unidade de Santa Filomena hoje?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.1330490000982536,
+        "retrieval_ms": 3.010961999962092,
+        "adjudication_ms": 0.06849600003988598,
+        "generation_ms": 0.0006390000635292381,
+        "grounding_ms": 0.011779000033129705
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N09",
+      "category": "unidade",
+      "query": "Qual o endereço da unidade de Floriano?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/informatica-basica-2026.md",
+        "atendimento/canais-institucionais.md",
+        "atendimento/canais-institucionais.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 2.9330260001643182,
+        "retrieval_ms": 2.801324000074601,
+        "adjudication_ms": 0.06566299998667091,
+        "generation_ms": 0.0006209997991390992,
+        "grounding_ms": 0.01203600004373584
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N10",
+      "category": "unidade",
+      "query": "Em que rua fica a unidade de Piripiri?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "entity_mismatch",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "presented_answer": "Não encontrei essa informação para a unidade ou serviço solicitado.",
+      "evidence_sources": [
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/informatica-basica-2026.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 2.9180779999933293,
+        "retrieval_ms": 2.7932680000049004,
+        "adjudication_ms": 0.06330199994408758,
+        "generation_ms": 0.0006800000846851617,
+        "grounding_ms": 0.012348000154815963
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N11",
+      "category": "dado_ausente",
+      "query": "Qual a senha da rede Wi-Fi do Senac Piauí?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.3321729898452759,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.3321729898452759,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "A senha da rede Wi-Fi do Senac Piauí é composta pelos quatro primeiros dígitos do CPF do aluno.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "biblioteca/bibliotecas-e-cachola.md",
+        "cursos/agenda-e-unidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A senha da rede Wi-Fi do Senac Piauí é composta pelos quatro primeiros dígitos do CPF do aluno.",
+          "score": 0.3321729898452759,
+          "source": "biblioteca/bibliotecas-e-cachola.md",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:1",
+              "source": "biblioteca/bibliotecas-e-cachola.md",
+              "start": 98,
+              "end": 225,
+              "text": "A orientação publicada informa login com CPF somente em números e senha inicial composta pelos quatro primeiros dígitos do CPF.",
+              "source_url": "https://www.pi.senac.br/institucional/biblioteca",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "composta",
+              "cpf",
+              "digitos",
+              "pelos",
+              "primeiros",
+              "quatro",
+              "senha"
+            ],
+            "lexical_coverage": 0.5384615384615384,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 889.3711279999934,
+        "retrieval_ms": 2.91167399996084,
+        "adjudication_ms": 0.07446999984495051,
+        "generation_ms": 864.0957360000812,
+        "grounding_ms": 22.18659399977696
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N12",
+      "category": "dado_ausente",
+      "query": "Qual o telefone privado do diretor do Senac PI?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.18836449086666107,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "requested_attribute_missing",
+        "nli_status": "uncertain",
+        "nli_score": 0.18836449086666107,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "INSUFFICIENT CONTEXT O telefone privado do diretor do Senac PI não está disponível no portal oficial do Senac Piauí.",
+      "presented_answer": "Encontrei informações relacionadas, mas não o dado específico solicitado.",
+      "evidence_sources": [
+        "unidades/rede-senac-piaui.md",
+        "atendimento/ouvidoria.md",
+        "atendimento/canais-institucionais.md",
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "unidades/rede-senac-piaui.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "INSUFFICIENT CONTEXT O telefone privado do diretor do Senac PI não está disponível no portal oficial do Senac Piauí.",
+          "score": 0.18836449086666107,
+          "source": "unidades/rede-senac-piaui.md",
+          "chunk_id": "unidades/rede-senac-piaui.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "unidades/rede-senac-piaui.md:1",
+              "source": "unidades/rede-senac-piaui.md",
+              "start": 266,
+              "end": 468,
+              "text": "## Como responder com segurança A listagem comprova que as entradas aparecem no portal, mas não confirma, isoladamente, endereço, telefone, funcionamento presencial ou horário de atendimento individual.",
+              "source_url": "https://www.pi.senac.br/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "nao",
+              "portal",
+              "telefone"
+            ],
+            "lexical_coverage": 0.25,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1144.5752680001533,
+        "retrieval_ms": 2.9467509998539754,
+        "adjudication_ms": 0.08315199988828681,
+        "generation_ms": 1072.290293000151,
+        "grounding_ms": 69.11027899991495
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N13",
+      "category": "dado_ausente",
+      "query": "Qual é o valor de inscrição cobrado no PSG 007/2026?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": false,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "generation_abstained",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "psg/como-se-inscrever.md",
+        "psg/vagas-e-editais.md",
+        "cursos/excel-avancado-2026.md",
+        "cursos/excel-2026.md",
+        "cursos/informatica-basica-2026.md",
+        "aprendizagem/jovem-aprendiz.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 348.8674870000068,
+        "retrieval_ms": 3.0386589999125135,
+        "adjudication_ms": 0.08573200011596782,
+        "generation_ms": 345.5977339999663,
+        "grounding_ms": 0.0243489998865698
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N14",
+      "category": "turma_especifica",
+      "query": "Qual é o horário exato da próxima turma de Excel em Parnaíba?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.5490387678146362,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.5490387678146362,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "INSUFFICIENT CONTEXT O horário exato da próxima turma de Excel em Parnaíba não foi especificado na página consultada em 29 de outubro de 2026.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "cursos/excel-2026.md",
+        "cursos/agenda-e-unidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "INSUFFICIENT CONTEXT O horário exato da próxima turma de Excel em Parnaíba não foi especificado na página consultada em 29 de outubro de 2026.",
+          "score": 0.5490387678146362,
+          "source": "cursos/excel-2026.md",
+          "chunk_id": "cursos/excel-2026.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "cursos/excel-2026.md:0",
+              "source": "cursos/excel-2026.md",
+              "start": 0,
+              "end": 167,
+              "text": "# Curso de Excel — Senac Piauí Na consulta à página oficial em 29 de outubro de 2026, as turmas listadas do curso Excel tinham **30 horas**, com modalidade presencial.",
+              "source_url": "https://pi.senac.br/tecnologia-da-informacao-ti/excel",
+              "entity_id": "curso:excel",
+              "attribute": null
+            },
+            "matched_terms": [
+              "2026",
+              "29",
+              "excel",
+              "outubro",
+              "pagina"
+            ],
+            "lexical_coverage": 0.3333333333333333,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1427.4893070000871,
+        "retrieval_ms": 3.0227489999106183,
+        "adjudication_ms": 0.09339999996882398,
+        "generation_ms": 1409.5420799999374,
+        "grounding_ms": 14.699317000122392
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N15",
+      "category": "dado_ausente",
+      "query": "Qual foi o número de inscritos no edital PSG 006/2026?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.02405642159283161,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_unsupported",
+        "nli_status": "unsupported",
+        "nli_score": 0.02405642159283161,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O número de inscritos no edital PSG 006/2026 não é especificado na listagem fornecida.",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O número de inscritos no edital PSG 006/2026 não é especificado na listagem fornecida.",
+          "score": 0.02405642159283161,
+          "source": "psg/vagas-e-editais.md",
+          "chunk_id": "psg/vagas-e-editais.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/vagas-e-editais.md:0",
+              "source": "psg/vagas-e-editais.md",
+              "start": 176,
+              "end": 412,
+              "text": "## Publicações que apareciam na consulta de 29/10/2026 - **Edital do Programa Senac de Gratuidade nº 006/2026 — PSG**: a listagem apresentava o quantitativo de **437 vagas previsto na publicação**, não um contador de vagas ainda livres.",
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "006",
+              "2026",
+              "edital",
+              "listagem",
+              "nao",
+              "psg"
+            ],
+            "lexical_coverage": 0.6,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 823.7197860000833,
+        "retrieval_ms": 2.990502999864475,
+        "adjudication_ms": 0.09118200000557408,
+        "generation_ms": 785.2244810001139,
+        "grounding_ms": 35.30089900004896
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N16",
+      "category": "dado_ausente",
+      "query": "Qual o número de participantes do Senac Aprendiz em 2026?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "uncertain",
+      "grounding_score": 0.6171203255653381,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "nli_uncertain",
+        "nli_status": "uncertain",
+        "nli_score": 0.6171203255653381,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "O número de vagas previstas no Edital Senac Aprendiz nº 05/2026 — Vigilância é 40 .",
+      "presented_answer": "Não encontrei evidências suficientes na base de conhecimento para responder com segurança.",
+      "evidence_sources": [
+        "psg/vagas-e-editais.md",
+        "psg/vagas-e-editais.md",
+        "aprendizagem/jovem-aprendiz.md",
+        "aprendizagem/jovem-aprendiz.md",
+        "psg/programa-senac-gratuidade.md",
+        "institucional/sobre-o-senac-piaui.md",
+        "unidades/rede-senac-piaui.md",
+        "institucional/sobre-o-senac-piaui.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "O número de vagas previstas no Edital Senac Aprendiz nº 05/2026 — Vigilância é 40 .",
+          "score": 0.6171203255653381,
+          "source": "psg/vagas-e-editais.md",
+          "chunk_id": "psg/vagas-e-editais.md:1",
+          "span_selection": {
+            "span": {
+              "chunk_id": "psg/vagas-e-editais.md:1",
+              "source": "psg/vagas-e-editais.md",
+              "start": 12,
+              "end": 125,
+              "text": "- **Edital Senac Aprendiz nº 05/2026 — Vigilância**: a listagem apresentava **40 vagas previstas na publicação**.",
+              "source_url": "https://psg.pi.senac.br/vagas/",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "05",
+              "2026",
+              "40",
+              "aprendiz",
+              "edital",
+              "previstas",
+              "senac",
+              "vagas",
+              "vigilancia"
+            ],
+            "lexical_coverage": 0.9,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1015.4915200000687,
+        "retrieval_ms": 2.9901769999014505,
+        "adjudication_ms": 0.09502000011707423,
+        "generation_ms": 917.8889180000169,
+        "grounding_ms": 94.39267100015059
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N17",
+      "category": "dado_ausente",
+      "query": "Qual a lotação máxima da biblioteca do Senac de Picos?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": null,
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "supported",
+      "grounding_score": 0.9806749224662781,
+      "generation_skipped": false,
+      "fact_validations": [
+        {
+          "status": "not_applicable",
+          "checks": [],
+          "full_claim_verified": false,
+          "enforced": false
+        }
+      ],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "requested_attribute_missing",
+        "nli_status": "supported",
+        "nli_score": 0.9806749224662781,
+        "fact_statuses": [
+          "not_applicable"
+        ],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "A página oficial consultada informa que o acesso à biblioteca física em Picos é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
+      "presented_answer": "Encontrei informações relacionadas, mas não o dado específico solicitado.",
+      "evidence_sources": [
+        "biblioteca/bibliotecas-e-cachola.md",
+        "biblioteca/bibliotecas-e-cachola.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/agenda-e-unidades.md",
+        "cursos/agenda-e-unidades.md",
+        "empregabilidade/banco-de-oportunidades.md"
+      ],
+      "claim_assessments": [
+        {
+          "claim": "A página oficial consultada informa que o acesso à biblioteca física em Picos é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
+          "score": 0.9806749224662781,
+          "source": "biblioteca/bibliotecas-e-cachola.md",
+          "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+          "span_selection": {
+            "span": {
+              "chunk_id": "biblioteca/bibliotecas-e-cachola.md:0",
+              "source": "biblioteca/bibliotecas-e-cachola.md",
+              "start": 140,
+              "end": 214,
+              "text": "O acesso é destinado a alunos, instrutores e colaboradores do Senac Piauí.",
+              "source_url": "https://www.pi.senac.br/institucional/biblioteca",
+              "entity_id": null,
+              "attribute": null
+            },
+            "matched_terms": [
+              "acesso",
+              "alunos",
+              "colaboradores",
+              "destinado",
+              "instrutores",
+              "piaui",
+              "senac"
+            ],
+            "lexical_coverage": 0.5,
+            "support_verified": false
+          }
+        }
+      ],
+      "latency": {
+        "total_ms": 1227.2950799999762,
+        "retrieval_ms": 2.986605999922176,
+        "adjudication_ms": 0.09605800005374476,
+        "generation_ms": 1146.6182060000847,
+        "grounding_ms": 77.44580500002485
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N18",
+      "category": "dado_ausente",
+      "query": "Qual dia preciso ir à unidade para retirar meu certificado de Excel?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "no_relevant_evidence",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não encontrei essa informação na minha base no momento.",
+      "presented_answer": "Não encontrei essa informação na minha base no momento.",
+      "evidence_sources": [],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.2105600000704726,
+        "retrieval_ms": 3.056742000126178,
+        "adjudication_ms": 0.09019599997373007,
+        "generation_ms": 0.0009410000529896934,
+        "grounding_ms": 0.01663299985921185
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N19",
+      "category": "oferta_atual",
+      "query": "Existe uma turma de 80 horas de Informática Básica em Picos ofertada hoje?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "cursos/informatica-basica-2026.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.207437000128266,
+        "retrieval_ms": 3.0539419999513484,
+        "adjudication_ms": 0.08987100000013015,
+        "generation_ms": 0.0009119999049289618,
+        "grounding_ms": 0.012792000006811577
+      },
+      "requires_human_review": true
+    },
+    {
+      "id": "N20",
+      "category": "preco_atual",
+      "query": "Quanto custa agora a matrícula de Excel em Teresina?",
+      "expected_abstain": true,
+      "predicted_abstain": true,
+      "false_allow": false,
+      "false_block": false,
+      "source_hit": true,
+      "text_anchor_pass": null,
+      "answerability_reason": "temporal_evidence_unavailable",
+      "precheck_verified_specific_answer": false,
+      "grounding_status": "unsupported",
+      "grounding_score": 0.0,
+      "generation_skipped": true,
+      "fact_validations": [],
+      "grounding_v3": {
+        "disposition": "abstain",
+        "reason": "precheck_blocked",
+        "nli_status": "unsupported",
+        "nli_score": 0.0,
+        "fact_statuses": [],
+        "supporting_chunk_ids": [],
+        "allows_response": false,
+        "should_abstain": true,
+        "enforced": true
+      },
+      "answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "presented_answer": "Não tenho essa informação atualizada na minha base. Consulte um canal oficial.",
+      "evidence_sources": [
+        "cursos/excel-2026.md",
+        "cursos/excel-avancado-2026.md",
+        "cursos/agenda-e-unidades.md",
+        "unidades/rede-senac-piaui.md",
+        "cursos/informatica-basica-2026.md"
+      ],
+      "claim_assessments": [],
+      "latency": {
+        "total_ms": 3.1971389998943778,
+        "retrieval_ms": 3.0365810000603233,
+        "adjudication_ms": 0.07851600003050407,
+        "generation_ms": 0.000841999963085982,
+        "grounding_ms": 0.01334600005975517
+      },
+      "requires_human_review": true
+    }
+  ],
+  "errors": []
+}

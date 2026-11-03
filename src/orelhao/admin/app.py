@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import html
 import json
 import os
+import subprocess
 import threading
 from pathlib import Path
 from time import perf_counter
@@ -10,9 +12,11 @@ from typing import Annotated
 from urllib.parse import quote
 
 from orelhao.config import AppConfig, load_config
+from orelhao.hardware.live_monitor import snapshot as monitor_snapshot
 from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.interfaces.voice.resample import resample_pcm16, trim_silence_pcm16
 from orelhao.runtime_paths import resolve_project_path
+from orelhao.services.knowledge.evidence_selector import SpanSelection
 from orelhao.services.knowledge.index import build_index
 from orelhao.services.knowledge.loader import load_documents
 from orelhao.services.knowledge.observation import (
@@ -23,15 +27,29 @@ from orelhao.services.knowledge.observation import (
 from orelhao.services.knowledge.paths import KnowledgePaths, default_knowledge_paths
 from orelhao.services.llm.service import LLMService, LocalOpenAICompatibleLLMService
 from orelhao.services.stt.service import FasterWhisperSTTService, STTService
-from orelhao.services.tts.service import PiperTTSService, TTSService
+from orelhao.services.tts.service import TTSService
+from orelhao.services.tts.voice_catalog import (
+    WorkbenchPiperVoices,
+    validate_voice_id,
+    voice_options,
+)
 
 try:
-    from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-    from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+    from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+    from fastapi.responses import (
+        HTMLResponse,
+        JSONResponse,
+        RedirectResponse,
+        Response,
+        StreamingResponse,
+    )
+    from starlette.concurrency import run_in_threadpool
 except ImportError:  # pacote base continua utilizável sem o extra [admin]
-    FastAPI = File = Form = HTTPException = UploadFile = None
-    HTMLResponse = JSONResponse = RedirectResponse = Response = None
+    FastAPI = File = Form = HTTPException = Request = UploadFile = None
+    HTMLResponse = JSONResponse = RedirectResponse = Response = StreamingResponse = None
+    run_in_threadpool = None
 
+from .live_view import MONITOR_BODY
 from .source_manager import (
     MAX_SOURCE_BYTES,
     atomic_write_source,
@@ -41,6 +59,8 @@ from .source_manager import (
     normalize_uploaded_text,
     read_source,
 )
+from .system_metrics import SystemMetricsCollector
+from .system_view import SYSTEM_BODY
 
 
 def _require_web() -> None:
@@ -48,6 +68,19 @@ def _require_web() -> None:
         raise RuntimeError(
             "Interface web não instalada. Execute: pip install -e '.[admin]'"
         )
+
+
+def _render_evidence_span(selection: SpanSelection | None) -> str:
+    """Exibe um candidato textual literal, nunca como prova de suporte."""
+    if selection is None:
+        return "<span class='muted'>Sem correspondência lexical</span>"
+    span = selection.span
+    label = f"[{span.start}:{span.end}]"
+    return (
+        f"<small class='muted'>caracteres {html.escape(label)}; "
+        f"cobertura lexical {selection.lexical_coverage:.0%}</small>"
+        f"<blockquote>{html.escape(span.text)}</blockquote>"
+    )
 
 
 def _layout(title: str, body: str) -> str:
@@ -78,7 +111,7 @@ th, td {{ text-align:left; padding:.6rem; border-bottom:1px solid #e5e7eb; }}
 </style>
 </head>
 <body>
-<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a></nav></header>
+<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a><a href="/system">Máquina</a></nav></header>
 {body}
 </body>
 </html>"""
@@ -136,15 +169,17 @@ def create_admin_app(
     stt: STTService | None = None,
     tts: TTSService | None = None,
     llm: LLMService | None = None,
+    tts_voices: dict[str, TTSService] | None = None,
 ):
     _require_web()
     resolved = paths or default_knowledge_paths()
     app = FastAPI(title="Orelhão IA Knowledge Admin", docs_url=None, redoc_url=None)
     active_workbench = workbench
     active_stt = stt
-    active_tts = tts
     active_llm = llm
+    voice_catalog: WorkbenchPiperVoices | None = None
     stt_preparation_lock = threading.Lock()
+    system_collector = SystemMetricsCollector()
     app.state.stt_preparation = {"status": "idle", "elapsed_ms": None, "error": None}
 
     def app_config() -> AppConfig:
@@ -172,11 +207,16 @@ def create_admin_app(
             active_stt = FasterWhisperSTTService(app_config().stt)
         return active_stt
 
-    def get_tts() -> TTSService:
-        nonlocal active_tts
-        if active_tts is None:
-            active_tts = PiperTTSService(app_config().tts)
-        return active_tts
+    def get_tts(voice: str = "cadu") -> TTSService:
+        nonlocal voice_catalog
+        validate_voice_id(voice)
+        if voice_catalog is None:
+            voice_catalog = WorkbenchPiperVoices(
+                app_config().tts,
+                injected={"cadu": tts, **(tts_voices or {})} if tts is not None
+                else tts_voices,
+            )
+        return voice_catalog.get(voice)
 
     def prepare_stt() -> None:
         with stt_preparation_lock:
@@ -209,6 +249,51 @@ def create_admin_app(
             }
 
         threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
+
+    @app.get("/system", response_class=HTMLResponse)
+    async def system_home():
+        return HTMLResponse(
+            _layout("Saúde do Servidor", SYSTEM_BODY),
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
+
+    @app.get("/system/state", response_class=JSONResponse)
+    async def system_state():
+        # systemctl e /proc são leitura local; não bloquear o event loop ASGI.
+        data = await run_in_threadpool(system_collector.snapshot)
+        return JSONResponse(
+            data, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
+
+    @app.get("/monitor", response_class=HTMLResponse)
+    async def monitor_home():
+        return HTMLResponse(_layout("Monitor de Atendimento", MONITOR_BODY),
+                            headers={"Cache-Control": "no-store"})
+
+    @app.get("/monitor/state", response_class=JSONResponse)
+    async def monitor_state():
+        return JSONResponse(monitor_snapshot(), headers={"Cache-Control": "no-store"})
+
+    @app.get("/monitor/events")
+    async def monitor_events(request: Request):
+        async def stream():
+            last_payload = None
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + 15.0
+            # Encerrar fluxos periodicamente evita bloquear reinícios do Uvicorn.
+            while loop.time() < deadline and not await request.is_disconnected():
+                payload = json.dumps(monitor_snapshot(), ensure_ascii=False,
+                                     separators=(",", ":"))
+                if payload != last_payload:
+                    yield f"data: {payload}\n\n"
+                    last_payload = payload
+                await asyncio.sleep(0.5)
+            yield "retry: 500\n\n"
+
+        return StreamingResponse(stream(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-store",
+                                          "X-Accel-Buffering": "no",
+                                          "X-Content-Type-Options": "nosniff"})
 
     @app.get("/", response_class=HTMLResponse)
     async def home():
@@ -383,12 +468,26 @@ def create_admin_app(
         prepare_stt()
         body = """
 <section class="card">
-<h2>Bancada de observação</h2>
-<p>Executa retrieval, LLM local e NLI. Nesta fase, o grounding <strong>não bloqueia</strong> a resposta apresentada.</p>
+<h2>Bancada de testes: RAG, LLM e grounding</h2>
+<p>Compare a resposta gerada e a decisão factual. O modo seguro bloqueia
+a resposta quando qualquer afirmação não for suportada.</p>
 <p id="llm-status" class="muted">Verificando LLM local...</p>
+<p id="tts-status" class="muted">Verificando voz local...</p>
 <form method="post" action="/workbench/run">
 <label>Pergunta</label>
 <textarea id="question" name="question" style="min-height:110px" required></textarea>
+<label for="voice">Voz para ouvir a resposta</label>
+<select name="voice" id="voice">
+<option value="cadu">Piper Cadu (original)</option>
+<option value="faber">Piper Faber (experimental)</option>
+</select>
+<p class="muted">Alterne a voz sem reiniciar. O modelo selecionado não altera a resposta nem o Grounding V3.</p>
+<button type="button" id="preview-voice">Ouvir apresentação do Lumi</button>
+<label>Política da bancada</label>
+<select name="mode">
+<option value="observe">Observação: exibir a saída mesmo se não for suportada</option>
+<option value="enforce">Seguro: bloquear respostas sem suporte</option>
+</select>
 <button type="submit" id="run" disabled>Executar teste</button>
 <button type="button" id="record" disabled>Preparando STT...</button>
 </form>
@@ -399,7 +498,42 @@ const recordButton = document.getElementById('record');
 const statusBox = document.getElementById('voice-status');
 const runButton = document.getElementById('run');
 const llmStatusBox = document.getElementById('llm-status');
+const ttsStatusBox = document.getElementById('tts-status');
+const voiceSelector = document.getElementById('voice');
+const previewVoiceButton = document.getElementById('preview-voice');
+let previewAudio = null;
+voiceSelector.addEventListener('change', updateTtsStatus);
+previewVoiceButton.addEventListener('click', async () => {
+  previewVoiceButton.disabled = true;
+  try {
+    const url = '/workbench/voice-preview?voice=' + encodeURIComponent(voiceSelector.value);
+    const response = await fetch(url);
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.detail || 'Falha HTTP ' + response.status);
+    }
+    if (previewAudio) previewAudio.pause();
+    previewAudio = new Audio(URL.createObjectURL(await response.blob()));
+    previewAudio.onended = () => URL.revokeObjectURL(previewAudio.src);
+    await previewAudio.play();
+    ttsStatusBox.textContent = 'Reproduzindo apresentação com ' + voiceSelector.selectedOptions[0].text;
+  } catch (error) {
+    ttsStatusBox.textContent = 'Não foi possível ouvir a voz: ' + error.message;
+  } finally { previewVoiceButton.disabled = false; }
+});
 let audioContext, processor, source, stream, samples = [], stopTimer;
+async function updateTtsStatus() {
+  try {
+    const response = await fetch('/workbench/tts-status?voice=' + encodeURIComponent(voiceSelector.value));
+    const payload = await response.json();
+    ttsStatusBox.textContent = payload.available
+      ? 'Voz pt-BR pronta: ' + payload.detail
+      : 'Voz indisponível: ' + payload.detail;
+  } catch (error) {
+    ttsStatusBox.textContent = 'Não foi possível verificar a voz: ' + error.message;
+  }
+}
+updateTtsStatus();
 async function updateLlmStatus() {
   const response = await fetch('/workbench/llm-status');
   const payload = await response.json();
@@ -522,31 +656,174 @@ function encodeWav(input, sampleRate) {
         )
 
     @app.post("/workbench/run", response_class=HTMLResponse)
-    async def run_workbench(question: str = Form(...)):
+    async def run_workbench(
+        question: str = Form(...), mode: str = Form("observe"),
+        voice: str = Form("cadu"),
+    ):
         try:
-            observation = get_workbench().observe(question)
+            validate_voice_id(voice)
+            observation = get_workbench().observe(question, mode=mode)
         except (RuntimeError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         decision = observation.grounding
-        status_class = "ok" if decision.allows_response else "warn"
+        v3 = observation.grounding_v3
+        status_class = (
+            "ok" if (v3.allows_response if v3 else decision.allows_response)
+            else "warn"
+        )
+        nli_info = (
+            "NLI não executado (fonte: relógio local)"
+            if observation.answer_origin == "local_clock"
+            else (
+                f"NLI anterior: {html.escape(v3.nli_status.value)} "
+                f"({v3.nli_score:.4f})"
+                if v3 else "Sem NLI"
+            )
+        )
+        v3_html = (
+            "<p><strong>Grounding V3 (decisão final):</strong> "
+            f"<span class='pill'>{html.escape(v3.disposition.value.upper())}</span> "
+            f"Motivo: {html.escape(v3.reason.value)}; "
+            f"{nli_info}; "
+            f"fatos verificados: {len(v3.supporting_chunk_ids)} chunks.</p>"
+            if v3 else "<p>Decisão V3 indisponível.</p>"
+        )
+        precheck = observation.answerability
+        if observation.answer_origin == "local_clock":
+            clock = observation.local_clock or {}
+            precheck_html = (
+                "<p><strong>Resposta operacional:</strong> data/hora do relógio "
+                "local. RAG, LLM, NLI e pré-gate não foram executados. "
+                f"Fuso: {html.escape(clock.get('timezone', '—'))}; "
+                f"instante: {html.escape(clock.get('timestamp', '—'))}.</p>"
+            )
+        elif precheck is None:
+            precheck_html = "<p>Gate de answerability não habilitado nesta bancada.</p>"
+        else:
+            pre_status = "SEM IMPEDIMENTO DETECTADO" if precheck.decision.answerable else "ABSTENÇÃO"
+            pre_reason = precheck.decision.reason.value if precheck.decision.reason else "—"
+            precheck_html = (
+                f"<p><strong>Answerability pré-geração:</strong> "
+                f"{html.escape(pre_status)} "
+                f"<span class='pill'>{html.escape(pre_reason)}</span></p>"
+                f"<p>Fontes admitidas: {len(precheck.admissible_chunk_ids)}"
+                f" · conflitos: {len(precheck.conflicting_chunk_ids)}"
+                f" · verificação específica: {str(precheck.verified_specific_answer).lower()}"
+                f" · geração ignorada: {str(observation.generation_skipped).lower()}"
+                f" · entidade incorreta na resposta: "
+                f"{str(observation.answer_entity_mismatch).lower()}</p>"
+            )
         evidence = "".join(
             f"<article class='card'><strong>{html.escape(item.source)}</strong> "
             f"<span class='pill'>retrieval {item.score:.4f}</span>"
             f"<pre class='evidence'>{html.escape(item.text)}</pre></article>"
             for item in observation.evidence
         ) or "<p class='muted'>Nenhum chunk recuperado.</p>"
+        claim_rows = "".join(
+            f"<tr><td>{html.escape(item.claim)}</td>"
+            f"<td>{html.escape(item.decision.status.value.upper())}</td>"
+            f"<td>{item.decision.score:.4f}</td>"
+            f"<td>{html.escape(item.source or '—')}</td>"
+            f"<td>{html.escape(item.chunk_id or '—')}</td>"
+            f"<td>{_render_evidence_span(item.span_selection)}</td></tr>"
+            for item in observation.claims
+        )
+        fact_rows = "".join(
+            f"<tr><td>{html.escape(item.fact.literal)}</td>"
+            f"<td>{html.escape(item.fact.kind.value)}</td>"
+            f"<td>{html.escape(item.status.value)}</td>"
+            f"<td>{html.escape(item.source or '—')} "
+            f"<small>{'[' + str(item.source_start) + ':' + str(item.source_end) + ']' if item.source_start is not None else ''}</small></td>"
+            f"<td>{html.escape(item.explanation)}</td></tr>"
+            for assessment in observation.fact_validations
+            for item in assessment.checks
+        )
+        policy_note = (
+            "Modo seguro: saída bloqueada quando grounding não permite resposta."
+            if observation.mode == "enforce"
+            else "Modo observação: saída mostrada para diagnóstico, mesmo se não suportada."
+        )
+        voice_select = "".join(
+            f'<option value="{opt.id}"'
+            f'{" selected" if opt.id == voice else ""}>{html.escape(opt.label)}</option>'
+            for opt in voice_options()
+        )
+        speech_controls = """
+<label for="result-voice">Voz da resposta (pode alterar sem repetir a pergunta)</label>
+<select id="result-voice">__VOICE_OPTIONS__</select>
+<button type="button" id="speak-answer">Ouvir resposta</button>
+<audio id="spoken-answer" controls preload="none" hidden></audio>
+<p id="spoken-status" class="muted" role="status">Clique em Ouvir resposta para sintetizar a voz em pt-BR.</p>
+<script>
+(() => {
+  const button = document.getElementById('speak-answer');
+  const player = document.getElementById('spoken-answer');
+  const status = document.getElementById('spoken-status');
+  const voice = document.getElementById('result-voice');
+  let currentUrl = null;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    status.textContent = 'Gerando áudio com ' + voice.selectedOptions[0].text + '...';
+    try {
+      const response = await fetch('/workbench/speech/__OBSERVATION_ID__?voice=' + encodeURIComponent(voice.value));
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || 'Falha HTTP ' + response.status);
+      }
+      if (currentUrl) URL.revokeObjectURL(currentUrl);
+      currentUrl = URL.createObjectURL(await response.blob());
+      player.src = currentUrl;
+      player.hidden = false;
+      try {
+        await player.play();
+        status.textContent = 'Reproduzindo resposta em português brasileiro.';
+      } catch (_) {
+        status.textContent = 'Áudio pronto. Clique no botão de reprodução do player.';
+      }
+    } catch (error) {
+      status.textContent = 'Não foi possível gerar áudio: ' + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+  });
+})();
+</script>
+""".replace("__OBSERVATION_ID__", observation.observation_id).replace(
+            "__VOICE_OPTIONS__", voice_select
+        )
         body = f"""
 <section class="card">
 <h2>Resultado</h2>
 <p><strong>Pergunta:</strong> {html.escape(observation.question)}</p>
-<p><strong>Grounding:</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
-<span class="pill">NLI {decision.score:.6f}</span></p>
+{precheck_html}
+{v3_html}
+<p><strong>Grounding (NLI legado):</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
+{"<span class='pill'>NLI não executado</span>" if observation.answer_origin == "local_clock" else f"<span class='pill'>NLI {decision.score:.6f}</span>"}</p>
 <p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
-<p class="warn"><strong>Modo observação:</strong> a resposta abaixo foi apresentada mesmo quando a política recomenda abstenção.</p>
+<p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
 <h3>Resposta apresentada</h3>
 <p>{html.escape(observation.presented_answer)}</p>
-<audio controls src="/workbench/speech/{observation.observation_id}?text={quote(observation.presented_answer)}"></audio>
-<p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
+{speech_controls}
+<p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · adjudicação={observation.latency.adjudication_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
+</section>
+<section class="card">
+<h2>Verificação por afirmação</h2>
+<p class="muted">Trechos selecionados por sobreposição lexical; não são comprovação
+semântica nem alteram a decisão do NLI.</p>
+<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th><th>Trecho candidato</th></tr></thead>
+<tbody>{claim_rows or '<tr><td colspan="6">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
+</section>
+<section class="card">
+<h2>Fact Validator V3 — diagnóstico</h2>
+<p class="muted">Compara atributos explícitos e escopos de fontes primárias.
+O resultado V3 pode vetar uma resposta no modo enforce, mas valores coincidentes
+não comprovam a afirmação inteira nem superam bloqueios do NLI.</p>
+<table><thead><tr><th>Valor mencionado</th><th>Atributo</th><th>Resultado</th>
+<th>Fonte</th><th>Justificativa</th></tr></thead>
+<tbody>{fact_rows or '<tr><td colspan="5">Nenhum atributo tipado identificado.</td></tr>'}</tbody></table>
 </section>
 <section class="card">
 <h2>Avaliação humana</h2>
@@ -622,13 +899,60 @@ function encodeWav(input, sampleRate) {
             }
         )
 
-    @app.get("/workbench/speech/{observation_id}", response_class=Response)
-    async def synthesize_workbench(observation_id: str, text: str):
-        del observation_id
+    @app.get("/workbench/tts-status", response_class=JSONResponse)
+    async def tts_status(voice: str = "cadu"):
         try:
-            audio = get_tts().synthesize(text)
+            service = get_tts(voice)
+            check = getattr(service, "validate", None)
+            if callable(check):
+                check()
+            return JSONResponse({
+                "available": True, "voice": voice,
+                "detail": f"Piper {voice.capitalize()} pronto para síntese",
+            })
         except (RuntimeError, ValueError) as exc:
+            return JSONResponse({"available": False, "voice": voice, "detail": str(exc)})
+
+    @app.get("/workbench/voice-preview", response_class=Response)
+    async def preview_voice(voice: str = "cadu"):
+        # Texto fixo: esta rota nunca sintetiza texto livre do cliente.
+        try:
+            service = get_tts(voice)
+            audio = await run_in_threadpool(
+                service.synthesize,
+                "Olá! Eu sou o Lumi, assistente virtual do Senac Piauí.",
+            )
+        except (RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        return Response(content=audio.to_wav_bytes(), media_type="audio/wav")
+        return Response(
+            content=audio.to_wav_bytes(),
+            media_type="audio/wav",
+            headers={
+                "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+                "X-Orelhao-Voice": voice,
+            },
+        )
+
+    @app.get("/workbench/speech/{observation_id}", response_class=Response)
+    async def synthesize_workbench(observation_id: str, voice: str = "cadu"):
+        try:
+            service = get_tts(voice)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        answer = get_workbench().log.presented_answer_for(observation_id)
+        if answer is None:
+            raise HTTPException(status_code=404, detail="Observação não encontrada")
+        try:
+            audio = await run_in_threadpool(service.synthesize, answer)
+        except (RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
+            raise HTTPException(status_code=422, detail=f"Falha de síntese de voz: {exc}") from exc
+        return Response(
+            content=audio.to_wav_bytes(),
+            media_type="audio/wav",
+            headers={
+                "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+                "X-Orelhao-Voice": voice,
+            },
+        )
 
     return app

@@ -11,7 +11,8 @@ audio:
   max_record_seconds: 30
   adaptive_vad: true
   vad_calibration_ms: 700
-  speech_start_timeout_seconds: 12
+  pipewire_warmup_seconds: 2.6
+  speech_start_timeout_seconds: 7
   speech_start_min_ms: 180
   min_speech_ms: 360
   false_start_silence_ms: 450
@@ -56,7 +57,7 @@ tts:
   voice_config_file: pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx.json
   voice_model_card_file: pt/pt_BR/cadu/medium/MODEL_CARD
   speaker: null
-  length_scale: 1.0
+  length_scale: 0.88
   noise_scale: 0.667
   noise_w: 0.8
 

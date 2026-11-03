@@ -1,0 +1,1107 @@
+[
+  {
+    "id": "dev-stable_general-01",
+    "query": "O que é o programa laboratorio 1?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa laboratorio 1 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "dev-historical-01",
+    "query": "Quais editais foram publicados para o programa laboratorio 1 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição laboratorio 1 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_course-01",
+    "query": "Qual é a carga horária do curso de laboratorio 1?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 1 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_unit-01",
+    "query": "Qual o telefone da unidade de laboratorio 1?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de laboratorio 1 é 3211-0000.",
+        "metadata": {
+          "unit_id": "laboratorio 1",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-verified_current-01",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 1?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para laboratorio 1.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-missing_evidence-01",
+    "query": "Qual o endereço do programa laboratorio 1?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "dev-stale_current-01",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 1?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para laboratorio 1 em agosto.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-entity_mismatch-01",
+    "query": "Qual a carga horária do curso de laboratorio 1?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unit_mismatch-01",
+    "query": "Qual o telefone da unidade de laboratorio 1?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-conflicting_sources-01",
+    "query": "Qual a carga horária do curso de laboratorio 1?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de laboratorio 1 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de laboratorio 1 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-specific_missing-01",
+    "query": "Qual a carga horária do curso de laboratorio 1?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 1 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 1",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unscoped_unit-01",
+    "query": "Qual o telefone da unidade de laboratorio 1?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-stable_general-02",
+    "query": "O que é o programa laboratorio 2?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa laboratorio 2 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "dev-historical-02",
+    "query": "Quais editais foram publicados para o programa laboratorio 2 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição laboratorio 2 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_course-02",
+    "query": "Qual é a carga horária do curso de laboratorio 2?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 2 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_unit-02",
+    "query": "Qual o telefone da unidade de laboratorio 2?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de laboratorio 2 é 3211-0000.",
+        "metadata": {
+          "unit_id": "laboratorio 2",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-verified_current-02",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 2?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para laboratorio 2.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-missing_evidence-02",
+    "query": "Qual o endereço do programa laboratorio 2?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "dev-stale_current-02",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 2?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para laboratorio 2 em agosto.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-entity_mismatch-02",
+    "query": "Qual a carga horária do curso de laboratorio 2?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unit_mismatch-02",
+    "query": "Qual o telefone da unidade de laboratorio 2?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-conflicting_sources-02",
+    "query": "Qual a carga horária do curso de laboratorio 2?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de laboratorio 2 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de laboratorio 2 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-specific_missing-02",
+    "query": "Qual a carga horária do curso de laboratorio 2?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 2 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 2",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unscoped_unit-02",
+    "query": "Qual o telefone da unidade de laboratorio 2?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-stable_general-03",
+    "query": "O que é o programa laboratorio 3?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa laboratorio 3 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "dev-historical-03",
+    "query": "Quais editais foram publicados para o programa laboratorio 3 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição laboratorio 3 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_course-03",
+    "query": "Qual é a carga horária do curso de laboratorio 3?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 3 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_unit-03",
+    "query": "Qual o telefone da unidade de laboratorio 3?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de laboratorio 3 é 3211-0000.",
+        "metadata": {
+          "unit_id": "laboratorio 3",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-verified_current-03",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 3?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para laboratorio 3.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-missing_evidence-03",
+    "query": "Qual o endereço do programa laboratorio 3?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "dev-stale_current-03",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 3?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para laboratorio 3 em agosto.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-entity_mismatch-03",
+    "query": "Qual a carga horária do curso de laboratorio 3?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unit_mismatch-03",
+    "query": "Qual o telefone da unidade de laboratorio 3?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-conflicting_sources-03",
+    "query": "Qual a carga horária do curso de laboratorio 3?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de laboratorio 3 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de laboratorio 3 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-specific_missing-03",
+    "query": "Qual a carga horária do curso de laboratorio 3?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 3 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 3",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unscoped_unit-03",
+    "query": "Qual o telefone da unidade de laboratorio 3?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-stable_general-04",
+    "query": "O que é o programa laboratorio 4?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa laboratorio 4 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "dev-historical-04",
+    "query": "Quais editais foram publicados para o programa laboratorio 4 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição laboratorio 4 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_course-04",
+    "query": "Qual é a carga horária do curso de laboratorio 4?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 4 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_unit-04",
+    "query": "Qual o telefone da unidade de laboratorio 4?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de laboratorio 4 é 3211-0000.",
+        "metadata": {
+          "unit_id": "laboratorio 4",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-verified_current-04",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 4?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para laboratorio 4.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-missing_evidence-04",
+    "query": "Qual o endereço do programa laboratorio 4?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "dev-stale_current-04",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 4?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para laboratorio 4 em agosto.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-entity_mismatch-04",
+    "query": "Qual a carga horária do curso de laboratorio 4?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unit_mismatch-04",
+    "query": "Qual o telefone da unidade de laboratorio 4?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-conflicting_sources-04",
+    "query": "Qual a carga horária do curso de laboratorio 4?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de laboratorio 4 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de laboratorio 4 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-specific_missing-04",
+    "query": "Qual a carga horária do curso de laboratorio 4?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 4 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 4",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unscoped_unit-04",
+    "query": "Qual o telefone da unidade de laboratorio 4?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-stable_general-05",
+    "query": "O que é o programa laboratorio 5?",
+    "category": "stable_general",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O programa laboratorio 5 oferece educação profissional.",
+        "metadata": {}
+      }
+    ]
+  },
+  {
+    "id": "dev-historical-05",
+    "query": "Quais editais foram publicados para o programa laboratorio 5 em outubro de 2026?",
+    "category": "historical",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O edital da instituição laboratorio 5 foi anunciado em outubro de 2026.",
+        "metadata": {
+          "retrieved_at": "2026-10-29"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_course-05",
+    "query": "Qual é a carga horária do curso de laboratorio 5?",
+    "category": "scoped_course",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 5 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-scoped_unit-05",
+    "query": "Qual o telefone da unidade de laboratorio 5?",
+    "category": "scoped_unit",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade de laboratorio 5 é 3211-0000.",
+        "metadata": {
+          "unit_id": "laboratorio 5",
+          "fact_key": "contact",
+          "fact_value": "3211-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-verified_current-05",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 5?",
+    "category": "verified_current",
+    "answerable": true,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Existe oferta confirmada hoje para laboratorio 5.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "fact_key": "availability",
+          "fact_value": "available",
+          "authority": "primary",
+          "current_state_confirmed": true,
+          "verified_at": "2026-10-29",
+          "valid_until": "2026-10-29",
+          "source_url": "https://example.org/fonte"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-missing_evidence-05",
+    "query": "Qual o endereço do programa laboratorio 5?",
+    "category": "missing_evidence",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": []
+  },
+  {
+    "id": "dev-stale_current-05",
+    "query": "Há vagas disponíveis hoje no curso de laboratorio 5?",
+    "category": "stale_current",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "Vagas anunciadas para laboratorio 5 em agosto.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "verified_at": "2026-08-24",
+          "valid_until": "2026-08-25"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-entity_mismatch-05",
+    "query": "Qual a carga horária do curso de laboratorio 5?",
+    "category": "entity_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso outro dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:outro",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unit_mismatch-05",
+    "query": "Qual o telefone da unidade de laboratorio 5?",
+    "category": "unit_mismatch",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O telefone da unidade diferente é 3000-0000.",
+        "metadata": {
+          "unit_id": "unidade diferente",
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-conflicting_sources-05",
+    "query": "Qual a carga horária do curso de laboratorio 5?",
+    "category": "conflicting_sources",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "primeiro.md",
+        "text": "O curso de laboratorio 5 dura 40 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "fact_key": "duration",
+          "fact_value": "40",
+          "authority": "primary"
+        }
+      },
+      {
+        "source": "segundo.md",
+        "text": "O curso de laboratorio 5 dura 60 horas.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "fact_key": "duration",
+          "fact_value": "60",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-specific_missing-05",
+    "query": "Qual a carga horária do curso de laboratorio 5?",
+    "category": "specific_missing",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "O curso de laboratorio 5 custa R$ 120.",
+        "metadata": {
+          "entity_id": "curso:laboratorio 5",
+          "fact_key": "price",
+          "fact_value": "120",
+          "authority": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "dev-unscoped_unit-05",
+    "query": "Qual o telefone da unidade de laboratorio 5?",
+    "category": "unscoped_unit",
+    "answerable": false,
+    "as_of": "2026-10-29",
+    "evidence": [
+      {
+        "source": "fixture.md",
+        "text": "A administração geral atende pelo telefone 3000-0000.",
+        "metadata": {
+          "fact_key": "contact",
+          "fact_value": "3000-0000",
+          "authority": "primary"
+        }
+      }
+    ]
+  }
+]

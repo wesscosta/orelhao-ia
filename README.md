@@ -1,380 +1,112 @@
 # Orelhão IA
 
-Terminal conversacional de voz **offline-first**, projetado para responder perguntas com base em uma fonte de conhecimento controlada.
+**Terminal conversacional de voz offline-first**, modular e reutilizável para atendimento a diferentes instituições e domínios de conhecimento. A implantação piloto utiliza documentos oficiais do Senac Piauí; o core não depende dessa instituição.
 
-O projeto não é acoplado a uma instituição ou domínio específico. A aplicação pode ser utilizada em diferentes cenários — atendimento institucional, orientação ao público, educação, eventos, serviços, suporte interno ou outros — conforme a base de conhecimento, configuração e integrações fornecidas à implantação.
+> **Estado em 03/11/2026:** o experimento físico do Dell com ESP32, monofone P3 e monitor web está na branch `feat/esp32-hook-serial-20261030`. A `main` permanece no checkpoint `v0.6.0-alpha.13` até revisão e integração. **Não é release nem homologação para atendimento público.** Veja o [estado técnico](docs/current-state.md) e o [fluxo físico](docs/esp32-voice-session.md).
 
-## Estado atual — v0.6.0-alpha.13 em desenvolvimento
+## Funcionalidades implementadas e limites
 
-A baseline de voz v0.3.10 permanece estável. A v0.4 consolidou a camada de conhecimento/RAG com índice persistente local, recuperação híbrida, corpus versionado e interface administrativa local. A v0.5.0 encerrou a instrumentação objetiva do retrieval. A v0.6.0-alpha.1 mediu `semantic-only` local; a alpha.2 avaliou fusão lexical + semântica por ranking; a alpha.3 produziu diagnósticos por caso. A alpha.4 rejeitou a promoção do primeiro gate de answerability ponta a ponta. A alpha.5 separou a avaliação de evidência e identificou boa ordenação, mas scores mal calibrados. A alpha.6 mediu generalização em holdout categorizado. A alpha.7 rejeitou FP32 por ganho insuficiente diante do custo. A alpha.8 rejeitou mDeBERTa-v3 INT8 na calibração. A alpha.9 mediu grounding factual por NLI. A alpha.10 confirmou a generalização em holdout próprio. A alpha.11 formalizou a decisão em três estados. A alpha.12 integra essa decisão à bancada administrativa em modo observação, sem bloquear respostas.
+- **Voz em bancada:** PipeWire/VAD, faster-whisper para STT local e Piper pt-BR para TTS. O comando `--voice-test` valida o fluxo legado de entrada → transcrição → síntese, **não** uma conversa com RAG e LLM sem intervenção do usuário.
+- **Conhecimento/RAG:** fontes editáveis Markdown/TXT, índice local persistente e retrieval baseline; retrievers semânticos/RRF e outras verificações permanecem experimentais.
+- **LLM pt-BR:** servidor local `llama.cpp` com cliente HTTP restrito a loopback. Tucano2 1.5B e Qwen3.5 0.8B foram comparados, **sem vencedor homologado**.
+- **Answerability e grounding:** verificação de fonte, entidade e atualidade antes da LLM e avaliação NLI por afirmação após a geração. A bancada oferece `observe` e `enforce` como modos experimentais.
+- **Admin, bancada e monitor:** `http://127.0.0.1:8765/workbench` para testes no navegador, `/monitor` para espelhar a **mesma sessão física** via SSE e `/system` para acompanhar CPU, RAM, disco, temperaturas e serviços em tempo real, sem segunda inferência nem agente residente. **Não expor o Admin diretamente à rede**, pois não há autenticação de produção.
+- **Hardware experimental:** ESP32 DevKit controla o contato seco do gancho via USB serial, iniciando/interrompendo o processo de voz no Dell Ubuntu; há testes físicos do monofone P3 e monitor. **Teclado 4×4 e display continuam pendentes**. Nada disso está homologado para atendimento público.
 
-Pipeline de voz já validado:
+## Qualidade da branch experimental
 
-`microfone → captura/VAD → STT local → texto → TTS local → reprodução`
+| Verificação | Resultado |
+|---|---|
+| Pytest (Dell Ubuntu 24.04, Python 3.12) | **471 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
+| Ruff / Mypy | Sem erros nos módulos avaliados no Dell |
+| Corpus Senac Piauí | **28 documentos indexados, 59 chunks**; índice reconstruível fora do Git |
+| Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
+| Gate adversarial — 40 perguntas, Tucano2 | 0/20 falsas permissões automáticas nos negativos e **8/20 bloqueios indevidos** nos positivos |
+| Gate adversarial — 40 perguntas, Qwen3.5 | 0/20 falsas permissões automáticas nos negativos, **10/20 bloqueios indevidos** e **2 respostas NLI-supported sem fatos esperados** |
 
-A versão v0.3.10 estabiliza a captura de áudio via PipeWire, detecção de início e fim de fala, transcrição local em português e síntese/reprodução local de voz.
+**Atenção:** os 40 casos foram curados e rotulados por IA a partir de fontes, sem revisão humana independente. Uma taxa de 0/20 falsas permissões **não comprova ausência de alucinações**. O resultado é **NO-GO** para o terminal de atendimento.
 
-Estado validado:
+Veja [benchmark adversarial](docs/benchmark-grounding-real-2026-10-29.md), [fila de revisão humana](docs/review-grounding-real-2026-10-29.md) e [benchmarks históricos](docs/index.md).
 
-- captura primária via `pw-record`/PipeWire;
-- `sounddevice` mantido como fallback e ferramenta de diagnóstico;
-- VAD com tolerância a pausas naturais e ruído ambiente;
-- STT local com `faster-whisper`;
-- configuração de reconhecimento em português com contexto voltado a português brasileiro;
-- TTS local com Piper;
-- provisionamento local do modelo de voz;
-- diagnóstico e seleção de dispositivos de áudio;
-- pipeline de voz `STT → TTS` funcional;
-- 40 testes automatizados passando na v0.3.10.
+## Experimento físico no Dell — 03/11/2026
 
-A camada Knowledge mantém os contratos `Document`, `Chunk`, `SearchResult`, `KnowledgeRepository`, `Retriever`, `ContextBuilder` e `KnowledgeService`, acrescentando persistência local, recuperação híbrida lexical + hashing vetorial local, gestão do corpus, administração web e Evaluation Harness. A alpha.13 conecta a bancada a uma LLM servida localmente por API compatível com OpenAI, ainda em modo de observação.
+O fluxo em teste é **gancho ESP32 → USB serial → sessão do monofone P3 → Whisper small CPU → consulta guiada ou RAG/LLM com grounding `enforce` → Piper 0.88**. A abertura atual é “Olá! Eu sou o Lumi. Como posso ajudar?”. O fluxo de cursos reconhece a escolha “Programação” após Informática e pode solicitar a cidade, apresentando apenas anúncios históricos identificados como tais. A entrada PipeWire é pré-ativada durante a saudação para evitar o transiente observado no Dell. A ligação mantém memória curta, até 12 perguntas válidas, 36 tentativas de captura e 180 segundos. O silêncio normal recebe um aviso e encerra após duas escutas sem fala (~14 s); pedido explícito de pausa permite até quatro escutas (~28 s), com retorno automático quando houver fala. Mensagens fixas possuem WAV em cache local.
 
-## Arquitetura alvo
+O [monitor SSE](docs/live-monitor.md) espelha **a mesma sessão**, sem inferência nem transmissão de áudio adicionais, e apaga a transcrição da visualização ao encerrar. Em recusas, a voz adota humor pontual inspirado no orelhão, com orientação ao atendimento ou à supervisão conforme o assunto, mas mantém as razões de grounding no monitor. O acesso web continua restrito a `localhost`: outras máquinas devem usar túnel SSH. A [base ampliada](docs/atualizacao-catalogo-2026-11-03.md) tem 28 documentos e 59 trechos, incluindo fichas recentes de IA, Power BI e Sala de Vacina, além de Saúde e cursos técnicos de TI por unidade; o benchmark legado de 40 casos **não regrediu**. Um teste real mostrou, porém, que o grounding ainda pode aprovar um nome de curso alterado indevidamente pela LLM. **Não homologado.**
 
-O fluxo completo previsto é:
+Mais detalhes: [sessão física](docs/esp32-voice-session.md), [memória e base](docs/context-and-knowledge-2026-11-03.md) e [operação](docs/operations.md).
 
-`voz → STT local → RAG → LLM local → TTS local → voz`
+## Desenvolvimento
 
-A base de conhecimento é uma dependência configurável da implantação, e não uma característica fixa do core.
-
-A aplicação permanece um **monólito modular**, com contratos entre Core, Serviços, Interfaces, Hardware e Infraestrutura. Implementações específicas de STT, TTS, LLM, hardware ou base de conhecimento não devem contaminar a lógica central.
-
-## Instalação de desenvolvimento
+Requisitos: Python 3.12+ no alvo planejado e ambiente virtual. Os comandos de exemplo pressupõem dependências de áudio, Admin e modelos locais provisionados.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev,admin,audio,stt,tts,vad,semantic,evidence]'
-```
 
-## Diagnóstico de áudio
-
-Liste os dispositivos disponíveis:
-
-```bash
-orelhao --list-audio-devices
-```
-
-Valide a configuração selecionada:
-
-```bash
-orelhao --audio-diagnose
-```
-
-Para a captura principal, o projeto utiliza PipeWire quando disponível.
-
-## STT local
-
-Teste somente reconhecimento de fala:
-
-```bash
-orelhao --stt-test
-```
-
-O STT utiliza `faster-whisper`. Modelos configurados por nome podem exigir download durante o provisionamento inicial. Uma instalação de produção deve manter os pesos necessários localmente.
-
-## TTS local
-
-Provisione a voz configurada:
-
-```bash
-orelhao --tts-provision
-```
-
-Teste a síntese:
-
-```bash
-orelhao --tts-test "Olá. Este é um teste de síntese de voz."
-```
-
-O backend atual utiliza Piper e mantém o modelo provisionado localmente.
-
-## Teste ponta a ponta de voz
-
-```bash
-orelhao --voice-test
-```
-
-O teste executa captura, detecção de fala, STT, TTS e reprodução local.
-
-As métricas exibidas permitem observar, entre outros dados:
-
-- sample rate de captura e pipeline;
-- nível de ruído;
-- threshold de detecção;
-- pico de áudio;
-- motivo do encerramento da captura;
-- falsos inícios;
-- overflows;
-- latência de STT;
-- latência e RTF do TTS.
-
-O encerramento normal de uma fala deve ocorrer por `fim=silence`. `max_duration` e timeouts são mecanismos de proteção, não o comportamento esperado para uma interação normal.
-
-## Testes automatizados
-
-```bash
-pytest
-```
-
-Estado validado antes do benchmark da v0.6.0-alpha.2:
-
-```text
-94 passed, 1 skipped
-```
-
-## Princípios de implantação
-
-O Orelhão IA é **offline-first**: o caminho crítico da conversa deve funcionar sem depender de serviços externos.
-
-A rede pode ser utilizada para funções auxiliares, como:
-
-- atualização controlada da base de conhecimento;
-- atualização autorizada de software ou modelos;
-- telemetria;
-- manutenção;
-- integrações opcionais.
-
-A indisponibilidade da rede não deve impedir uma conversa quando os modelos e a base necessários estiverem provisionados localmente.
-
-## Base de conhecimento
-
-O conteúdo respondido pelo terminal deve ser determinado pela base configurada para cada implantação.
-
-Exemplos possíveis:
-
-- informações institucionais;
-- catálogo de produtos ou serviços;
-- cursos e programas educacionais;
-- documentação técnica;
-- orientação em eventos;
-- procedimentos internos;
-- FAQs e atendimento ao público.
-
-Essa separação é intencional: **Orelhão IA é a plataforma conversacional; a base define o domínio da aplicação.**
-
-## Avaliação do retrieval
-
-Reconstrua o índice e execute o dataset padrão:
-
-```bash
+# Índice e testes
 orelhao knowledge index
-orelhao knowledge evaluate
+orelhao knowledge search "O que é o PSG?" --limit 4
+orelhao knowledge evaluate --retriever baseline --json
+pytest -q
+
+# Diagnóstico da voz
+orelhao --list-audio-devices
+orelhao --audio-diagnose
+orelhao --stt-test
+orelhao --tts-test "Teste de voz do Orelhão IA."
+orelhao --voice-test
+
+# Bancada experimental (requer servidor LLM local iniciado em 127.0.0.1:8081)
+ORELHAO_CONFIG=config/benchmark-tucano2-15b-ptbr.yaml orelhao admin
 ```
 
-Baseline final no dataset de 40 casos em pt-BR:
+O servidor `llama-server` não é iniciado automaticamente pela aplicação: seus pesos GGUF devem estar provisionados, com modelo e alias compatíveis com a configuração. Para a bancada, acesse `http://127.0.0.1:8765/workbench`.
 
-- Hit@1: `0.633`;
-- Hit@4: `0.800`;
-- MRR: `0.703`;
-- acurácia de abstenção: `0.600`;
-- latência média observada nesta execução: aproximadamente `2.04 ms`.
-
-## Experimento semântico da v0.6
-
-A implementação experimental utiliza `intfloat/multilingual-e5-small` em ONNX, com revisão fixada, e mantém pesos e índices somente no ambiente local. Provisione uma vez com rede; a indexação e a avaliação seguintes funcionam offline:
+Para repetir o gate adversarial completo:
 
 ```bash
-orelhao knowledge semantic-provision
-orelhao knowledge semantic-index
-orelhao knowledge evaluate --retriever semantic --json
+python scripts/run_live_grounding_gate.py \
+  --config config/benchmark-tucano2-15b-ptbr.yaml \
+  --dataset knowledge/evaluation/grounding-real-senac-pi-v1.json \
+  --output /tmp/orelhao-grounding-report.json
 ```
 
-Resultados semantic-only no mesmo dataset:
+## Grounding V3 — implementação iniciada
 
-- sem threshold: Hit@1 `0.867`, Hit@4 `0.900`, MRR `0.878` e abstenção `0.000`;
-- candidato `min_score=0.852`: Hit@1 `0.833`, Hit@4 `0.833`, MRR `0.833` e abstenção `0.600`;
-- latência média aproximada: `33–36 ms`;
-- pico de memória observado: aproximadamente `772 MiB`;
-- modelo local: `241 MiB`.
+O primeiro incremento da nova etapa adiciona **auditoria triclasse do NLI** e classificação reproduzível de falhas de retrieval, pré-gate e pós-gate. Não modifica thresholds nem promove modelos. Consulte [PR-01 e resultados do NLI](docs/grounding-v3-pr01-nli-diagnostics-2026-10-29.md) e [estado técnico](docs/current-state.md). O quadro de qualidade acima continua sendo o baseline anterior à V3.
 
-O candidato melhorou ranking e preservou a abstenção da baseline, mas não foi promovido devido ao custo operacional e ao risco de calibração sobre o mesmo dataset.
+### PR-02 — Evidence Span Extraction (29/10/2026)
 
-Fusão RRF medida na alpha.2:
+A linha experimental do Grounding V3 passou a registrar **trechos literais do chunk com offsets verificáveis** em cada avaliação de afirmação e na bancada. Uma auditoria com o NLI ONNX comparou chunks inteiros com passagens curtas: 48 pares, 23 scores maiores, 24 menores e 1 estável. **Sem alteração da política factual ou promoção de modelo.** Consulte [PR-02 e diagnóstico](docs/grounding-v3-pr02-evidence-spans-2026-10-29.md).
 
-```bash
-orelhao knowledge evaluate --retriever fusion --json
-```
+### PR-03 — Fact Validator (29/10/2026)
 
-A fusão utiliza os gates `0.40` da baseline e `0.852` do semântico e combina apenas posições. No benchmark, obteve Hit@1 `0.833`, Hit@4 `0.933`, MRR `0.872`, abstenção `0.500` e latência aproximada de `34–36 ms`. Embora tenha melhorado recall e ranking, não foi promovida porque degradou a abstenção em relação à baseline e ao semantic-only calibrado.
+O Grounding V3 passou a registrar comparações **diagnósticas** de valores, horas, idade mínima, prazos, vagas, telefones e datas, sob escopo de entidade/unidade/vigência. Sem alteração de thresholds nem do comportamento de aprovação. A auditoria retrospectiva encontrou 14 correspondências tipadas em 48 claims arquivadas; isso **não** é medida de acurácia. Consulte [relatório PR-03](docs/grounding-v3-pr03-fact-validator-2026-10-29.md).
 
-Diagnóstico por caso da alpha.3:
+### PR-04 — Grounding Decision V3 (29/10/2026)
 
-```bash
-orelhao knowledge evaluate --retriever baseline --diagnostics --json > /tmp/baseline-details.json
-orelhao knowledge evaluate --retriever semantic --min-score 0.852 --diagnostics --json > /tmp/semantic-details.json
-orelhao knowledge evaluate --retriever fusion --diagnostics --json > /tmp/fusion-details.json
-```
+A decisão final agora combina NLI, pré-gate, entidade e Fact Validator. Em modo seguro, divergências verificáveis e atributos faltantes bloqueiam texto e áudio; ofertas múltiplas podem exigir esclarecimento. Correspondência lexical/numérica não eleva NLI incerto para resposta aprovada. **277 testes** aprovados; avaliação com 40 casos por modelo: 0 falsas permissões nos 20 negativos de cada, **8/20** falsos bloqueios Tucano2 e **11/20** Qwen. Conjunto não independente. Veja [Relatório PR-04](docs/grounding-v3-pr04-decision-policy-2026-10-29.md).
 
-A saída preserva as métricas agregadas e acrescenta `results`, contendo consulta, expectativa, fontes, scores, posição relevante e resultado correto/incorreto. Cada resultado também inclui `matches` com identificador, documento, posição, texto e metadados do chunk. Esse diagnóstico não modifica ranking ou abstenção.
+**Escopo do catálogo:** a bancada carrega todas as entidades indexadas para verificar cursos nomeados, evitando confundir ausência de evidência para Excel com ofertas de Informática Básica. Novas fontes requerem reindexação e reinício do Admin.
 
-## Gate de evidência — resultado da v0.6.0-alpha.4
+### Alternância de vozes no Workbench (30/10/2026)
 
-O gate usa QA extrativa para estimar se cada chunk contém uma resposta extraível. Ele é aplicado depois da fusão e não altera o ranking dos candidatos preservados. Provisione o artefato ONNX int8 uma vez:
+A bancada agora permite alternar Piper Cadu e Faber sem reiniciar e ouvir a mesma resposta sem recomputar retrieval/LLM/Grounding. A saudação utiliza o masculino **o Lumi**; a LLM também recebe essa instrução e a correção é aplicada antes do grounding. Cadu continua como padrão; instale a Faber com python scripts/provision_piper_faber.py. Veja [relatório técnico](docs/workbench-piper-voices-lumi-2026-10-30.md).
 
-```bash
-pip install -e '.[semantic,evidence]'
-orelhao knowledge evidence-provision
-```
+### Data/hora e abstenção segura (30/10/2026)
 
-Execute o A/B no dataset congelado:
+Perguntas exclusivas de data/hora agora usam o relógio local com fuso `ORELHAO_TIMEZONE` (padrão America/Fortaleza), sem RAG ou LLM. O Grounding registra a origem `local_clock` e NLI `not_applicable`, sem score artificial. A normalização reconhece repetições de `INSUFFICIENT CONTEXT` com espaços e impede que o marcador seja sintetizado. **327 testes** aprovados. [Relatório de correção](docs/local-clock-abstention-fix-2026-10-30.md).
 
-```bash
-orelhao knowledge evaluate --retriever fusion --json
-orelhao knowledge evaluate --retriever evidence --evidence-min-score 0.50 --json
-```
+## Alvo de hardware e próximos gates
 
-No dataset de retrieval, o threshold `0.50` obteve Hit@1/Hit@4/MRR `0.533`, abstenção `1.000` e latência média aproximada de `228 ms`. O processo atingiu aproximadamente `1.30 GiB` de RAM e o modelo ocupa cerca de `283 MiB`. A varredura posterior não encontrou threshold que preservasse recall e abstenção simultaneamente. O gate e o modelo não foram promovidos.
-Com `--diagnostics`, o metadado `evidence_support` registra o suporte estimado de cada chunk preservado. Use threshold `0.0` para observar a distribuição antes de selecionar um candidato.
+O piloto está restrito ao **Dell OptiPlex 7050 Micro**, i5-7500T (4 núcleos/4 threads), **8 GiB RAM fixos**, SSD ~256 GB, Ubuntu Server 24.04 LTS minimal e inferência CPU. Desempenho no Arch Linux **não substitui benchmark no Dell**. A sessão pelo gancho/ESP32 e áudio P3 já funcionam em testes físicos, mas ainda faltam validação humana independente, redução de falsos bloqueios, confiabilidade do STT, estabilidade em ciclos prolongados, teclado e display.
 
-## Benchmark de answerability da v0.6.0-alpha.5
+## Documentação
 
-O benchmark separado mede diretamente se um chunk contém resposta para uma pergunta. Ele não executa retrieval e não modifica `retrieval-v1.json`:
+**[Índice da documentação](docs/index.md)** · **[Estado técnico vigente](docs/current-state.md)** · [Gancho e voz](docs/esp32-voice-session.md) · [Monitor web](docs/live-monitor.md) · [Contexto e base ampliada](docs/context-and-knowledge-2026-11-03.md) · [Arquitetura](docs/architecture.md) · [RAG](docs/rag.md) · [LLM](docs/llm.md) · [Admin](docs/knowledge-admin.md) · [Áudio](docs/audio.md) · [Hardware](docs/hardware.md) · [Operação](docs/operations.md) · [Changelog](CHANGELOG.md)
 
-```bash
-orelhao knowledge evidence-evaluate --json
-orelhao knowledge evidence-evaluate --threshold 0.50 --diagnostics --json
-```
+O antigo README com a cronologia das versões alpha foi [preservado como documento histórico](docs/history/README-before-consolidation-2026-10-29.md); não use seus valores antigos como estado atual.
 
-O dataset `evidence-v1.json` contém 40 pares pt-BR balanceados. Cada caso referencia um `chunk_id` reconstruível do índice e declara `answerable`. O relatório inclui acurácia balanceada, precisão, recall, especificidade, F1, ROC AUC e latência. `--model-dir` permite avaliar outro modelo ONNX compatível no mesmo conjunto.
-
-Este primeiro dataset serve para desenvolvimento e calibração. A promoção de um modelo exige confirmação em um conjunto independente, evitando selecionar modelo e threshold sobre os mesmos exemplos.
-
-## Holdout categorizado da v0.6.0-alpha.6
-
-O holdout `evidence-v2-holdout.json` contém 40 consultas inéditas: 20 respondíveis e 20 não respondíveis. Os negativos distinguem ausência de atualidade, entidade incorreta e informação específica ausente. Execute exatamente as três políticas congeladas:
-
-```bash
-for policy in initial conservative balanced; do
-  orelhao knowledge evidence-evaluate \
-    knowledge/evaluation/evidence-v2-holdout.json \
-    --threshold-policy "$policy" \
-    --diagnostics \
-    --json \
-    > "/tmp/orelhao-evidence-holdout-${policy}.json"
-done
-```
-
-As políticas são `initial=0.50`, `conservative=0.69740408` e `balanced=0.00016509`. Elas foram definidas antes da execução no holdout e não devem ser recalibradas nesse conjunto. O relatório inclui métricas agregadas e `category_metrics`.
-
-Quando a decisão for abster, `EvidenceDecision` representa o motivo sem delegar a decisão à LLM. A mensagem pt-BR informa ausência de evidência suficiente, específica, atualizada ou compatível com a entidade solicitada. A LLM futura poderá apenas verbalizar essa decisão estruturada.
-
-## Ablação de precisão da v0.6.0-alpha.7
-
-INT8 contém a arquitetura completa quantizada; não é uma fração do modelo. Para medir isoladamente o efeito da quantização, a alpha.7 permite manter INT8 e FP32 lado a lado:
-
-```bash
-orelhao knowledge evidence-provision --variant fp32
-orelhao knowledge evidence-evaluate --model-variant fp32 --diagnostics --json
-```
-
-INT8 continua sendo o padrão. A comparação deve usar os mesmos datasets e registrar ROC AUC, métricas por categoria, latência, pico de memória e tamanho do artefato. Um threshold escolhido em `evidence-v1.json` deve ser congelado antes de qualquer avaliação confirmatória; `evidence-v2-holdout.json` não deve ser reutilizado para calibrar FP32.
-
-No holdout, a ROC AUC FP32 foi `0.907`, praticamente igual à INT8 (`0.905`). FP32 balanced elevou recall para `0.900`, mas reduziu especificidade para `0.750`; o conservative preservou especificidade `1.000`, mas recall caiu para `0.400`. Com aproximadamente `2.155 MiB` de RAM e artefato de `1.059 MiB`, FP32 foi rejeitado.
-
-## Candidato mDeBERTa da v0.6.0-alpha.8
-
-A alpha.8 testa somente `mdeberta-v3-base-squad2` em ONNX INT8, sem alterar o padrão:
-
-```bash
-orelhao knowledge evidence-provision --model mdeberta-v3
-orelhao knowledge evidence-evaluate \
-  knowledge/evaluation/evidence-v1.json \
-  --model mdeberta-v3 --diagnostics --json
-```
-
-O candidato usa arquitetura multilíngue diferente e foi treinado com casos sem resposta. O primeiro objetivo é comparar ROC AUC, distribuição dos scores, categorias, latência, memória e tamanho contra XLM-RoBERTa INT8. Thresholds serão calibrados somente em `evidence-v1.json` e congelados antes do holdout.
-
-Resultado: o mDeBERTa-v3 INT8 obteve ROC AUC `0.875`, acurácia balanceada `0.800`, especificidade `0.800`, latência média `263.21 ms` e artefato de `302.3 MiB`. O XLM-RoBERTa INT8 obteve ROC AUC `0.943`, acurácia balanceada `0.825`, especificidade `1.000`, latência média `125.23 ms` e `265.7 MiB` na mesma rodada. O candidato foi rejeitado antes do holdout.
-
-## Grounding factual por NLI da v0.6.0-alpha.9
-
-A alpha.9 separa uma nova tarefa: verificar se uma passagem implica uma afirmação factual. O candidato inicial é `multilingual-MiniLMv2-L6-mnli-xnli`, treinado em MNLI/XNLI e executado localmente em ONNX. A passagem é a premissa; a afirmação é a hipótese; o score é a probabilidade da classe `entailment`.
-
-```bash
-orelhao knowledge evidence-provision --model nli-minilm --variant fp32
-orelhao knowledge evidence-evaluate \
-  knowledge/evaluation/grounding-v1.json \
-  --model nli-minilm \
-  --model-variant fp32 \
-  --threshold 0.5 \
-  --diagnostics --json
-```
-
-`grounding-v1.json` possui 20 afirmações suportadas e 20 não suportadas. Ele é somente de desenvolvimento e calibração. `evidence-v2-holdout.json` não será usado porque mede outra tarefa. Nenhum gate será integrado antes de congelar threshold, confirmar em holdout próprio e medir custo.
-
-Na calibração, o NLI obteve ROC AUC `0.973`, latência média `9.14 ms`, pico de memória de aproximadamente `1.139 MiB` e artefato de `408.3 MiB`. As políticas foram congeladas como `nli-balanced=0.1250362694` e `nli-conservative=0.7557643056`.
-
-## Holdout NLI da v0.6.0-alpha.10
-
-`grounding-v2-holdout.json` contém 40 afirmações inéditas: 20 suportadas e 20 não suportadas. Os negativos são divididos igualmente entre contradição, incompatibilidade de entidade, informação específica ausente e temporalidade.
-
-```bash
-for policy in nli-balanced nli-conservative; do
-  orelhao knowledge evidence-evaluate \
-    knowledge/evaluation/grounding-v2-holdout.json \
-    --model nli-minilm \
-    --model-variant fp32 \
-    --threshold-policy "$policy" \
-    --diagnostics --json \
-    > "/tmp/orelhao-grounding-holdout-${policy}.json"
-done
-```
-
-Cada categoria agora expõe `applicable_metric` e `applicable_score`: recall para categorias positivas, especificidade para categorias negativas e acurácia balanceada somente quando a categoria contém ambas as classes. O holdout não será usado para calibrar um terceiro threshold.
-
-No holdout, a ROC AUC foi `0.965`. A política balanced obteve acurácia balanceada `0.900`, recall `0.850` e especificidade `0.950`; a conservative obteve `0.775`, recall `0.550` e especificidade `1.000`. Contradição, informação específica e temporalidade mantiveram especificidade `1.000`; entidade ficou em `0.800` na balanced e `1.000` na conservative.
-
-## GroundingDecision da v0.6.0-alpha.11
-
-O contrato de decisão usa os dois limites congelados sem criar um terceiro threshold:
-
-- score `>= 0.7557643056`: `supported`;
-- score `< 0.1250362694`: `unsupported`;
-- intervalo intermediário: `uncertain`.
-
-Somente `supported` permite resposta. `unsupported` e `uncertain` exigem abstenção no MVP. Em avaliações NLI, o JSON inclui `grounding_policy`, `grounding_summary` e `grounding_decision` por caso quando `--diagnostics` está ativo. Esta etapa não conecta o contrato ao retrieval ou à LLM.
-
-Fluxo futuro preservado:
-
-`pergunta transcrita → recuperação (RAG) → contexto → LLM local → resposta → TTS`
-
-A implementação deve preservar o funcionamento offline-first. Não haverá tuning adicional de RRF nesta etapa.
-
-## Escopo futuro
-
-Após RAG e LLM, permanecem previstas etapas como:
-
-- integração com controlador físico/gancho;
-- integração com monofone;
-- benchmarks completos de CPU/GPU/RAM/VRAM e latência;
-- dimensionamento do hardware definitivo;
-- integração física;
-- operação como appliance;
-- health checks, watchdog e recuperação automática;
-- homologação e piloto.
-
-Interface touch é uma extensão possível, mas não é dependência do fluxo de voz.
-
-
-## Smoke test do RAG — v0.4.0-alpha.4
-
-```bash
-orelhao --rag-test "como funciona a base de conhecimento?"
-```
-
-Esse comando usa uma base em memória deliberadamente pequena e determinística. O objetivo é validar ingestão, chunking, ranking e construção de contexto sem baixar modelos adicionais.
-
-
-## Administração da base
-
-A partir da v0.4.0-alpha.3, a base pode ser administrada por uma interface web local:
-
-```bash
-pip install -e '.[admin]'
-orelhao admin
-```
-
-A interface abre por padrão em `http://127.0.0.1:8765` e manipula apenas
-`knowledge/sources/`. O índice é derivado e pode ser reconstruído pela própria
-interface ou com `orelhao knowledge index`.
+**Regra de documentação:** commits e testes comprovam implementação experimental, enquanto a passagem de gate, merge, tag e avaliação no hardware comprovam promoção e homologação. São estados diferentes.

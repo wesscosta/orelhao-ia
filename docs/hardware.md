@@ -1,11 +1,35 @@
 # Hardware
 
-A v0.0 não fixa hardware definitivo.
+> **Estado físico em 03/11/2026:** o ESP32 DevKit via USB serial (GPIO27/GND no contato seco do gancho) inicia e interrompe a sessão de voz no Dell, com monofone P3 em testes. O **display e o teclado ainda não estão conectados**; a qualidade do STT e a instalação física não foram homologadas. Veja [sessão e diagnóstico](esp32-voice-session.md) e [estado vigente](current-state.md).
 
-Restrições atuais:
+> **Experimento ESP32 — 30/10/2026.** Iniciada a integração USB serial do gancho no GPIO 27 (contato seco, GND). Este novo experimento substitui o Arduino Uno apenas como controlador candidato; a validação física e a aprovação do appliance ainda dependem de ensaios. Consulte [Gancho ESP32](esp32-hook.md).
 
-- todo o conjunto computacional deve caber no gabinete do telefone;
-- refrigeração e potência são critérios de seleção tão importantes quanto desempenho;
-- infraestrutura elétrica protegida, aterramento, UPS e gerador são fornecidos pelo ambiente Senac;
-- Raspberry Pi é opcional;
-- microcontrolador USB pode cuidar do gancho e I/O.
+> **VERIFICAÇÃO — 29/10/2026.** As restrições do Dell de 8 GiB continuam válidas. Não foram realizados ensaios físicos de monofone, gancho, teclado ou boot autônomo até o último commit experimental. Ver [Estado vigente](current-state.md) e [plano de operação](operations.md).
+
+## Decisão vigente — 28/10/2026
+
+A primeira instalação e o piloto do Orelhão IA utilizarão **somente**
+o Dell OptiPlex 7050 Micro existente: Intel Core i5-7500T (4 núcleos
+e 4 threads), 8 GB DDR4, SSD de aproximadamente 256 GB, GPU Intel HD 630,
+sem possibilidade de ampliação de RAM, troca de máquina ou GPU dedicada.
+
+O sistema operacional alvo é **Ubuntu Server 24.04 LTS minimal**, com
+Python 3.12 e inferência inicialmente em CPU. Toda escolha de modelo deve
+ser aprovada por teste no próprio Dell, sem assumir desempenho a partir
+de experiências no computador Arch Linux de desenvolvimento.
+
+Há apenas uma conversa por vez, sem display no MVP. Arduino Uno é o
+controlador planejado para teclado 4 × 4 e gancho. Preservar monofone
+original e avaliar pinagem, impedância, captura, playback e integração
+antes de ligar os conectores eletricamente.
+
+Os critérios de aceitação são groundedness/abstenção, latência de voz,
+RSS combinada sem swap sustentado, temperatura com gabinete fechado,
+boot autônomo e recuperação de falhas. Consulte
+[plano de benchmark](benchmark-optiplex-7050.md).
+
+## Histórico de hardware (substituído)
+
+As propostas anteriores de Mini-PC Core Ultra, Ryzen, 16–32 GB DDR5 ou
+GPU dedicada permanecem como histórico de dimensionamento. Elas não
+representam possibilidades para esta implantação.

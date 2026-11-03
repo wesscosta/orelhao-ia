@@ -15,6 +15,7 @@ class AudioConfig(BaseModel):
     rms_threshold: float = 0.015  # legado/fallback para VAD fixo
     adaptive_vad: bool = True
     vad_calibration_ms: int = 700
+    pipewire_warmup_seconds: float = 2.6  # inicialização fria, em paralelo à saudação
     speech_start_timeout_seconds: float = 12.0
     speech_start_min_ms: int = 180
     min_speech_ms: int = 360

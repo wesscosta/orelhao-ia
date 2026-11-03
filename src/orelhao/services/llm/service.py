@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from typing import Protocol
 from urllib.error import HTTPError, URLError
@@ -10,9 +11,33 @@ from urllib.request import Request, urlopen
 from orelhao.config import LLMConfig
 from orelhao.services.rag.retriever import RetrievedContext
 
+from .abstention import normalize_abstention
 from .prompts import SYSTEM_PROMPT
 
 INSUFFICIENT_CONTEXT = "INSUFFICIENT_CONTEXT"
+
+_LUMI_ARTICLE = re.compile(
+    r"(?<!\w)(a|da|à|pela|uma)\s+(Lumi)\b", re.IGNORECASE
+)
+_LUMI_MASCULINE = {
+    "a": "o", "da": "do", "à": "ao", "pela": "pelo", "uma": "um",
+}
+
+
+def normalize_lumi_identity(text: str) -> str:
+    """Corrige apenas o artigo do nome do assistente, antes do grounding.
+
+    A saída original é mantida no campo raw_text para auditoria.
+    """
+
+    def replace(match: re.Match[str]) -> str:
+        article = match.group(1)
+        masculine = _LUMI_MASCULINE[article.casefold()]
+        if article[0].isupper():
+            masculine = masculine.capitalize()
+        return f"{masculine} {match.group(2)}"
+
+    return _LUMI_ARTICLE.sub(replace, text)
 
 
 class LLMProtocolError(RuntimeError):
@@ -33,6 +58,15 @@ class MockLLMService:
 class LLMHealth:
     available: bool
     detail: str
+
+
+@dataclass(frozen=True, slots=True)
+class LLMCompletion:
+    text: str
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    tokens_per_second: float | None = None
+    raw_text: str | None = None
 
 
 class LocalOpenAICompatibleLLMService:
@@ -73,11 +107,14 @@ class LocalOpenAICompatibleLLMService:
         return LLMHealth(True, f"modelo {self.config.model!r} disponível")
 
     def generate(self, query: str, context: list[RetrievedContext]) -> str:
+        return self.generate_completion(query, context).text
+
+    def generate_completion(self, query: str, context: list[RetrievedContext]) -> LLMCompletion:
         clean_query = query.strip()
         if not clean_query:
             raise ValueError("pergunta para LLM não pode ser vazia")
         if not context:
-            return INSUFFICIENT_CONTEXT
+            return LLMCompletion(INSUFFICIENT_CONTEXT)
         evidence = self._format_context(context)
         payload = self._request(
             "POST",
@@ -104,7 +141,19 @@ class LocalOpenAICompatibleLLMService:
         content = message.get("content")
         if not isinstance(content, str) or not content.strip():
             raise RuntimeError("LLM local produziu resposta vazia")
-        return content.strip()
+        usage = payload.get("usage")
+        timings = payload.get("timings")
+        def integer_metric(key: str) -> int | None:
+            value = usage.get(key) if isinstance(usage, dict) else None
+            return value if isinstance(value, int) and not isinstance(value, bool) else None
+        speed = timings.get("predicted_per_second") if isinstance(timings, dict) else None
+        return LLMCompletion(
+            normalize_lumi_identity(normalize_abstention(content)),
+            prompt_tokens=integer_metric("prompt_tokens"),
+            completion_tokens=integer_metric("completion_tokens"),
+            tokens_per_second=float(speed) if isinstance(speed, (float, int)) and not isinstance(speed, bool) else None,
+            raw_text=content.strip(),
+        )
 
     def _format_context(self, context: list[RetrievedContext]) -> str:
         sections: list[str] = []
@@ -129,7 +178,10 @@ class LocalOpenAICompatibleLLMService:
     ) -> dict[str, object]:
         body = None if payload is None else json.dumps(payload).encode("utf-8")
         request = Request(
-            f"{self.base_url}{path}",
+            (
+                f"{self.base_url.removesuffix('/v1')}/health"
+                if path == "/health" else f"{self.base_url}{path}"
+            ),
             data=body,
             method=method,
             headers={"Content-Type": "application/json"},
