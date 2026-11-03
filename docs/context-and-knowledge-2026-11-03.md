@@ -76,8 +76,8 @@ e reiniciar a administração para recarregar os dados.
 
 ## Limites conhecidos e próxima evolução
 
-- Não existe contexto ilimitado: a chamada ainda tem máximo de 8
-  turnos e 120 segundos no worker experimental.
+- Não existe contexto ilimitado: a chamada agora possui limite de 12 perguntas válidas,
+  36 tentativas de captura e 180 segundos no worker experimental; a política de silêncio encerra antes se necessário.
 - A memória atual resolve referências simples; não substitui um
   gerenciador geral de diálogo nem aplica identificação semântica
   profunda de intenção.

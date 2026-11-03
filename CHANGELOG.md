@@ -2,6 +2,15 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — auditoria e ampliação do Knowledge de Saúde/TI (03/11/2026)
+
+- Corpus do Senac PI ampliado de **21 documentos/43 trechos** para **25/51**, com quatro documentos oficiais novos: Saúde técnica, capacitações em Saúde, técnicos de TI por unidade e ficha do Técnico em Enfermagem (1600 h). Datas e fontes preservadas, sem transformar anúncios em vagas atuais.
+- Corrigida a omissão de Programação com Minecraft em Parnaíba (40 h) na fonte de tecnologia e na navegação física do Lumi.
+- Benchmark legado de 40 consultas sem regressão: Hit@1 0,600, Hit@4 0,833, MRR 0,697 e acurácia de abstenção 0,600. Dataset adicional de 17 consultas derivadas dos documentos: Hit@1 1,0; não independente.
+- Teste real Qwen+Grounding confirmou duração de Técnico em Enfermagem e recusa de vagas atuais; **identificou falso positivo de grounding para um nome de curso incorreto**. A LLM não está homologada para orientação factual sem revisão.
+- Documento de links de catálogo por unidade mantido em `docs/`, não indexado: sua inclusão reduziu MRR legado para 0,689. Backup do índice anterior preservado; **460 testes passaram**, Ruff/Mypy sem erros.
+- Auditoria completa: [docs/auditoria-knowledge-2026-11-03.md](docs/auditoria-knowledge-2026-11-03.md). Próximo gate: catálogo estruturado e validação exata de nomes de cursos/unidades.
+
 ## Não lançado — respostas de abstenção e consultas genéricas (03/11/2026)
 
 - Tom amigável do Lumi quando o grounding nega uma resposta: brincadeira com o orelhão dos anos 90 uma única vez por ligação; demais abstenções recebem texto curto. Perguntas sobre inscrições, vagas e preços são encaminhadas ao atendimento; questões pedagógicas à supervisão/coordenação responsável.

@@ -17,7 +17,9 @@ Revisão editorial: **03/11/2026**. Este é o ponto de entrada para documentaç�
 | [Sessão física](esp32-voice-session.md) | Gancho, monofone P3, limites da ligação e ensaios |
 | [Monitor de atendimento](live-monitor.md) | SSE da mesma sessão física e diagnóstico em tempo real |
 | [Intenções de voz](voice-intents.md) | Perguntas guiadas, comandos e regressões |
-| [Memória e Knowledge 03/11](context-and-knowledge-2026-11-03.md) | Corpus ampliado, benchmarks e limites |
+| [Auditoria atual do Knowledge 03/11](auditoria-knowledge-2026-11-03.md) | 25 fontes, 51 trechos, testes de Saúde/TI e falha identificada no grounding |
+| [Links do catálogo por unidade](catalogo-por-unidade-2026.md) | Referências oficiais para consulta externa, mantidas fora do índice por regressão |
+| [Memória e Knowledge (checkpoint anterior)](context-and-knowledge-2026-11-03.md) | Histórico de 21/43, benchmarks e limites |
 | [Operação](operations.md) | Serviços, acesso seguro e rollback |
 | [Changelog](../CHANGELOG.md) | Histórico versionado, com experimental separado de releases |
 | [Conhecimento](../knowledge/README.md) e [modelos](../models/README.md) | Organização e provisionamento |

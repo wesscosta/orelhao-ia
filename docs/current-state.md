@@ -7,10 +7,12 @@
 | Dimensão | Verificação atual |
 |---|---|
 | Branch de implementação | `feat/esp32-hook-serial-20261030`, derivada de `f2957c9`; `main` anterior à promoção em `351aacd` |
-| Testes no Dell Ubuntu 24.04, Python 3.12 | **453 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
-| Corpus Senac PI | **21 documentos / 43 trechos**, índice local não versionado |
+| Testes no Dell Ubuntu 24.04, Python 3.12 | **460 aprovados**, 1 aviso Starlette; Ruff/Mypy sem erros nos componentes verificados |
+| Corpus Senac PI | **25 documentos / 51 trechos**, índice local não versionado |
 | Retrieval legado (40 casos) | Hit@1 0,600; Hit@4 0,833; MRR 0,697; acurácia de abstenção 0,600: sem regressão |
 | Dataset de expansão (11 perguntas) | Hit@1 1,0; **não independente**, não mede respostas da LLM |
+| Nova expansão de Saúde/TI (17 perguntas) | Hit@1 1,0; dados derivados das novas fontes, **não é holdout** |
+| Teste real de geração/grounding no Dell | Duração do Técnico em Enfermagem corretamente fundamentada; vagas atuais bloqueadas; **nome de curso alterado pelo Qwen passou indevidamente como supported**. [Auditoria](auditoria-knowledge-2026-11-03.md) |
 | Voz física | ESP32 GPIO27/GND e USB serial, monofone P3 com entrada PipeWire pré-ativada por 2,6 s durante a saudação, Whisper small CPU e Piper `length_scale: 0.88`; qualidade STT ainda exige validação humana |
 | Monitor do atendimento | `/monitor` por SSE, somente leitura da mesma sessão; sem segundo STT/LLM/TTS |
 | Memória de diálogo | Até 4 interações na RAM da ligação, contexto de navegação e respostas guiadas. Abstenção do monofone: humor no máximo uma vez por ligação e encaminhamento ao atendimento/supervisão, preservando as causas técnicas no monitor e na bancada |
@@ -18,7 +20,7 @@
 | Segurança do Admin | Somente loopback `127.0.0.1:8765`; túnel SSH para outra máquina, sem autenticação para exposição pública |
 | Aprovação do piloto | **NO-GO**, até avaliação humana, microfone/STT confiáveis e ensaios físicos repetidos |
 
-O teclado 4×4 e o display do Orelhão **ainda não estão integrados** ao ESP32. Fontes de cursos de 2026 são históricas: **não atestam vagas e matrículas abertas hoje**. Consulte [hardware/voz](esp32-voice-session.md), [monitor](live-monitor.md), [base/memória](context-and-knowledge-2026-11-03.md) e [operação](operations.md).
+O teclado 4×4 e o display do Orelhão **ainda não estão integrados** ao ESP32. Fontes de cursos de 2026 são históricas: **não atestam vagas e matrículas abertas hoje**. Consulte [hardware/voz](esp32-voice-session.md), [monitor](live-monitor.md), [auditoria atual do Knowledge](auditoria-knowledge-2026-11-03.md), [base/memória anterior](context-and-knowledge-2026-11-03.md) e [operação](operations.md).
 
 ## Checkpoint histórico — 30/10/2026
 

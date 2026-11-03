@@ -17,9 +17,9 @@
 
 | Verificação | Resultado |
 |---|---|
-| Pytest (Dell Ubuntu 24.04, Python 3.12) | **453 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
+| Pytest (Dell Ubuntu 24.04, Python 3.12) | **460 testes aprovados**, 1 aviso de depreciação Starlette (03/11/2026) |
 | Ruff / Mypy | Sem erros nos módulos avaliados no Dell |
-| Corpus Senac Piauí | **21 documentos indexados, 43 chunks**; índice reconstruível fora do Git |
+| Corpus Senac Piauí | **25 documentos indexados, 51 chunks**; índice reconstruível fora do Git |
 | Retrieval original — 40 perguntas | Hit@1 **0,60**, Hit@k **0,833**, abstenção **0,60** |
 | Gate adversarial — 40 perguntas, Tucano2 | 0/20 falsas permissões automáticas nos negativos e **8/20 bloqueios indevidos** nos positivos |
 | Gate adversarial — 40 perguntas, Qwen3.5 | 0/20 falsas permissões automáticas nos negativos, **10/20 bloqueios indevidos** e **2 respostas NLI-supported sem fatos esperados** |
@@ -32,7 +32,7 @@ Veja [benchmark adversarial](docs/benchmark-grounding-real-2026-10-29.md), [fila
 
 O fluxo em teste é **gancho ESP32 → USB serial → sessão do monofone P3 → Whisper small CPU → consulta guiada ou RAG/LLM com grounding `enforce` → Piper 0.88**. A abertura atual é “Olá! Eu sou o Lumi. Como posso ajudar?”. O fluxo de cursos reconhece a escolha “Programação” após Informática e pode solicitar a cidade, apresentando apenas anúncios históricos identificados como tais. A entrada PipeWire é pré-ativada durante a saudação para evitar o transiente observado no Dell. A ligação mantém memória curta, até 12 perguntas válidas, 36 tentativas de captura e 180 segundos. O silêncio normal recebe um aviso e encerra após duas escutas sem fala (~14 s); pedido explícito de pausa permite até quatro escutas (~28 s), com retorno automático quando houver fala. Mensagens fixas possuem WAV em cache local.
 
-O [monitor SSE](docs/live-monitor.md) espelha **a mesma sessão**, sem inferência nem transmissão de áudio adicionais, e apaga a transcrição da visualização ao encerrar. Em recusas, a voz adota humor pontual inspirado no orelhão, com orientação ao atendimento ou à supervisão conforme o assunto, mas mantém as razões de grounding no monitor. O acesso web continua restrito a `localhost`: outras máquinas devem usar túnel SSH. A [base revisada](docs/context-and-knowledge-2026-11-03.md) tem 21 documentos e 43 trechos; o benchmark de recuperação legado de 40 casos **não regrediu**, mas isso **não homologa a qualidade das respostas da LLM**.
+O [monitor SSE](docs/live-monitor.md) espelha **a mesma sessão**, sem inferência nem transmissão de áudio adicionais, e apaga a transcrição da visualização ao encerrar. Em recusas, a voz adota humor pontual inspirado no orelhão, com orientação ao atendimento ou à supervisão conforme o assunto, mas mantém as razões de grounding no monitor. O acesso web continua restrito a `localhost`: outras máquinas devem usar túnel SSH. A [base ampliada](docs/auditoria-knowledge-2026-11-03.md) tem 25 documentos e 51 trechos, incluindo cursos de Saúde e cursos técnicos de TI por unidade; o benchmark legado de 40 casos **não regrediu**. Um teste real mostrou, porém, que o grounding ainda pode aprovar um nome de curso alterado indevidamente pela LLM. **Não homologado.**
 
 Mais detalhes: [sessão física](docs/esp32-voice-session.md), [memória e base](docs/context-and-knowledge-2026-11-03.md) e [operação](docs/operations.md).
 

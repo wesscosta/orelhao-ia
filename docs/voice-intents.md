@@ -109,16 +109,17 @@ Agora o roteador mantém estados de navegação efêmeros por ligação:
   a resposta `technology_area`;
 - `awaiting_programming_city` mantém o pedido de cidade após uma
   seleção geral de programação;
-- “Programação”, “Cursos na área de programação”, “E em Teresina?” e
-  “Quero em Piripiri” são reconhecidos como escolhas de navegação;
+- “Programação”, “Cursos na área de programação”, “E em Teresina?”,
+  “Em Parnaíba?” e “Quero em Piripiri” são reconhecidos como escolhas de navegação;
 - consultas sobre vagas, preços, requisitos, inscrições e carga horária
   continuam no RAG/grounding, em vez de receber afirmações prontas.
 
 As respostas guiadas citam apenas **exemplos históricos** da fonte
 `knowledge/sources/cursos/tecnologia-qualificacoes-2026.md`
 (publicação do Senac PI em 08/06/2026): Programação com Minecraft na
-Zona Leste de Teresina (40 h) e Técnico em Desenvolvimento de Sistemas
-em Piripiri (1200 h). Não apresentam vagas ou matrículas como atuais.
+Zona Leste de Teresina e em Parnaíba (40 h em cada localidade) e Técnico
+em Desenvolvimento de Sistemas em Piripiri (1200 h). Não apresentam
+vagas ou matrículas como atuais.
 
 **Limitação de manutenção:** os exemplos foram selecionados a partir de
 um documento verificado, mas estão incorporados em mensagens fixas,
