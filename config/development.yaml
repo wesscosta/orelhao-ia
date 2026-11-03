@@ -56,7 +56,7 @@ tts:
   voice_config_file: pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx.json
   voice_model_card_file: pt/pt_BR/cadu/medium/MODEL_CARD
   speaker: null
-  length_scale: 1.0
+  length_scale: 0.88
   noise_scale: 0.667
   noise_w: 0.8
 
