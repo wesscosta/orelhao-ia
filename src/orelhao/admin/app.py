@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import html
 import json
 import os
@@ -11,6 +12,7 @@ from typing import Annotated
 from urllib.parse import quote
 
 from orelhao.config import AppConfig, load_config
+from orelhao.hardware.live_monitor import snapshot as monitor_snapshot
 from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.interfaces.voice.resample import resample_pcm16, trim_silence_pcm16
 from orelhao.runtime_paths import resolve_project_path
@@ -33,14 +35,21 @@ from orelhao.services.tts.voice_catalog import (
 )
 
 try:
-    from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-    from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+    from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+    from fastapi.responses import (
+        HTMLResponse,
+        JSONResponse,
+        RedirectResponse,
+        Response,
+        StreamingResponse,
+    )
     from starlette.concurrency import run_in_threadpool
 except ImportError:  # pacote base continua utilizável sem o extra [admin]
-    FastAPI = File = Form = HTTPException = UploadFile = None
-    HTMLResponse = JSONResponse = RedirectResponse = Response = None
+    FastAPI = File = Form = HTTPException = Request = UploadFile = None
+    HTMLResponse = JSONResponse = RedirectResponse = Response = StreamingResponse = None
     run_in_threadpool = None
 
+from .live_view import MONITOR_BODY
 from .source_manager import (
     MAX_SOURCE_BYTES,
     atomic_write_source,
@@ -100,7 +109,7 @@ th, td {{ text-align:left; padding:.6rem; border-bottom:1px solid #e5e7eb; }}
 </style>
 </head>
 <body>
-<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a></nav></header>
+<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a></nav></header>
 {body}
 </body>
 </html>"""
@@ -237,6 +246,36 @@ def create_admin_app(
             }
 
         threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
+
+    @app.get("/monitor", response_class=HTMLResponse)
+    async def monitor_home():
+        return HTMLResponse(_layout("Monitor de Atendimento", MONITOR_BODY),
+                            headers={"Cache-Control": "no-store"})
+
+    @app.get("/monitor/state", response_class=JSONResponse)
+    async def monitor_state():
+        return JSONResponse(monitor_snapshot(), headers={"Cache-Control": "no-store"})
+
+    @app.get("/monitor/events")
+    async def monitor_events(request: Request):
+        async def stream():
+            last_payload = None
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + 15.0
+            # Encerrar fluxos periodicamente evita bloquear reinícios do Uvicorn.
+            while loop.time() < deadline and not await request.is_disconnected():
+                payload = json.dumps(monitor_snapshot(), ensure_ascii=False,
+                                     separators=(",", ":"))
+                if payload != last_payload:
+                    yield f"data: {payload}\n\n"
+                    last_payload = payload
+                await asyncio.sleep(0.5)
+            yield "retry: 500\n\n"
+
+        return StreamingResponse(stream(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-store",
+                                          "X-Accel-Buffering": "no",
+                                          "X-Content-Type-Options": "nosniff"})
 
     @app.get("/", response_class=HTMLResponse)
     async def home():
