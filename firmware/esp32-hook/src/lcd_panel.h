@@ -5,7 +5,14 @@
 
 #include <cstring>
 
-// Adaptador opcional LCD 1602, paralelo 4 bits.
+#ifndef ORELHAO_LCD_ROWS
+#define ORELHAO_LCD_ROWS 2
+#endif
+#if ORELHAO_LCD_ROWS != 1 && ORELHAO_LCD_ROWS != 2
+#error "LCD: only 1 or 2 character rows supported"
+#endif
+
+// LCD paralelo opcional, no modo 4 bits.
 // HABILITAR somente apos confirmar pinagem, tensao e interface 3V3->5V.
 // Pinos do ESP32: RS=16, E=17, D4=18, D5=19, D6=21, D7=22.
 // GPIO27 permanece exclusivamente reservado ao gancho.
@@ -34,10 +41,22 @@ void writeRow(uint8_t row, const char* text) {
 
 void show(const char* first, const char* second) {
   writeRow(0, first);
+#if ORELHAO_LCD_ROWS == 2
   writeRow(1, second);
+#else
+  (void)second;
+#endif
 }
 
 void state(const char* name) {
+#if ORELHAO_LCD_ROWS == 1
+  if (strcmp(name, "READY") == 0) { show("LUMI - SENAC", ""); }
+  else if (strcmp(name, "LISTENING") == 0) { show("ESCUTANDO...", ""); }
+  else if (strcmp(name, "PROCESSING") == 0) { show("PROCESSANDO...", ""); }
+  else if (strcmp(name, "SPEAKING") == 0) { show("RESPONDENDO...", ""); }
+  else if (strcmp(name, "PAUSED") == 0) { show("AGUARDANDO...", ""); }
+  else if (strcmp(name, "ERROR") == 0) { show("INDISPONIVEL", ""); }
+#else
   if (strcmp(name, "READY") == 0) {
     show("LUMI - SENAC", "RETIRE O FONE");
   } else if (strcmp(name, "LISTENING") == 0) {
@@ -51,6 +70,7 @@ void state(const char* name) {
   } else if (strcmp(name, "ERROR") == 0) {
     show("LUMI - SENAC", "INDISPONIVEL");
   }
+#endif
 }
 
 void handle(char* message) {
@@ -71,8 +91,8 @@ void handle(char* message) {
 }  // namespace
 
 inline void begin() {
-  lcd.begin(16, 2);
-  show("LUMI - SENAC", "AGUARDANDO...");
+  lcd.begin(16, ORELHAO_LCD_ROWS);
+  state("READY");
 }
 
 // Recebe comandos completos sem bloquear o loop do gancho.
