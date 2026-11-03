@@ -1,0 +1,68 @@
+[
+  {
+    "query": "Quais cursos de gestão o Senac Piauí anunciou em 2026?",
+    "expected_sources": [
+      "cursos/gestao-comercio-amostras-2026.md"
+    ]
+  },
+  {
+    "query": "O Senac Piauí anunciou capacitações de gestão ou comércio em 2026?",
+    "expected_sources": [
+      "cursos/gestao-comercio-amostras-2026.md"
+    ]
+  },
+  {
+    "query": "Qual a carga horária do curso 5S Aplicado à Logística?",
+    "expected_sources": [
+      "cursos/gestao-comercio-amostras-2026.md"
+    ]
+  },
+  {
+    "query": "Quais cursos de inteligência artificial para negócios apareceram em Bom Jesus?",
+    "expected_sources": [
+      "cursos/gestao-comercio-amostras-2026.md"
+    ]
+  },
+  {
+    "query": "Que cursos de robótica o Senac apresentou em Teresina?",
+    "expected_sources": [
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  },
+  {
+    "query": "O Senac ofereceu capacitação Agentes de IA com N8N?",
+    "expected_sources": [
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Onde o Senac divulgou Engenharia de Prompt com 24 horas?",
+    "expected_sources": [
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Qual capacitação de Power BI Avançado foi anunciada em Floriano?",
+    "expected_sources": [
+      "cursos/tecnologia-qualificacoes-2026.md"
+    ]
+  },
+  {
+    "query": "Quantas vagas estavam previstas no Edital PSG 004 de 2026?",
+    "expected_sources": [
+      "psg/edital-004-2026-exemplo.md"
+    ]
+  },
+  {
+    "query": "Quais documentos eram exigidos no Edital 004 do PSG em 2026?",
+    "expected_sources": [
+      "psg/edital-004-2026-exemplo.md"
+    ]
+  },
+  {
+    "query": "Quais cursos gratuitos foram citados no edital PSG 004 2026?",
+    "expected_sources": [
+      "psg/edital-004-2026-exemplo.md"
+    ]
+  }
+]
