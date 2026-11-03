@@ -1,5 +1,13 @@
 #include <Arduino.h>
 
+#ifndef ORELHAO_LCD_ENABLED
+#define ORELHAO_LCD_ENABLED 0
+#endif
+
+#if ORELHAO_LCD_ENABLED
+#include "lcd_panel.h"
+#endif
+
 // GPIO27 <-> contato seco do gancho <-> GND.
 // Nunca conectar tensao externa/linha telefonica ao GPIO.
 namespace {
@@ -31,6 +39,9 @@ void setup() {
   pinMode(kHookPin, INPUT_PULLUP);
   Serial.begin(115200);
   delay(250);
+#if ORELHAO_LCD_ENABLED
+  lcd_panel::begin();
+#endif
   stableClosed = (digitalRead(kHookPin) == LOW);
   lastRawClosed = stableClosed;
   lastRawChange = millis();
@@ -49,7 +60,10 @@ void loop() {
     publish("change");
   }
   if (now - lastReport >= kReportEveryMs) {
-    publish("state");  // Recupera o estado caso o host abra a porta depois do boot.
+    publish("state");  // Recupera estado caso host abra porta depois do boot.
   }
+#if ORELHAO_LCD_ENABLED
+  lcd_panel::poll();
+#endif
   delay(kLoopDelayMs);
 }
