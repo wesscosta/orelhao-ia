@@ -12,6 +12,7 @@ from orelhao.hardware.conversation_context import ContextResolution, Conversatio
 from orelhao.hardware.hook_runtime import ensure_audio_ready
 from orelhao.hardware.idle_policy import CallIdlePolicy
 from orelhao.hardware.live_monitor import publish, voice_observation_log_path
+from orelhao.hardware.turn_taking import TurnTakingPlayback
 from orelhao.hardware.voice_abstention import VoiceAbstentionPolicy
 from orelhao.hardware.voice_intents import (
     VoiceIntentRouter,
@@ -47,7 +48,7 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
     prompts = VoicePromptCache(tts)
     intents = VoiceIntentRouter(runtime_summary=runtime_description(config))
     context = ConversationContext()
-    playback = SoundDeviceAudioPlayback(config.audio)
+    playback = TurnTakingPlayback(SoundDeviceAudioPlayback(config.audio))
     if not ensure_audio_ready():
         raise RuntimeError("Rota P3 indisponível antes da saudação")
     deadline = time.monotonic() + max_seconds
@@ -90,6 +91,10 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             break
         if not ensure_audio_ready():
             raise RuntimeError("Rota P3 indisponível antes da captura")
+        # Nao abrir o microfone antes do fim do TTS e do intervalo antieco.
+        playback.wait_before_capture()
+        if time.monotonic() >= deadline:
+            break
         LOG.info("escuta_iniciada turno=%d", turn)
         publish(
             "voice.listening", turn=turn,
