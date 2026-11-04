@@ -11,12 +11,16 @@ A serigrafia fotografada e `SCL | SDA | VCC | GND`
 
 | Backpack | ESP32 DevKit V1 | Observacao |
 |---|---|---|
-| SCL | GPIO22 (D22) | via adaptador de nivel I2C, se alimentado 5 V |
-| SDA | GPIO21 (D21) | via adaptador de nivel I2C, se alimentado 5 V |
+| SCL | GPIO18 (D18) | via adaptador de nivel I2C, se alimentado 5 V |
+| SDA | GPIO4 (D4) | via adaptador de nivel I2C, se alimentado 5 V |
 | VCC | 5 V regulados/VIN medido | verificar especificacao e tensao real antes |
 | GND | GND | terra comum |
 | LED (2 pinos separados) | **nao ligar ao ESP32** | conector para jumper de habilitacao backlight |
 | Gancho | GPIO27/GND | manter como esta |
+
+**GPIO4:** verificar reinicializacao e modo de boot com o LCD conectado;
+se surgir incompatibilidade, escolher GPIO comum alternativo, como GPIO19,
+e ajustar o firmware. Nao confundir pino GPIO4 do ESP32 com o pino 4 do LCD paralelo.
 
 **Seguranca eletrica:** os GPIOs do ESP32 nao toleram 5 V.
 Backpacks comuns usam resistores pull-up I2C a VCC=5 V.

@@ -1,6 +1,6 @@
 #pragma once
 
-// LCD 16x2 + backpack PCF8574. SDA=GPIO21, SCL=GPIO22.
+// LCD 16x2 + backpack PCF8574. SDA=GPIO4 (D4), SCL=GPIO18 (D18).
 // Never put 5V on ESP32 GPIOs: use a bidirectional I2C level shifter
 // when the backpack is powered at 5V.
 #include <Arduino.h>
@@ -71,7 +71,7 @@ void handle(char* message) {
 }  // namespace
 
 inline void begin() {
-  Wire.begin(21, 22);
+  Wire.begin(4, 18);
   Wire.setClock(100000);
   Wire.setTimeOut(50);  // Falha de I2C nao deve congelar o monitor do gancho.
   int status = lcd.begin(kColumns, kRows);
