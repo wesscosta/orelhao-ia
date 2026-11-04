@@ -10,7 +10,8 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from orelhao.hardware.live_monitor import finish_session, start_session
+from orelhao.hardware.lcd_status import LCDStatusBridge
+from orelhao.hardware.live_monitor import finish_session, snapshot, start_session
 from orelhao.hardware.serial_hook import DEFAULT_PORT, HookEvent, parse_hook_event
 
 LOG = logging.getLogger(__name__)
@@ -175,12 +176,17 @@ def main() -> None:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     controller = HookCallController()
+    # So enviar comandos de LCD apos gravar a variante I2C validada.
+    lcd = LCDStatusBridge() if os.environ.get("ORELHAO_LCD_I2C_ENABLED") == "1" else None
     while True:
         try:
             with serial.Serial(DEFAULT_PORT, 115200, timeout=1, rtscts=False, dsrdtr=False) as port:
                 port.dtr = False
                 port.rts = False
                 LOG.info("gancho_usb_conectado")
+                if lcd is not None:
+                    lcd.reset()
+                    lcd.send(port, "READY")
                 while True:
                     event = parse_hook_event(port.readline(257))
                     if event is not None:
@@ -189,6 +195,10 @@ def main() -> None:
                         if event.kind == "change" or previous is None:
                             LOG.info("gancho contato=%s kind=%s", event.contact, event.kind)
                     controller.check()
+                    if lcd is not None:
+                        pid = getattr(controller._proc, "pid", -1)
+                        current_session = _MONITOR_SESSIONS.get(pid)
+                        lcd.tick(port, session_id=current_session, snapshot_fn=snapshot)
         except (OSError, serial.SerialException) as exc:
             controller.disconnected()
             LOG.warning("gancho_usb_desconectado: %s", exc)

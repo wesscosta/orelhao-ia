@@ -5,7 +5,11 @@
 #endif
 
 #if ORELHAO_LCD_ENABLED
+#if ORELHAO_LCD_I2C
+#include "lcd_panel_i2c.h"
+#else
 #include "lcd_panel.h"
+#endif
 #endif
 
 // GPIO27 <-> contato seco do gancho <-> GND.
