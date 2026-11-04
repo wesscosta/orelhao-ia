@@ -49,6 +49,13 @@ def test_transitions_and_deduplication() -> None:
     ]
 
 
+def test_waiting_for_knowledge_is_processing_not_user_pause() -> None:
+    data = {"session_id": "s", "active": True, "events": [{"type": "voice.waiting"}]}
+    assert choose_state(data, "s") == "PROCESSING"
+    data["events"].append({"type": "voice.paused"})
+    assert choose_state(data, "s") == "PAUSED"
+
+
 def test_invalid_state_not_sent() -> None:
     port = FakeSerial()
     reporter = LCDStatusBridge()

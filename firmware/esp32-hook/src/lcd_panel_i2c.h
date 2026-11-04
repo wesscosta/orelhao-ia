@@ -13,10 +13,8 @@ namespace lcd_panel {
 namespace {
 constexpr int kColumns = 16;
 constexpr int kRows = 2;
-constexpr uint32_t kRetryMs = 10000;
 hd44780_I2Cexp lcd;  // Auto-detecta endereco e mapeamento do backpack.
 bool ready = false;
-uint32_t lastAttempt = 0;
 char input[96] = {};
 size_t length = 0;
 bool discarding = false;
@@ -75,26 +73,18 @@ void handle(char* message) {
 inline void begin() {
   Wire.begin(21, 22);
   Wire.setClock(100000);
-  lastAttempt = millis();
+  Wire.setTimeOut(50);  // Falha de I2C nao deve congelar o monitor do gancho.
   int status = lcd.begin(kColumns, kRows);
   ready = (status == 0);
   if (ready) {
     lcd.backlight();
     state("READY");
   }
-  // Fail-open for hook: missing LCD must not block hook detection.
+  Serial.printf("{\"lcd\":\"%s\"}\n", ready ? "ready" : "not_found");
+  // Sem retry automatico: uma falha I2C nao deve atrasar os eventos do gancho.
 }
 
 inline void poll() {
-  if (!ready && millis() - lastAttempt >= kRetryMs) {
-    lastAttempt = millis();
-    int status = lcd.begin(kColumns, kRows);
-    ready = (status == 0);
-    if (ready) {
-      lcd.backlight();
-      state("READY");
-    }
-  }
   while (Serial.available() > 0) {
     const char c = static_cast<char>(Serial.read());
     if (c == '\n') {

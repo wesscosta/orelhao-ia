@@ -180,7 +180,8 @@ def main() -> None:
     lcd = LCDStatusBridge() if os.environ.get("ORELHAO_LCD_I2C_ENABLED") == "1" else None
     while True:
         try:
-            with serial.Serial(DEFAULT_PORT, 115200, timeout=1, rtscts=False, dsrdtr=False) as port:
+            with serial.Serial(DEFAULT_PORT, 115200, timeout=1, write_timeout=0.25,
+                               rtscts=False, dsrdtr=False) as port:
                 port.dtr = False
                 port.rts = False
                 LOG.info("gancho_usb_conectado")

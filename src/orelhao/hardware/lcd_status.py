@@ -18,7 +18,7 @@ _EVENT_STATE = {
     "voice.transcription_invalid": "LISTENING",
     "voice.context": "PROCESSING",
     "voice.processing": "PROCESSING",
-    "voice.waiting": "PAUSED",
+    "voice.waiting": "PROCESSING",
     "voice.paused": "PAUSED",
     "voice.response": "SPEAKING",
     "voice.playback": "SPEAKING",
