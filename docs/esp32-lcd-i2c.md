@@ -59,13 +59,25 @@ LCD:TEXT:LUMI - SENAC|BEM-VINDO!
 ```
 
 A rotina do gancho continua emitindo JSON Lines `orelhao.hook.v1`.
-O supervisor serial existente pode mandar estados de UI pela
-mesma porta, sem abrir segunda conexao serial. O bridge do host
-`src/orelhao/hardware/lcd_status.py` so transmite enumeracoes
-sem transcricoes, respostas ou outros dados pessoais.
-**Por padrao fica desativado:** `ORELHAO_LCD_I2C_ENABLED=1`
-deve ser configurado para o servico depois do flash e da
-validacao da placa. Isso evita alterar a sessao atual.
+O supervisor serial transmite estados e paginas de resposta pela
+mesma porta do gancho, sem abrir segunda conexao serial.
+O bridge `src/orelhao/hardware/lcd_status.py` usa somente os
+resultados apresentados ao usuario pelo fluxo validado (RAG/grounding).
+A exibicao de respostas exige habilitacao explicita para evitar
+exposicao involuntaria em uma tela publica. Perguntas transcritas
+nao sao exibidas por padrao.
+
+Variaveis de ambiente do servico:
+- `ORELHAO_LCD_I2C_ENABLED=1`: ativa atualizacao de estados.
+- `ORELHAO_LCD_SHOW_ANSWERS=1`: exibe o texto da resposta, com
+  paginacao de 16x2 caracteres a cada 2,3 segundos.
+
+Caracteres acentuados sao transliterados para ASCII; comandos de
+controle sao neutralizados. Apenas os primeiros 480 caracteres
+da resposta sao mostrados, com `...` quando truncada. O buffer
+de paginas fica somente em memoria, e e apagado ao encerrar a
+sessao. Nao ha persistencia adicional de transcricoes nesse recurso.
+O firmware do ESP32 continua sendo o mesmo: a paginacao ocorre no host.
 
 ## Etapas de verificacao (ainda nao executadas fisicamente)
 
@@ -84,5 +96,8 @@ validacao da placa. Isso evita alterar a sessao atual.
    no servico de voz para refletir os estados em tempo real.
 7. Nao deixar dois clientes simultaneos em /dev/ttyUSB0.
 
-**Estado deste registro:** firmware e host preparados;
-nenhum flash nem energizacao fisica executados nesta etapa.
+**Estado deste registro:** variante I2C gravada no ESP32 e
+comunicacao basica confirmada visualmente; integracao das respostas
+foi testada automaticamente no host. A validacao eletrica da
+interface 3V3/5V continua necessaria, independentemente da tela
+funcionar.

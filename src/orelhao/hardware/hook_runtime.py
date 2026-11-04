@@ -177,7 +177,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     controller = HookCallController()
     # So enviar comandos de LCD apos gravar a variante I2C validada.
-    lcd = LCDStatusBridge() if os.environ.get("ORELHAO_LCD_I2C_ENABLED") == "1" else None
+    lcd = (LCDStatusBridge(
+        show_answers=os.environ.get("ORELHAO_LCD_SHOW_ANSWERS") == "1",
+    ) if os.environ.get("ORELHAO_LCD_I2C_ENABLED") == "1" else None)
     while True:
         try:
             with serial.Serial(DEFAULT_PORT, 115200, timeout=1, write_timeout=0.25,
