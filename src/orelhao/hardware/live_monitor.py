@@ -104,6 +104,8 @@ def start_session() -> str:
             _replace(path, _event(session_id, "session.started", status="iniciando"))
         except OSError as exc:
             LOG.warning("Monitor não disponível: %s", exc)
+    from orelhao.hardware.audit import record_event
+    record_event(session_id, "session.started", status="iniciando")
     return session_id
 
 
@@ -127,6 +129,8 @@ def publish(kind: str, *, session_id: str | None = None, **details: Any) -> None
     current = session_id or os.environ.get("ORELHAO_MONITOR_SESSION_ID")
     if not current:
         return
+    from orelhao.hardware.audit import record_event
+    record_event(current, kind, **details)
     path = _file()
     if path is None or _existing_session(path) != current:
         return  # Evita que um worker antigo polua uma chamada nova.
@@ -145,6 +149,8 @@ def publish(kind: str, *, session_id: str | None = None, **details: Any) -> None
 
 def finish_session(session_id: str, reason: str) -> None:
     """Apaga transcrições/respostas ao encerrar a ligação, preservando só o estado."""
+    from orelhao.hardware.audit import record_event
+    record_event(session_id, "session.ended", reason=reason)
     path = _file()
     if path is None or _existing_session(path) != session_id:
         return

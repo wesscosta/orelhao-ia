@@ -121,7 +121,10 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                     metrics={"capture_ms": capture_ms,
                              "peak_rms": diagnostics.peak_rms,
                              "noise_floor": diagnostics.noise_floor,
-                             "threshold": diagnostics.speech_threshold})
+                             "threshold": diagnostics.speech_threshold,
+                             "overflow_count": diagnostics.overflow_count,
+                             "false_starts": diagnostics.false_starts,
+                             "speech_detected": int(diagnostics.speech_detected)})
         else:
             publish("voice.capture", turn=turn, status="concluida",
                     metrics={"capture_ms": capture_ms})
