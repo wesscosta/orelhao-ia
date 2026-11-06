@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from orelhao.hardware.audit import export_csv, summary
 
+from .access import is_local_request
 from .audit_view import audit_page as render_audit_page
 
 router = APIRouter(prefix="/audit")
@@ -31,8 +32,8 @@ def _admin_only(
 ) -> None:
     # HTTPS na frente pode alterar o endereco visto pelo app. Sem proxy de confianca,
     # a rota e restrita a conexao local (acessivel por tunel SSH).
-    address = request.client.host if request.client else ""
-    if address not in ("127.0.0.1", "::1", "testclient"):
+    # O Host tambem precisa ser local, bloqueando DNS rebinding.
+    if not is_local_request(request):
         raise HTTPException(status_code=403, detail="Auditoria somente via acesso local")
     expected = os.environ.get("ORELHAO_AUDIT_PASSWORD", "")
     if len(expected) < 16:

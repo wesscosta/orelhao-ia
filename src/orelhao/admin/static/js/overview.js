@@ -95,7 +95,7 @@
   async function audit() {
     const status = byId('ov-audit-status');
     try {
-      const res = await fetch('/audit/summary?days=7', {cache: 'no-store', credentials: 'same-origin'});
+      const res = await fetch('/audit/summary?days=7', {cache: 'no-store', credentials: 'same-origin', headers: {'X-Requested-With': 'fetch'}});
       if (res.status === 401 || res.status === 403) {
         status.textContent = 'Indicadores restritos ao administrador. Entre pela página de auditoria para vê-los.';
         done(); return;

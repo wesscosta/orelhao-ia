@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import threading
+from collections.abc import AsyncIterator
 from pathlib import Path
 from time import perf_counter
 from typing import Annotated
@@ -33,7 +34,6 @@ from orelhao.services.tts.voice_catalog import (
 
 try:
     from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
-    from fastapi.exceptions import HTTPException as _FastAPIHTTPException
     from fastapi.responses import (
         HTMLResponse,
         JSONResponse,
@@ -44,17 +44,21 @@ try:
     from fastapi.staticfiles import StaticFiles
     from starlette.concurrency import run_in_threadpool
     from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    from .access import local_only
 except ImportError:  # pacote base continua utilizável sem o extra [admin]
     FastAPI = File = Form = HTTPException = Request = UploadFile = None
     HTMLResponse = JSONResponse = RedirectResponse = Response = StreamingResponse = None
     run_in_threadpool = None
-    StaticFiles = StarletteHTTPException = _FastAPIHTTPException = None
+    StaticFiles = StarletteHTTPException = None  # type: ignore[assignment,misc]
+    local_only = None  # type: ignore[assignment]
 
 from . import knowledge_view, workbench_view
 from .live_view import monitor_page
 from .overview_view import overview_page
 from .source_manager import (
     MAX_SOURCE_BYTES,
+    SourceFile,
     atomic_write_source,
     create_markdown_source,
     delete_source,
@@ -65,6 +69,15 @@ from .source_manager import (
 from .system_metrics import SystemMetricsCollector
 from .system_view import system_page
 from .ui import STATIC_DIR, alert, render_page
+
+# Respostas com dados operacionais: sem cache, sem sniffing, sem enquadramento
+# por outros sites e sem vazar a URL interna em Referer.
+PRIVATE_HEADERS = {
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+}
 
 
 def _require_web() -> None:
@@ -158,6 +171,10 @@ def create_admin_app(
         # Navegação do navegador (Accept: text/html) recebe página legível; fetch e
         # clientes de API continuam recebendo JSON com "detail".
         headers = getattr(exc, "headers", None)
+        if headers and request.headers.get("x-requested-with") == "fetch":
+            # Consultas em segundo plano (visão geral) não devem abrir o diálogo
+            # Basic do navegador; a página trata 401/403 com mensagem própria.
+            headers = {k: v for k, v in headers.items() if k.lower() != "www-authenticate"}
         if "text/html" in request.headers.get("accept", ""):
             return HTMLResponse(_error_page(exc.status_code, str(exc.detail)),
                                 status_code=exc.status_code, headers=headers)
@@ -239,32 +256,33 @@ def create_admin_app(
 
         threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
 
-    @app.get("/system", response_class=HTMLResponse)
-    async def system_home():
-        return HTMLResponse(
-            system_page(),
-            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
-        )
+    # Monitoramento e visão geral expõem transcrições ao vivo e o estado da
+    # máquina: somente acesso local (túnel SSH), inclusive contra DNS rebinding.
+    from fastapi import Depends
 
-    @app.get("/system/state", response_class=JSONResponse)
-    async def system_state():
+    local = [Depends(local_only)]
+
+    @app.get("/system", response_class=HTMLResponse, dependencies=local)
+    async def system_home() -> HTMLResponse:
+        return HTMLResponse(system_page(), headers=PRIVATE_HEADERS)
+
+    @app.get("/system/state", response_class=JSONResponse, dependencies=local)
+    async def system_state() -> JSONResponse:
         # systemctl e /proc são leitura local; não bloquear o event loop ASGI.
         data = await run_in_threadpool(system_collector.snapshot)
-        return JSONResponse(
-            data, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
-        )
+        return JSONResponse(data, headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor", response_class=HTMLResponse)
-    async def monitor_home():
-        return HTMLResponse(monitor_page(), headers={"Cache-Control": "no-store"})
+    @app.get("/monitor", response_class=HTMLResponse, dependencies=local)
+    async def monitor_home() -> HTMLResponse:
+        return HTMLResponse(monitor_page(), headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor/state", response_class=JSONResponse)
-    async def monitor_state():
-        return JSONResponse(monitor_snapshot(), headers={"Cache-Control": "no-store"})
+    @app.get("/monitor/state", response_class=JSONResponse, dependencies=local)
+    async def monitor_state() -> JSONResponse:
+        return JSONResponse(monitor_snapshot(), headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor/events")
-    async def monitor_events(request: Request):
-        async def stream():
+    @app.get("/monitor/events", dependencies=local)
+    async def monitor_events(request: Request) -> StreamingResponse:
+        async def stream() -> AsyncIterator[str]:
             last_payload = None
             loop = asyncio.get_running_loop()
             deadline = loop.time() + 15.0
@@ -279,11 +297,9 @@ def create_admin_app(
             yield "retry: 500\n\n"
 
         return StreamingResponse(stream(), media_type="text/event-stream",
-                                 headers={"Cache-Control": "no-store",
-                                          "X-Accel-Buffering": "no",
-                                          "X-Content-Type-Options": "nosniff"})
+                                 headers={**PRIVATE_HEADERS, "X-Accel-Buffering": "no"})
 
-    def knowledge_state() -> tuple[list, dict[str, str], dict[str, object], bool]:
+    def knowledge_state() -> tuple[list[SourceFile], dict[str, str], dict[str, object], bool]:
         files = list_sources(resolved.sources)
         manifest = _manifest(resolved.index)
         indexed = _indexed_sources(manifest)
@@ -295,16 +311,16 @@ def create_admin_app(
         }
         return files, statuses, manifest, _index_is_stale(current_indexable, manifest)
 
-    @app.get("/overview", response_class=HTMLResponse)
-    async def overview():
+    @app.get("/overview", response_class=HTMLResponse, dependencies=local)
+    async def overview() -> HTMLResponse:
         files, _statuses, manifest, stale = await run_in_threadpool(knowledge_state)
         return HTMLResponse(
             overview_page(index_ready=bool(manifest), index_stale=stale, sources=len(files)),
-            headers={"Cache-Control": "no-store"},
+            headers=PRIVATE_HEADERS,
         )
 
     @app.get("/", response_class=HTMLResponse)
-    async def home():
+    async def home() -> HTMLResponse:
         files, statuses, manifest, stale = knowledge_state()
         return HTMLResponse(knowledge_view.sources_page(files, statuses, manifest, stale=stale))
 
@@ -352,7 +368,7 @@ def create_admin_app(
         return RedirectResponse(url=f"/edit/{quote(name)}", status_code=303)
 
     @app.get("/edit/{relative_path:path}", response_class=HTMLResponse)
-    async def edit(relative_path: str, saved: bool = False):
+    async def edit(relative_path: str, saved: bool = False) -> HTMLResponse:
         try:
             content = read_source(resolved.sources, relative_path)
         except (ValueError, FileNotFoundError) as exc:
