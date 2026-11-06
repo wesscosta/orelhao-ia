@@ -19,6 +19,7 @@ img, svg { max-width: 100%; }
 .icon { flex: none; vertical-align: middle; }
 
 [id] { scroll-margin-top: var(--sp-4); }
+a, button, summary, label, select, input[type="checkbox"] { touch-action: manipulation; }
 .alert:focus { outline: none; box-shadow: var(--focus-ring); }
 :focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
 .skip-link {
@@ -104,6 +105,7 @@ img, svg { max-width: 100%; }
   .app { background: none; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; }
   .topbar { grid-column: 1; grid-row: 1; padding: var(--sp-3) var(--sp-4); }
   .nav-toggle { display: inline-flex; }
+  html { scroll-padding-top: 5.5rem; } /* barra superior fixa não cobre o foco */
   .sidebar {
     grid-column: 1; grid-row: 2; position: static; max-height: none; padding-bottom: var(--sp-4);
     border-top: 1px solid #2a4566;

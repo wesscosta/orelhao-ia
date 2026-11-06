@@ -116,7 +116,7 @@ def edit_page(relative_path: str, content: str, *, saved: bool = False) -> str:
     body = f"""{notice}
 <section class="panel" aria-labelledby="editor-titulo">
   <div class="panel-head"><h2 id="editor-titulo"><code>{e(relative_path)}</code></h2></div>
-  <form method="post" action="/save" data-busy="Salvando…">
+  <form method="post" action="/save" data-busy="Salvando…" data-guard>
     <input type="hidden" name="relative_path" value="{e(relative_path)}">
     <div class="field"><label for="content">Conteúdo em Markdown</label>
       <textarea id="content" class="code" name="content" required spellcheck="true"

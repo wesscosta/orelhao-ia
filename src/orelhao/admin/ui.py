@@ -113,6 +113,8 @@ def render_page(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1726" media="(prefers-color-scheme: dark)">
 <title>{e(title)} — Orelhão IA</title>
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" href="/static/fonts/atkinson-hyperlegible-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -127,7 +129,7 @@ def render_page(
   <header class="topbar">
     <a class="brand" href="/overview">
       <span class="brand-mark" aria-hidden="true">{icon("i-phone", size=18)}</span>
-      <span class="brand-text"><strong>Orelhão IA</strong><span>Lumi · Senac Piauí</span></span>
+      <span class="brand-text" translate="no"><strong>Orelhão IA</strong><span>Lumi · Senac Piauí</span></span>
     </a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu-principal">
       {icon("i-menu")}<span>Menu</span>

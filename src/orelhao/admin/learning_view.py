@@ -103,11 +103,11 @@ def _review_panel(item: Mapping[str, Any] | None, row: Mapping[str, Any],
     )
     invalid = ' aria-invalid="true"' if error else ""
     form = f"""
-<form method="post" action="/audit/faq/review" data-busy="Salvando…">
+<form method="post" action="/audit/faq/review" data-busy="Salvando…" data-guard>
   <input type="hidden" name="label" value="{e(item['label'])}">
   <input type="hidden" name="topic" value="{e(item['topic'])}">
   <div class="field"><label for="faq-question">Pergunta revisada</label>
-    <input id="faq-question" name="question" required minlength="10" maxlength="240"
+    <input id="faq-question" name="question" autocomplete="off" required minlength="10" maxlength="240"
       value="{e(values.get('question', ''))}" aria-describedby="faq-question-hint"{invalid}>
     <span class="field-hint" id="faq-question-hint">Uma linha, 10 a 240 caracteres. O agrupamento é
     aproximado: escreva uma pergunta específica.</span></div>
@@ -116,7 +116,7 @@ def _review_panel(item: Mapping[str, Any] | None, row: Mapping[str, Any],
       aria-describedby="faq-answer-hint"{invalid}>{e(values.get('answer', ''))}</textarea>
     <span class="field-hint" id="faq-answer-hint">Somente fatos confirmados na fonte; até 1.600 caracteres.</span></div>
   <div class="field"><label for="faq-source">Fonte institucional vigente</label>
-    <input id="faq-source" name="source" type="url" required maxlength="700" inputmode="url"
+    <input id="faq-source" name="source" type="url" autocomplete="off" required maxlength="700" inputmode="url"
       spellcheck="false" placeholder="https://" value="{e(values.get('source', ''))}"
       aria-describedby="faq-source-hint"{invalid}>
     <span class="field-hint" id="faq-source-hint">Endereço HTTPS completo da página oficial consultada.</span></div>

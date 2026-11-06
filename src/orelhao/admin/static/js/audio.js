@@ -35,7 +35,14 @@
       } else {
         const wrap = document.createElement('div'); wrap.className = 'table-wrap';
         const table = document.createElement('table');
-        table.innerHTML = '<thead><tr><th scope="col">Motivo</th><th scope="col" class="num">Ocorrências</th></tr></thead>';
+        const head = document.createElement('thead');
+        const hr = document.createElement('tr');
+        for (const [label, cls] of [['Motivo', ''], ['Ocorrências', 'num']]) {
+          const th = document.createElement('th'); th.scope = 'col'; th.textContent = label;
+          if (cls) th.className = cls;
+          hr.append(th);
+        }
+        head.append(hr); table.append(head);
         const body = document.createElement('tbody');
         for (const item of items) {
           const tr = document.createElement('tr');

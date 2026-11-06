@@ -135,7 +135,7 @@ def test_pages_and_assets_work_without_external_cdn(client: TestClient) -> None:
 
 
 def test_scripts_never_inject_event_text_as_html() -> None:
-    for name in ("monitor.js", "overview.js", "audit.js", "system.js", "workbench.js"):
+    for name in ("monitor.js", "overview.js", "audit.js", "system.js", "workbench.js", "audio.js", "shell.js"):
         text = (STATIC_DIR / "js" / name).read_text(encoding="utf-8")
         assert "innerHTML" not in text, name
         assert "eval(" not in text, name

@@ -23,6 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
     error.focus({preventScroll: true});
     error.scrollIntoView({block: 'center'});
   }
+  // Formulários com data-guard avisam antes de sair com alterações não salvas.
+  let dirty = false;
+  for (const form of document.querySelectorAll('form[data-guard]')) {
+    form.addEventListener('input', () => { dirty = true; });
+    form.addEventListener('submit', () => { dirty = false; });
+  }
+  window.addEventListener('beforeunload', event => {
+    if (!dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
   // Formulários com data-busy mostram progresso e evitam envio duplo.
   for (const form of document.querySelectorAll('form[data-busy]')) {
     form.addEventListener('submit', () => {
@@ -34,6 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { button.disabled = true; }, 0);
     });
   }
+  // Ao voltar pelo histórico (bfcache), reabilita botões que ficaram em envio.
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    for (const button of document.querySelectorAll('button[aria-busy="true"]')) {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      if (button.dataset.label) button.textContent = button.dataset.label;
+    }
+  });
 });
 
 // Utilitários compartilhados pelas telas (sem dependências externas).
