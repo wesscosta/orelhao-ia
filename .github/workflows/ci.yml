@@ -11,7 +11,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -e '.[dev,admin,vad,tts]'
+      # semantic: tokenizers/onnxruntime tipados, exigidos pelo mypy de services/knowledge.
+      # dev inclui pulsectl (puro Python; libpulse só é carregada ao conectar).
+      - run: pip install -e '.[dev,admin,vad,tts,semantic]'
       - run: ruff check src/orelhao/services/knowledge src/orelhao/services/llm src/orelhao/services/tts src/orelhao/admin tests/knowledge tests/llm tests/tts tests/admin
       - run: mypy src/orelhao/services/knowledge src/orelhao/services/llm src/orelhao/services/tts
+      # Os testes usam tests/fixtures/orelhao-server.profile.yaml, nunca o perfil
+      # privado config/*.local.yaml (ignorado pelo Git).
+      - run: test ! -e config/orelhao-server.qwen.local.yaml
       - run: pytest -q

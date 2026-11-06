@@ -43,8 +43,8 @@ def test_pipewire_playback_target_explicitly_selects_speaker(monkeypatch) -> Non
     assert command[1] == "--target=alsa_output.pci-0000_00_1f.3.analog-stereo"
 
 
-def test_server_profile_pins_both_pipewire_nodes_without_hardcoded_indices() -> None:
-    config = load_config("config/orelhao-server.qwen.local.yaml")
+def test_server_profile_pins_both_pipewire_nodes_without_hardcoded_indices(server_profile_path: Path) -> None:
+    config = load_config(server_profile_path)
     assert config.audio.pipewire_target == "alsa_input.pci-0000_00_1f.3.analog-stereo"
     assert config.audio.pipewire_playback_target == (
         "alsa_output.pci-0000_00_1f.3.analog-stereo"

@@ -51,6 +51,7 @@ dev = [
   "ruff>=0.6,<1",
   "mypy>=1.11,<2",
   "numpy>=2,<3",
+  "pulsectl>=23,<26",
   "types-PyYAML>=6,<7",
   "types-pyserial>=3.5,<4",
 ]

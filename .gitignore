@@ -22,3 +22,6 @@ logs/
 
 # PlatformIO build/cache
 .pio/
+
+# Perfis privados do servidor (nunca versionar)
+config/*.local.yaml

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 
@@ -79,8 +80,8 @@ def test_greeting_curta_sem_instrucao_extra() -> None:
     assert PROMPTS["greeting"] == "Olá! Eu sou o Lumi. Como posso ajudar?"
 
 
-def test_glossario_stt_servidor_nao_contem_metalinguagem() -> None:
-    config = load_config("config/orelhao-server.qwen.local.yaml")
+def test_glossario_stt_servidor_nao_contem_metalinguagem(server_profile_path: Path) -> None:
+    config = load_config(server_profile_path)
     assert config.stt.initial_prompt is not None
     assert "Transcrição" not in config.stt.initial_prompt
     assert "Senac" in config.stt.initial_prompt
