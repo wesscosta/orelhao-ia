@@ -2,6 +2,17 @@
 
 > **Aviso:** os blocos numerados abaixo preservam o histórico de desenvolvimento das linhas alpha. A presença de uma seção não implica que tenha havido tag, merge ou homologação. O último marcador de release encontrado continua sendo `v0.3.10`. Estado vigente: [docs/current-state.md](docs/current-state.md).
 
+## Não lançado — refatoração de UI/UX do Admin (06/11/2026)
+
+- Painel reorganizado em cinco áreas (Visão geral, Atendimento ao vivo, Conhecimento, Diagnóstico, Administração) com menu lateral e navegação móvel; rotas anteriores preservadas.
+- Nova **Central de operações** em `/overview`, alimentada apenas por endpoints existentes, sem métricas simuladas.
+- Monitor com fluxo Escuta → STT → RAG → Grounding → LLM → TTS → Reprodução derivado dos eventos SSE e sinal da última captura (pico, ruído, limiar do VAD).
+- FAQ supervisionado com tabela de pendências e painel de revisão; erros preservam o texto digitado e falhas de reindexação são recuperáveis. Revisão humana e publicação explícita mantidas.
+- Diagnóstico de áudio com estado da coleta, indicadores agregados e barra de sinal por amostra; gravação continua desligada por padrão.
+- Design system local (tokens claro/escuro, componentes, ícones SVG, fonte Atkinson Hyperlegible OFL) servido em `/static`, sem CDN. HTML/JS extraídos das strings Python.
+- Rotas de monitoramento e visão geral restritas a cliente e `Host` loopback.
+- Validação em navegador (reflow 320/375/768 px, teclado, fluxo do FAQ) e auditoria Web Interface Guidelines. Detalhes e itens não verificados: [Interface administrativa](docs/admin-ui-ux.md). Experimental, sem homologação no Dell.
+
 ## Não lançado — correção de captura e ganho do monofone P3 (03/11/2026)
 
 - Identificada falha de abertura de captura por metadados ausentes do PipeWire: sem alvo explícito, `pw-record` retornava `no target node available`, e `wpctl @DEFAULT_...@` falhava apesar da placa detectada.

@@ -11,6 +11,7 @@ Revisão editorial: **03/11/2026**. Este é o ponto de entrada para documentaç�
 | [Knowledge / RAG](rag.md) | Corpus, retrieval e decisões de grounding |
 | [LLM](llm.md) | Início do servidor local, modelos, geração e segurança factual |
 | [Admin e bancada](knowledge-admin.md) | Indexação, testes de pergunta/voz, segurança e logs |
+| [Interface administrativa (UI/UX)](admin-ui-ux.md) | Navegação, design system, telas, acesso local, verificação e pendências de homologação |
 | [Áudio](audio.md), [entrada](voice-input.md), [STT](stt.md) e [TTS](tts.md) | Captura, reconhecimento, síntese e diagnósticos |
 | [Hardware](hardware.md) e [gancho ESP32](esp32-hook.md) | Restrições Dell e integração física experimental |
 | [Plano de benchmark Dell](benchmark-optiplex-7050.md) | Gates do hardware físico, ainda não executados |

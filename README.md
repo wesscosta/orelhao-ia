@@ -105,7 +105,7 @@ O piloto está restrito ao **Dell OptiPlex 7050 Micro**, i5-7500T (4 núcleos/4 
 
 ## Documentação
 
-**[Índice da documentação](docs/index.md)** · **[Estado técnico vigente](docs/current-state.md)** · [Gancho e voz](docs/esp32-voice-session.md) · [Monitor web](docs/live-monitor.md) · [Contexto e base ampliada](docs/context-and-knowledge-2026-11-03.md) · [Arquitetura](docs/architecture.md) · [RAG](docs/rag.md) · [LLM](docs/llm.md) · [Admin](docs/knowledge-admin.md) · [FAQ supervisionado e diagnóstico de áudio](docs/faq-supervisionado-audio-diagnostico.md) · [Áudio](docs/audio.md) · [Hardware](docs/hardware.md) · [Operação](docs/operations.md) · [Changelog](CHANGELOG.md)
+**[Índice da documentação](docs/index.md)** · **[Estado técnico vigente](docs/current-state.md)** · [Gancho e voz](docs/esp32-voice-session.md) · [Monitor web](docs/live-monitor.md) · [Contexto e base ampliada](docs/context-and-knowledge-2026-11-03.md) · [Arquitetura](docs/architecture.md) · [RAG](docs/rag.md) · [LLM](docs/llm.md) · [Admin](docs/knowledge-admin.md) · [Interface do Admin (UI/UX)](docs/admin-ui-ux.md) · [FAQ supervisionado e diagnóstico de áudio](docs/faq-supervisionado-audio-diagnostico.md) · [Áudio](docs/audio.md) · [Hardware](docs/hardware.md) · [Operação](docs/operations.md) · [Changelog](CHANGELOG.md)
 
 O antigo README com a cronologia das versões alpha foi [preservado como documento histórico](docs/history/README-before-consolidation-2026-10-29.md); não use seus valores antigos como estado atual.
 
