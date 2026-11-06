@@ -111,7 +111,7 @@ th, td {{ text-align:left; padding:.6rem; border-bottom:1px solid #e5e7eb; }}
 </style>
 </head>
 <body>
-<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a><a href="/system">Máquina</a><a href="/audit">Auditoria</a></nav></header>
+<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a><a href="/system">Máquina</a><a href="/audit">Auditoria</a><a href="/audit/faq">FAQ</a><a href="/audit/audio">Áudio</a></nav></header>
 {body}
 </body>
 </html>"""
@@ -956,5 +956,7 @@ não comprovam a afirmação inteira nem superam bloqueios do NLI.</p>
         )
 
     from .audit_routes import router as audit_router
+    from .learning_routes import router as learning_router
     app.include_router(audit_router)
+    app.include_router(learning_router)
     return app

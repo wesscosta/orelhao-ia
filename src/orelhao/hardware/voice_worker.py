@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 
 from orelhao.config import load_config
+from orelhao.hardware.audio_diagnostics import save_sample
 from orelhao.hardware.conversation_context import ContextResolution, ConversationContext
 from orelhao.hardware.hook_runtime import ensure_audio_ready
 from orelhao.hardware.idle_policy import CallIdlePolicy
@@ -147,9 +148,21 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 playback.play(prompts.audio("idle_check"))
             continue
         stt_start = time.monotonic()
-        transcribed = stt.transcribe(audio)
+        try:
+            transcribed = stt.transcribe(audio)
+        except Exception:
+            save_sample(
+                os.environ.get("ORELHAO_MONITOR_SESSION_ID", ""), turn, audio,
+                stt_status="error", diagnostics=diagnostics,
+            )
+            raise
         stt_ms = (time.monotonic() - stt_start) * 1000
         question = transcribed.text.strip()
+        # Somente sessões explicitamente autorizadas armazenam WAV; nunca texto.
+        save_sample(
+            os.environ.get("ORELHAO_MONITOR_SESSION_ID", ""), turn, audio,
+            stt_status="recognized" if question else "empty", diagnostics=diagnostics,
+        )
         if not question or looks_like_stt_hallucination(question):
             LOG.info("transcricao_invalida turno=%d", turn)
             publish("voice.transcription_invalid", turn=turn, text=question,
