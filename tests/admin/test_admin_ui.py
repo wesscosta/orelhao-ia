@@ -186,7 +186,7 @@ def test_source_save_shows_confirmation(client: TestClient) -> None:
 def test_faq_table_and_review_panel(client: TestClient) -> None:
     _refusal()
     page = client.get("/audit/faq", auth=AUTH).text
-    for column in ("Assunto", "Pergunta agrupada", "Frequência", "Revisão", "Última ocorrência"):
+    for column in ("Pergunta agrupada e assunto", "Frequência", "Revisão", "Última ocorrência"):
         assert column in page
     assert "Sem revisão" in page and "Selecione uma pendência" in page
     assert "enfermagem" not in page  # a tabela exibe só o rótulo agrupado, nunca a fala

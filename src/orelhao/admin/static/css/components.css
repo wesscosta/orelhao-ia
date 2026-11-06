@@ -117,7 +117,7 @@ details > summary { cursor: pointer; font-weight: 700; min-height: 2.25rem; disp
 details[open] > summary { margin-bottom: var(--sp-3); }
 
 /* Tabelas: rolagem horizontal própria para dados em duas dimensões (1.4.10) */
-.table-wrap { overflow-x: auto; border: var(--border); border-radius: var(--radius-sm); }
+.table-wrap { position: relative; overflow-x: auto; border: var(--border); border-radius: var(--radius-sm); }
 table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 caption { text-align: left; padding: var(--sp-3); font-weight: 700; }
 th, td { text-align: left; padding: .65rem .8rem; border-bottom: 1px solid var(--c-rule); vertical-align: top; }
@@ -221,3 +221,4 @@ blockquote { margin: var(--sp-2) 0 0; padding-left: var(--sp-3); border-left: 3p
 .connection { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--c-ink-muted); }
 
 .divider { border: 0; border-top: 1px solid var(--c-rule); margin: var(--sp-5) 0; }
+.status-item .badge, .stat .badge { align-self: flex-start; }

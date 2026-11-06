@@ -18,6 +18,8 @@ code { background: var(--c-surface-sunken); padding: .1rem .35rem; border-radius
 img, svg { max-width: 100%; }
 .icon { flex: none; vertical-align: middle; }
 
+[id] { scroll-margin-top: var(--sp-4); }
+.alert:focus { outline: none; box-shadow: var(--focus-ring); }
 :focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
 .skip-link {
   position: absolute; left: var(--sp-4); top: -4rem; z-index: 100;
@@ -91,6 +93,7 @@ img, svg { max-width: 100%; }
 .grid { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); align-items: start; }
 .grid-2 { display: grid; gap: var(--sp-4); grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
 .grid-split { display: grid; gap: var(--sp-4); grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
+.grid-wide-first { grid-template-columns: minmax(0, 1.8fr) minmax(20rem, 1fr); }
 .stats { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
 .section-gap { margin-top: var(--sp-5); }
 

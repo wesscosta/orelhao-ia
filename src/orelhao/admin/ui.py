@@ -6,13 +6,26 @@ Renderização no servidor, sem dependências novas: todo texto variável passa 
 """
 from __future__ import annotations
 
+import hashlib
 import html
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 STATIC_DIR = Path(__file__).with_name("static")
-ASSET_VERSION = "20261106"
+
+
+def _asset_version() -> str:
+    """Hash curto do conteúdo de static/: muda a URL dos assets a cada alteração."""
+    digest = hashlib.sha256()
+    for path in sorted(STATIC_DIR.rglob("*")):
+        if path.is_file():
+            digest.update(path.relative_to(STATIC_DIR).as_posix().encode())
+            digest.update(path.read_bytes())
+    return digest.hexdigest()[:10]
+
+
+ASSET_VERSION = _asset_version()
 
 Tone = Literal["neutral", "info", "ok", "warn", "bad", "live"]
 

@@ -50,8 +50,8 @@ def _faq_table(groups: Sequence[Mapping[str, Any]], saved: Mapping[tuple[str, st
         action = "Ver publicação" if state == "published" else (
             "Continuar revisão" if state == "draft" else "Revisar")
         rows.append(
-            f"<tr{current}><td>{e(item['topic'])}</td>"
-            f"<th scope='row' class='wrap' style='font-weight:400'>{e(item['label'])}</th>"
+            f"<tr{current}><th scope='row' class='wrap' style='font-weight:400'>{e(item['label'])}"
+            f"<br><small class='muted'>{e(item['topic'])}</small></th>"
             f"<td class='num'>{int(item['count'])}</td>"
             f"<td>{badge(label, tone)}{published}</td>"
             f"<td>{e(when(item.get('last_seen')))}</td>"
@@ -60,7 +60,7 @@ def _faq_table(groups: Sequence[Mapping[str, Any]], saved: Mapping[tuple[str, st
         )
     return (
         "<div class='table-wrap' tabindex='0' role='region' aria-labelledby='pendencias-titulo'>"
-        "<table><thead><tr><th scope='col'>Assunto</th><th scope='col'>Pergunta agrupada</th>"
+        "<table><thead><tr><th scope='col'>Pergunta agrupada e assunto</th>"
         "<th scope='col' class='num'>Frequência</th><th scope='col'>Revisão</th>"
         "<th scope='col'>Última ocorrência</th><th scope='col'><span class='visually-hidden'>Ação</span></th>"
         f"</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
@@ -174,7 +174,7 @@ def faq_page(
         "info", title="Como funciona.")
     body = (
         intro + stats
-        + "<div class='grid-split section-gap'>"
+        + "<div class='grid-split grid-wide-first section-gap'>"
         + panel("Pendências dos últimos 30 dias", _faq_table(shown, saved, selected), id="pendencias")
         + _review_panel(item, row, form_values, error, notice)
         + "</div>"

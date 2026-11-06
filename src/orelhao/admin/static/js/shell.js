@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  // Após um envio com erro, leva o foco à mensagem para que seja anunciada e vista.
+  const error = document.querySelector('main .alert-bad');
+  if (error) {
+    error.tabIndex = -1;
+    error.focus({preventScroll: true});
+    error.scrollIntoView({block: 'center'});
+  }
   // Formulários com data-busy mostram progresso e evitam envio duplo.
   for (const form of document.querySelectorAll('form[data-busy]')) {
     form.addEventListener('submit', () => {
