@@ -10,8 +10,10 @@
 - FAQ supervisionado com tabela de pendências e painel de revisão; erros preservam o texto digitado e falhas de reindexação são recuperáveis. Revisão humana e publicação explícita mantidas.
 - Diagnóstico de áudio com estado da coleta, indicadores agregados e barra de sinal por amostra; gravação continua desligada por padrão.
 - Design system local (tokens claro/escuro, componentes, ícones SVG, fonte Atkinson Hyperlegible OFL) servido em `/static`, sem CDN. HTML/JS extraídos das strings Python.
-- Rotas de monitoramento e visão geral restritas a cliente e `Host` loopback.
-- Validação em navegador (reflow 320/375/768 px, teclado, fluxo do FAQ) e auditoria Web Interface Guidelines. Detalhes e itens não verificados: [Interface administrativa](docs/admin-ui-ux.md). Experimental, sem homologação no Dell.
+- Todo o Admin restrito a cliente e `Host` loopback (inclui fontes, reindexação e bancada; bloqueia `--host 0.0.0.0` acidental e DNS rebinding); `/openapi.json` não é publicado.
+- Correções do code review: pipeline do monitor em respostas de esclarecimento, aviso de índice após exclusão, recuperação do status do STT, parada dupla de gravação, estado de serviços na visão geral, consultas concorrentes da auditoria.
+- Testes independentes do perfil privado `config/*.local.yaml`; CI instala `pulsectl` e o extra `semantic`.
+- Validação em navegador (reflow 320/375/720/768/1440 px, zoom de 200% emulado, teclado, erro → voltar e corrigir, capturas antes/depois) e auditoria Web Interface Guidelines. Detalhes e itens não verificados: [Interface administrativa](docs/admin-ui-ux.md). Experimental, sem homologação no Dell.
 
 ## Não lançado — correção de captura e ganho do monofone P3 (03/11/2026)
 

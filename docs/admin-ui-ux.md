@@ -90,19 +90,33 @@ existentes. Tornar `/overview` a página inicial é uma decisão de homologaçã
 - **Erros de navegação:** pedidos com `Accept: text/html` recebem página de erro legível;
   `fetch` e clientes de API continuam recebendo JSON `{"detail": ...}`.
 
-## Acesso local (commit `a3288ef`)
+## Acesso local (commits `a3288ef` e `df9566d`)
 
-`/overview`, `/monitor`, `/monitor/state`, `/monitor/events`, `/system` e `/system/state`
-respondem 403 se o cliente **e** o cabeçalho `Host` não forem loopback (`127.0.0.1`,
-`localhost`, `::1`), o que também bloqueia *DNS rebinding*. `/audit*` usa a mesma
-verificação mais Basic Auth. Respostas privadas levam `no-store`, `nosniff`,
+**Todo o Admin** (visão geral, monitor, máquina, fontes, edição, reindexação, bancada e
+auditoria) responde 403 se o cliente **e** o cabeçalho `Host` não forem loopback
+(`127.0.0.1`, `localhost`, `::1`). A regra é uma dependência global do FastAPI
+(`orelhao/admin/access.py`), o que cobre rotas futuras e bloqueia:
+
+- acesso remoto se o Admin for iniciado por engano com `--host 0.0.0.0`;
+- *DNS rebinding* (um site externo resolvendo para 127.0.0.1 e lendo, pelo navegador do
+  operador, transcrições ao vivo ou reescrevendo fontes).
+
+`/audit*` mantém, além disso, Basic Auth. `/openapi.json` não é publicado. `/static` não
+contém dados. Respostas de monitoramento e visão geral levam `no-store`, `nosniff`,
 `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`. A visão geral envia
 `X-Requested-With: fetch` ao consultar a auditoria para receber 401 sem o diálogo Basic do
 navegador e mostrar "Indicadores restritos ao administrador".
 
+A exceção do `TestClient` (cliente `testclient`, Host `testserver`) existe só em
+`tests/admin/conftest.py`; `tests/admin/test_admin_access.py` usa a regra real
+(marcador `real_access`).
+
+Verificação no servidor de demonstração: `curl -H 'Host: evil.example'
+http://127.0.0.1:8766/edit/x.md` → 403; o mesmo pedido a `/monitor/state` no commit
+`2757f86` (antes) → 200 com o estado da ligação.
+
 Consequência para operação: o túnel SSH deve ser acessado como `http://127.0.0.1:8765` ou
-`http://localhost:8765`; outro nome de host retorna 403. `/`, `/edit`, `/workbench` e
-`/reindex` mantêm o comportamento anterior (sem essa verificação), como antes desta branch.
+`http://localhost:8765`; outro nome de host (inclusive um proxy reverso) retorna 403.
 
 ## Verificação
 
@@ -118,13 +132,14 @@ Ambiente: Chrome no notebook Arch, servidor local com dados sintéticos isolados
 | Player de amostra autorizada | Verificado | `readyState 4`, duração correta |
 | Modo claro e escuro | Verificado (visual) | Capturas em 375 px claro e 1440 px escuro |
 | Erros de console | Verificado | Nenhum erro nas páginas visitadas |
-| Zoom de 200% | Não verificado | Coberto indiretamente pelo reflow em 768 px; não testado com zoom real |
+| Zoom de 200% | Verificado (emulado) | Viewport de 720 px CSS com fator de escala 2 (equivalente a 1440 px em 200%); sem rolagem horizontal da página; a coluna de ação do FAQ rola dentro da tabela (região focável) |
 | Leitor de tela | Não verificado | Semântica conferida no código e em testes; sem NVDA/Orca |
 | Contraste medido com ferramenta | Não verificado | Valores escolhidos para ≥ 4,5:1, sem medição automatizada registrada |
 | Ligação física real no monitor | Não verificado | Somente eventos sintéticos |
 
 | Aviso de alterações não salvas | Verificado | `beforeunload` bloqueia com texto alterado e libera após envio |
-| Página vem do bfcache após envio | Não verificado em navegador | Botões em envio são reabilitados em `pageshow` (código) |
+| Erro de envio → "Voltar e corrigir" por teclado | Verificado | Foco no alerta → Tab → Enter; o formulário volta com o valor digitado e o botão reabilitado ("Salvar alterações") |
+| Erros de JavaScript | Verificado | Nenhum `error`/`unhandledrejection` nas 8 páginas (HEAD) |
 
 Uma checagem parcial não estabelece conformidade WCAG 2.2 AA.
 
@@ -147,13 +162,49 @@ Regras obtidas de `vercel-labs/web-interface-guidelines` (`command.md`) em 06/11
 | Title Case em títulos e botões | — | Não se aplica: português usa caixa de frase |
 | Amostras de áudio sem transcrição | — | Não se aplica: transcrições não são retidas por política de privacidade |
 
+### Reflow antes/depois (matriz automatizada)
+
+Páginas `/overview`, `/`, `/monitor`, `/system`, `/workbench`, `/audit`, `/audit/faq`,
+`/audit/audio` e `/edit/…` em 320, 375, 720, 768 e 1440 px (`scrollWidth ≤ innerWidth`).
+
+| Commit | Resultado |
+|---|---|
+| `2757f86` (antes) | `/workbench` 320 px (363 > 320); `/audit/faq` 320 e 375 px (676 px) |
+| HEAD (depois) | Nenhuma rolagem horizontal da página em nenhuma combinação |
+
+### Capturas
+
+Geradas com Chrome headless e dados sintéticos isolados, em `docs/admin-ui-ux/`:
+`before-*.png` (commit `2757f86`) e `after-*.png` (HEAD) para FAQ 320/375 px,
+bancada 320 px, monitor 375 px, visão geral 768/1440 px e FAQ em zoom de 200%.
+
+### Code review (`/code-review`, base `6c92e07`)
+
+| Achado | Severidade | Situação |
+|---|---|---|
+| Rotas de fontes/edição/reindexação/bancada sem restrição local | Alta | Corrigido (dependência global) |
+| Botões em envio presos após voltar do bfcache | Alta | Corrigido (`pageshow`) |
+| Monitor marcava RAG/LLM como executados em respostas de esclarecimento | Média | Corrigido |
+| Aviso de índice desatualizado dizia "0 fonte(s)" após exclusão | Média | Corrigido |
+| Consulta de status do STT parava após uma falha de rede | Média | Corrigido (recuo) |
+| `stopRecording` podia rodar duas vezes durante o auto-stop | Média | Corrigido |
+| Visão geral contava serviço iniciando/desconhecido como fora do ar | Baixa | Corrigido |
+| Troca rápida de período na auditoria podia mostrar dados antigos | Baixa | Corrigido (`AbortController`) |
+| Exceção do `TestClient` no código de produção | Baixa | Corrigido (só nos testes) |
+| Lista de vozes fixa na bancada; código morto | Baixa | Corrigido |
+
+`/verify` não está disponível neste ambiente.
+
 ## Testes e CI
 
 - `tests/admin/test_admin_ui.py` e `tests/admin/test_admin_access.py`.
 - Testes do perfil do servidor usam `tests/fixtures/orelhao-server.profile.yaml`, sem
   depender do arquivo privado `config/*.local.yaml` (agora no `.gitignore`).
 - **GitHub Actions está desabilitado no repositório**: o push não executa CI. Os passos do
-  workflow foram reproduzidos localmente (Ruff, Mypy no escopo do CI, Pytest).
+  workflow foram reproduzidos localmente em venv limpo com `.[dev,admin,vad,tts,semantic]`
+  e sem o perfil privado: Ruff (escopo do CI) sem erros, Mypy (escopo do CI) sem erros,
+  Pytest **556 aprovados**. Python local 3.14; o workflow fixa 3.12.
+- Mypy em `src` inteiro: 62 → 52 erros, nenhum novo; os restantes são anteriores.
 
 Testes automatizados: `tests/admin/test_admin_ui.py` (shell, navegação nas cinco áreas,
 rótulos de formulário, ausência de CDN, erros HTML/JSON, FAQ e áudio).
@@ -161,8 +212,9 @@ rótulos de formulário, ausência de CDN, erros HTML/JSON, FAQ e áudio).
 ## Pendências para homologação no Dell
 
 1. Confirmar que `static/` está presente na instalação (editável ou `package-data`).
-2. Acessar pelo túnel usando `127.0.0.1` ou `localhost` (outros nomes de host retornam 403).
+2. Acessar pelo túnel usando `127.0.0.1` ou `localhost` (outros nomes de host, inclusive
+   proxy reverso, retornam 403 em todo o Admin).
 3. Abrir todas as páginas pelo túnel SSH e conferir autenticação da auditoria.
 4. Validar o monitor durante uma ligação real, incluindo o sinal da captura.
-5. Testar zoom de 200% e um leitor de tela.
+5. Testar zoom real de 200% no navegador do operador e um leitor de tela.
 6. Decidir se `/overview` passa a ser a página inicial.
