@@ -14,7 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from orelhao.hardware.audit import export_csv, summary
 
-from .audit_view import AUDIT_BODY
+from .audit_view import audit_page as render_audit_page
 
 router = APIRouter(prefix="/audit")
 basic = HTTPBasic(auto_error=False)
@@ -50,12 +50,7 @@ Auth = Annotated[None, Depends(_admin_only)]
 
 @router.get("", response_class=HTMLResponse)
 async def audit_page(_auth: Auth) -> HTMLResponse:
-    from .app import _layout
-
-    return HTMLResponse(
-        _layout("Auditoria e backups", AUDIT_BODY),
-        headers=NO_CACHE,
-    )
+    return HTMLResponse(render_audit_page(), headers=NO_CACHE)
 
 
 @router.get("/summary")

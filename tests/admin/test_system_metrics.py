@@ -115,8 +115,10 @@ def test_admin_tem_rota_html_e_json_leitura_sem_acionar_ia() -> None:
     assert "Saúde do Servidor" in page.text
     assert "Temperatura CPU" in page.text
     assert "Máquina" in page.text
-    assert "fetch('/system/state'" in page.text
-    assert "textContent" in page.text
+    assert "/static/js/system.js" in page.text
+    script = client.get("/static/js/system.js").text
+    assert "fetch('/system/state'" in script
+    assert "textContent" in script
     assert "Cache-Control" in page.headers
 
     state = client.get("/system/state")

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import html
 import json
 import os
 import subprocess
@@ -16,7 +15,6 @@ from orelhao.hardware.live_monitor import snapshot as monitor_snapshot
 from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.interfaces.voice.resample import resample_pcm16, trim_silence_pcm16
 from orelhao.runtime_paths import resolve_project_path
-from orelhao.services.knowledge.evidence_selector import SpanSelection
 from orelhao.services.knowledge.index import build_index
 from orelhao.services.knowledge.loader import load_documents
 from orelhao.services.knowledge.observation import (
@@ -31,11 +29,11 @@ from orelhao.services.tts.service import TTSService
 from orelhao.services.tts.voice_catalog import (
     WorkbenchPiperVoices,
     validate_voice_id,
-    voice_options,
 )
 
 try:
     from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+    from fastapi.exceptions import HTTPException as _FastAPIHTTPException
     from fastapi.responses import (
         HTMLResponse,
         JSONResponse,
@@ -43,13 +41,18 @@ try:
         Response,
         StreamingResponse,
     )
+    from fastapi.staticfiles import StaticFiles
     from starlette.concurrency import run_in_threadpool
+    from starlette.exceptions import HTTPException as StarletteHTTPException
 except ImportError:  # pacote base continua utilizável sem o extra [admin]
     FastAPI = File = Form = HTTPException = Request = UploadFile = None
     HTMLResponse = JSONResponse = RedirectResponse = Response = StreamingResponse = None
     run_in_threadpool = None
+    StaticFiles = StarletteHTTPException = _FastAPIHTTPException = None
 
-from .live_view import MONITOR_BODY
+from . import knowledge_view, workbench_view
+from .live_view import monitor_page
+from .overview_view import overview_page
 from .source_manager import (
     MAX_SOURCE_BYTES,
     atomic_write_source,
@@ -60,7 +63,8 @@ from .source_manager import (
     read_source,
 )
 from .system_metrics import SystemMetricsCollector
-from .system_view import SYSTEM_BODY
+from .system_view import system_page
+from .ui import STATIC_DIR, alert, render_page
 
 
 def _require_web() -> None:
@@ -70,51 +74,24 @@ def _require_web() -> None:
         )
 
 
-def _render_evidence_span(selection: SpanSelection | None) -> str:
-    """Exibe um candidato textual literal, nunca como prova de suporte."""
-    if selection is None:
-        return "<span class='muted'>Sem correspondência lexical</span>"
-    span = selection.span
-    label = f"[{span.start}:{span.end}]"
-    return (
-        f"<small class='muted'>caracteres {html.escape(label)}; "
-        f"cobertura lexical {selection.lexical_coverage:.0%}</small>"
-        f"<blockquote>{html.escape(span.text)}</blockquote>"
-    )
+_render_evidence_span = workbench_view.render_evidence_span
 
 
 def _layout(title: str, body: str) -> str:
-    return f"""<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)} — Orelhão IA</title>
-<style>
-body {{ font-family: system-ui, sans-serif; max-width: 1080px; margin: 2rem auto; padding: 0 1rem; color: #1f2937; }}
-header {{ display:flex; justify-content:space-between; align-items:center; gap:1rem; }}
-nav a {{ margin-left:1rem; }}
-.card {{ border:1px solid #d1d5db; border-radius:10px; padding:1rem; margin:1rem 0; }}
-.grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }}
-input, textarea, select {{ width:100%; box-sizing:border-box; padding:.65rem; margin:.3rem 0 .8rem; }}
-textarea {{ min-height:420px; font-family:ui-monospace,monospace; }}
-button {{ padding:.65rem 1rem; cursor:pointer; }}
-.muted {{ color:#6b7280; }}
-.ok {{ color:#047857; }}
-.warn {{ color:#b45309; }}
-.bad {{ color:#b91c1c; }}
-.pill {{ display:inline-block; padding:.2rem .55rem; border-radius:999px; background:#f3f4f6; }}
-.evidence {{ white-space:pre-wrap; max-height:220px; overflow:auto; }}
-code {{ background:#f3f4f6; padding:.15rem .35rem; border-radius:4px; }}
-table {{ width:100%; border-collapse:collapse; }}
-th, td {{ text-align:left; padding:.6rem; border-bottom:1px solid #e5e7eb; }}
-</style>
-</head>
-<body>
-<header><h1>Orelhão IA — Knowledge Admin</h1><nav><a href="/">Base</a><a href="/workbench">Bancada</a><a href="/monitor">Monitor</a><a href="/system">Máquina</a><a href="/audit">Auditoria</a><a href="/audit/faq">FAQ</a><a href="/audit/audio">Áudio</a></nav></header>
-{body}
-</body>
-</html>"""
+    """Compatibilidade: páginas antigas passam a usar o shell novo."""
+    return render_page(title, body)
+
+
+def _error_page(status_code: int, detail: str) -> str:
+    titles = {401: "Autenticação necessária", 403: "Acesso negado", 404: "Página não encontrada",
+              413: "Arquivo muito grande", 503: "Serviço indisponível"}
+    title = titles.get(status_code, "Não foi possível concluir")
+    body = (alert(f"{detail}", "bad", title=f"Erro {status_code}.")
+            + "<div class='btn-row'><a class='btn btn-primary' href='javascript:history.back()'>"
+              "Voltar e corrigir</a><a class='btn' href='/overview'>Ir para a visão geral</a></div>"
+            + "<p class='note section-gap'>Ao voltar, o navegador normalmente mantém o que "
+              "foi digitado no formulário.</p>")
+    return render_page(title, body)
 
 
 def _manifest(index_dir: Path) -> dict[str, object]:
@@ -174,6 +151,18 @@ def create_admin_app(
     _require_web()
     resolved = paths or default_knowledge_paths()
     app = FastAPI(title="Orelhão IA Knowledge Admin", docs_url=None, redoc_url=None)
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+    @app.exception_handler(StarletteHTTPException)
+    async def html_errors(request: Request, exc: StarletteHTTPException) -> Response:
+        # Navegação do navegador (Accept: text/html) recebe página legível; fetch e
+        # clientes de API continuam recebendo JSON com "detail".
+        headers = getattr(exc, "headers", None)
+        if "text/html" in request.headers.get("accept", ""):
+            return HTMLResponse(_error_page(exc.status_code, str(exc.detail)),
+                                status_code=exc.status_code, headers=headers)
+        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code,
+                            headers=headers)
     active_workbench = workbench
     active_stt = stt
     active_llm = llm
@@ -253,7 +242,7 @@ def create_admin_app(
     @app.get("/system", response_class=HTMLResponse)
     async def system_home():
         return HTMLResponse(
-            _layout("Saúde do Servidor", SYSTEM_BODY),
+            system_page(),
             headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
         )
 
@@ -267,8 +256,7 @@ def create_admin_app(
 
     @app.get("/monitor", response_class=HTMLResponse)
     async def monitor_home():
-        return HTMLResponse(_layout("Monitor de Atendimento", MONITOR_BODY),
-                            headers={"Cache-Control": "no-store"})
+        return HTMLResponse(monitor_page(), headers={"Cache-Control": "no-store"})
 
     @app.get("/monitor/state", response_class=JSONResponse)
     async def monitor_state():
@@ -295,59 +283,30 @@ def create_admin_app(
                                           "X-Accel-Buffering": "no",
                                           "X-Content-Type-Options": "nosniff"})
 
-    @app.get("/", response_class=HTMLResponse)
-    async def home():
+    def knowledge_state() -> tuple[list, dict[str, str], dict[str, object], bool]:
         files = list_sources(resolved.sources)
         manifest = _manifest(resolved.index)
         indexed = _indexed_sources(manifest)
         current_indexable = _current_indexable_sources(resolved.sources)
-        rows = "".join(
-            f"<tr><td><a href='/edit/{quote(item.relative_path)}'>{html.escape(item.relative_path)}</a></td>"
-            f"<td>{item.size_bytes:,} B</td>"
-            f"<td>{html.escape(_source_status(item.relative_path, item.sha256, indexed, current_indexable))}</td></tr>"
+        statuses = {
+            item.relative_path: _source_status(
+                item.relative_path, item.sha256, indexed, current_indexable)
             for item in files
-        ) or "<tr><td colspan='3' class='muted'>Nenhuma fonte cadastrada.</td></tr>"
-        stale = _index_is_stale(current_indexable, manifest)
-        status = (
-            f"{manifest.get('documents', 0)} documentos / {manifest.get('chunks', 0)} chunks"
-            if manifest
-            else "Índice ainda não gerado"
+        }
+        return files, statuses, manifest, _index_is_stale(current_indexable, manifest)
+
+    @app.get("/overview", response_class=HTMLResponse)
+    async def overview():
+        files, _statuses, manifest, stale = await run_in_threadpool(knowledge_state)
+        return HTMLResponse(
+            overview_page(index_ready=bool(manifest), index_stale=stale, sources=len(files)),
+            headers={"Cache-Control": "no-store"},
         )
-        freshness = "DESATUALIZADO" if stale else "ATUALIZADO"
-        freshness_class = "warn" if stale else "ok"
-        body = f"""
-<div class="grid">
-<section class="card">
-<h2>Status</h2>
-<p><strong>Fontes:</strong> {len(files)}</p>
-<p><strong>Índice:</strong> {html.escape(status)}</p>
-<p><strong>Estado:</strong> <span class="{freshness_class}">{freshness}</span></p>
-<p class="muted">A interface altera apenas <code>knowledge/sources/</code>.</p>
-<form method="post" action="/reindex"><button type="submit">Reindexar base</button></form>
-</section>
-<section class="card">
-<h2>Criar documento</h2>
-<form method="post" action="/create">
-<label>Nome do arquivo</label><input name="filename" placeholder="faq.md">
-<label>Título</label><input name="title" placeholder="FAQ geral" required>
-<label>Tags opcionais, separadas por vírgula</label><input name="tags" placeholder="faq, atendimento">
-<button type="submit">Criar Markdown</button>
-</form>
-<hr>
-<h2>Enviar arquivo</h2>
-<form method="post" action="/upload" enctype="multipart/form-data">
-<label>Arquivo Markdown ou TXT</label><input type="file" name="file" accept=".md,.txt" required>
-<label>Título opcional</label><input name="title" placeholder="Título do documento">
-<label>Tags opcionais, separadas por vírgula</label><input name="tags" placeholder="faq, atendimento">
-<button type="submit">Enviar e salvar</button>
-</form>
-<p class="muted">TXT é normalizado para Markdown. Limite: {MAX_SOURCE_BYTES // 1024 // 1024} MiB.</p>
-</section>
-</div>
-<section class="card"><h2>Fontes</h2><table><thead><tr><th>Arquivo</th><th>Tamanho</th><th>Status</th></tr></thead>
-<tbody>{rows}</tbody></table></section>
-"""
-        return HTMLResponse(_layout("Base de conhecimento", body))
+
+    @app.get("/", response_class=HTMLResponse)
+    async def home():
+        files, statuses, manifest, stale = knowledge_state()
+        return HTMLResponse(knowledge_view.sources_page(files, statuses, manifest, stale=stale))
 
     @app.post("/create")
     async def create(
@@ -393,26 +352,12 @@ def create_admin_app(
         return RedirectResponse(url=f"/edit/{quote(name)}", status_code=303)
 
     @app.get("/edit/{relative_path:path}", response_class=HTMLResponse)
-    async def edit(relative_path: str):
+    async def edit(relative_path: str, saved: bool = False):
         try:
             content = read_source(resolved.sources, relative_path)
         except (ValueError, FileNotFoundError) as exc:
             raise HTTPException(status_code=404, detail="Fonte não encontrada") from exc
-        body = f"""
-<section class="card">
-<h2>{html.escape(relative_path)}</h2>
-<form method="post" action="/save">
-<input type="hidden" name="relative_path" value="{html.escape(relative_path, quote=True)}">
-<textarea name="content" required>{html.escape(content)}</textarea>
-<button type="submit">Salvar</button>
-</form>
-<p class="muted">Salvar não reindexa automaticamente. Isso permite revisar várias fontes antes de reconstruir o índice.</p>
-<form method="get" action="/delete/{quote(relative_path)}">
-<button type="submit">Excluir documento</button>
-</form>
-</section>
-"""
-        return HTMLResponse(_layout("Editar fonte", body))
+        return HTMLResponse(knowledge_view.edit_page(relative_path, content, saved=saved))
 
     @app.post("/save")
     async def save(relative_path: str = Form(...), content: str = Form(...)):
@@ -420,7 +365,7 @@ def create_admin_app(
             atomic_write_source(resolved.sources, relative_path, content.rstrip() + "\n")
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        return RedirectResponse(url=f"/edit/{quote(relative_path)}", status_code=303)
+        return RedirectResponse(url=f"/edit/{quote(relative_path)}?saved=1", status_code=303)
 
     @app.get("/delete/{relative_path:path}", response_class=HTMLResponse)
     async def confirm_delete(relative_path: str):
@@ -428,19 +373,7 @@ def create_admin_app(
             read_source(resolved.sources, relative_path)
         except (ValueError, FileNotFoundError) as exc:
             raise HTTPException(status_code=404, detail="Fonte não encontrada") from exc
-        body = f"""
-<section class="card">
-<h2 class="warn">Confirmar exclusão</h2>
-<p>Deseja realmente excluir <strong>{html.escape(relative_path)}</strong>?</p>
-<p class="muted">O índice ficará desatualizado até a próxima reindexação.</p>
-<form method="post" action="/delete">
-<input type="hidden" name="relative_path" value="{html.escape(relative_path, quote=True)}">
-<button type="submit">Confirmar exclusão</button>
-</form>
-<p><a href="/edit/{quote(relative_path)}">Cancelar</a></p>
-</section>
-"""
-        return HTMLResponse(_layout("Excluir fonte", body))
+        return HTMLResponse(knowledge_view.confirm_delete_page(relative_path))
 
     @app.post("/delete")
     async def remove(relative_path: str = Form(...)):
@@ -453,188 +386,12 @@ def create_admin_app(
     @app.post("/reindex", response_class=HTMLResponse)
     async def reindex():
         stats = build_index(resolved.sources, resolved.index)
-        body = f"""
-<section class="card">
-<h2 class="ok">Índice atualizado</h2>
-<p>Documentos: <strong>{stats['documents']}</strong></p>
-<p>Chunks: <strong>{stats['chunks']}</strong></p>
-<p><a href="/">Voltar para a base</a></p>
-</section>
-"""
-        return HTMLResponse(_layout("Índice atualizado", body))
+        return HTMLResponse(knowledge_view.reindex_page(stats))
 
     @app.get("/workbench", response_class=HTMLResponse)
     async def workbench_home():
         prepare_stt()
-        body = """
-<section class="card">
-<h2>Bancada de testes: RAG, LLM e grounding</h2>
-<p>Compare a resposta gerada e a decisão factual. O modo seguro bloqueia
-a resposta quando qualquer afirmação não for suportada.</p>
-<p id="llm-status" class="muted">Verificando LLM local...</p>
-<p id="tts-status" class="muted">Verificando voz local...</p>
-<form method="post" action="/workbench/run">
-<label>Pergunta</label>
-<textarea id="question" name="question" style="min-height:110px" required></textarea>
-<label for="voice">Voz para ouvir a resposta</label>
-<select name="voice" id="voice">
-<option value="cadu">Piper Cadu (original)</option>
-<option value="faber">Piper Faber (experimental)</option>
-</select>
-<p class="muted">Alterne a voz sem reiniciar. O modelo selecionado não altera a resposta nem o Grounding V3.</p>
-<button type="button" id="preview-voice">Ouvir apresentação do Lumi</button>
-<label>Política da bancada</label>
-<select name="mode">
-<option value="observe">Observação: exibir a saída mesmo se não for suportada</option>
-<option value="enforce">Seguro: bloquear respostas sem suporte</option>
-</select>
-<button type="submit" id="run" disabled>Executar teste</button>
-<button type="button" id="record" disabled>Preparando STT...</button>
-</form>
-<p id="voice-status" class="muted">O microfone envia WAV PCM16 para o STT local.</p>
-</section>
-<script>
-const recordButton = document.getElementById('record');
-const statusBox = document.getElementById('voice-status');
-const runButton = document.getElementById('run');
-const llmStatusBox = document.getElementById('llm-status');
-const ttsStatusBox = document.getElementById('tts-status');
-const voiceSelector = document.getElementById('voice');
-const previewVoiceButton = document.getElementById('preview-voice');
-let previewAudio = null;
-voiceSelector.addEventListener('change', updateTtsStatus);
-previewVoiceButton.addEventListener('click', async () => {
-  previewVoiceButton.disabled = true;
-  try {
-    const url = '/workbench/voice-preview?voice=' + encodeURIComponent(voiceSelector.value);
-    const response = await fetch(url);
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({}));
-      throw new Error(payload.detail || 'Falha HTTP ' + response.status);
-    }
-    if (previewAudio) previewAudio.pause();
-    previewAudio = new Audio(URL.createObjectURL(await response.blob()));
-    previewAudio.onended = () => URL.revokeObjectURL(previewAudio.src);
-    await previewAudio.play();
-    ttsStatusBox.textContent = 'Reproduzindo apresentação com ' + voiceSelector.selectedOptions[0].text;
-  } catch (error) {
-    ttsStatusBox.textContent = 'Não foi possível ouvir a voz: ' + error.message;
-  } finally { previewVoiceButton.disabled = false; }
-});
-let audioContext, processor, source, stream, samples = [], stopTimer;
-async function updateTtsStatus() {
-  try {
-    const response = await fetch('/workbench/tts-status?voice=' + encodeURIComponent(voiceSelector.value));
-    const payload = await response.json();
-    ttsStatusBox.textContent = payload.available
-      ? 'Voz pt-BR pronta: ' + payload.detail
-      : 'Voz indisponível: ' + payload.detail;
-  } catch (error) {
-    ttsStatusBox.textContent = 'Não foi possível verificar a voz: ' + error.message;
-  }
-}
-updateTtsStatus();
-async function updateLlmStatus() {
-  const response = await fetch('/workbench/llm-status');
-  const payload = await response.json();
-  if (payload.available) {
-    runButton.disabled = false;
-    llmStatusBox.textContent = `LLM pronta: ${payload.detail}`;
-    return;
-  }
-  llmStatusBox.textContent = `LLM indisponível: ${payload.detail}`;
-  setTimeout(updateLlmStatus, 2000);
-}
-updateLlmStatus();
-async function updateSttStatus() {
-  const response = await fetch('/workbench/stt-status');
-  const payload = await response.json();
-  if (payload.status === 'ready') {
-    recordButton.disabled = false;
-    recordButton.textContent = 'Gravar pergunta';
-    statusBox.textContent = `STT pronto; modelo carregado em ${payload.elapsed_ms.toFixed(1)} ms.`;
-    return;
-  }
-  if (payload.status === 'error') {
-    statusBox.textContent = `Falha ao carregar STT: ${payload.error}`;
-    return;
-  }
-  setTimeout(updateSttStatus, 1000);
-}
-updateSttStatus();
-async function stopRecording() {
-  if (!processor) return;
-  clearTimeout(stopTimer);
-  processor.disconnect(); source.disconnect();
-  stream.getTracks().forEach(track => track.stop());
-  const inputRate = audioContext.sampleRate;
-  await audioContext.close();
-  processor = null;
-  recordButton.textContent = 'Gravar pergunta';
-  statusBox.textContent = 'Transcrevendo; o primeiro uso também carrega o modelo STT...';
-  const wav = encodeWav(resample(concatenate(samples), inputRate, 16000), 16000);
-  const form = new FormData();
-  form.append('file', wav, 'question.wav');
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000);
-  try {
-    const response = await fetch('/workbench/transcribe', {method: 'POST', body: form, signal: controller.signal});
-    const payload = await response.json();
-    if (!response.ok) { statusBox.textContent = payload.detail || 'Falha no STT'; return; }
-    document.getElementById('question').value = payload.text;
-    statusBox.textContent = `Transcrição concluída em ${payload.total_ms.toFixed(1)} ms.`;
-  } catch (error) {
-    statusBox.textContent = error.name === 'AbortError'
-      ? 'O STT excedeu 90 segundos. Aguarde o carregamento do modelo e tente novamente.'
-      : `Falha ao enviar áudio: ${error.message}`;
-  } finally { clearTimeout(timeout); }
-}
-recordButton.addEventListener('click', async () => {
-  if (processor) {
-    await stopRecording();
-    return;
-  }
-  stream = await navigator.mediaDevices.getUserMedia({audio: true});
-  audioContext = new AudioContext();
-  source = audioContext.createMediaStreamSource(stream);
-  processor = audioContext.createScriptProcessor(4096, 1, 1);
-  samples = [];
-  processor.onaudioprocess = event => samples.push(Array.from(event.inputBuffer.getChannelData(0)));
-  source.connect(processor); processor.connect(audioContext.destination);
-  stopTimer = setTimeout(stopRecording, 12000);
-  recordButton.textContent = 'Parar gravação';
-  statusBox.textContent = 'Gravando... parada automática em 12 segundos.';
-});
-function concatenate(blocks) {
-  const length = blocks.reduce((total, block) => total + block.length, 0);
-  const output = new Float32Array(length);
-  let offset = 0;
-  blocks.forEach(block => { output.set(block, offset); offset += block.length; });
-  return output;
-}
-function resample(input, fromRate, toRate) {
-  if (fromRate === toRate) return input;
-  const ratio = fromRate / toRate, output = new Array(Math.round(input.length / ratio));
-  for (let i = 0; i < output.length; i++) {
-    const position = i * ratio, left = Math.floor(position), right = Math.min(left + 1, input.length - 1);
-    output[i] = input[left] + (input[right] - input[left]) * (position - left);
-  }
-  return output;
-}
-function encodeWav(input, sampleRate) {
-  const buffer = new ArrayBuffer(44 + input.length * 2), view = new DataView(buffer);
-  const write = (offset, value) => [...value].forEach((char, index) => view.setUint8(offset + index, char.charCodeAt(0)));
-  write(0, 'RIFF'); view.setUint32(4, 36 + input.length * 2, true); write(8, 'WAVE');
-  write(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
-  view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
-  write(36, 'data'); view.setUint32(40, input.length * 2, true);
-  input.forEach((sample, index) => view.setInt16(44 + index * 2, Math.max(-1, Math.min(1, sample)) * (sample < 0 ? 32768 : 32767), true));
-  return new Blob([view], {type: 'audio/wav'});
-}
-</script>
-"""
-        return HTMLResponse(_layout("Bancada de observação", body))
+        return HTMLResponse(workbench_view.home_page())
 
     @app.get("/workbench/stt-status", response_class=JSONResponse)
     async def stt_status():
@@ -665,179 +422,7 @@ function encodeWav(input, sampleRate) {
             observation = get_workbench().observe(question, mode=mode)
         except (RuntimeError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        decision = observation.grounding
-        v3 = observation.grounding_v3
-        status_class = (
-            "ok" if (v3.allows_response if v3 else decision.allows_response)
-            else "warn"
-        )
-        nli_info = (
-            "NLI não executado (fonte: relógio local)"
-            if observation.answer_origin == "local_clock"
-            else (
-                f"NLI anterior: {html.escape(v3.nli_status.value)} "
-                f"({v3.nli_score:.4f})"
-                if v3 else "Sem NLI"
-            )
-        )
-        v3_html = (
-            "<p><strong>Grounding V3 (decisão final):</strong> "
-            f"<span class='pill'>{html.escape(v3.disposition.value.upper())}</span> "
-            f"Motivo: {html.escape(v3.reason.value)}; "
-            f"{nli_info}; "
-            f"fatos verificados: {len(v3.supporting_chunk_ids)} chunks.</p>"
-            if v3 else "<p>Decisão V3 indisponível.</p>"
-        )
-        precheck = observation.answerability
-        if observation.answer_origin == "local_clock":
-            clock = observation.local_clock or {}
-            precheck_html = (
-                "<p><strong>Resposta operacional:</strong> data/hora do relógio "
-                "local. RAG, LLM, NLI e pré-gate não foram executados. "
-                f"Fuso: {html.escape(clock.get('timezone', '—'))}; "
-                f"instante: {html.escape(clock.get('timestamp', '—'))}.</p>"
-            )
-        elif precheck is None:
-            precheck_html = "<p>Gate de answerability não habilitado nesta bancada.</p>"
-        else:
-            pre_status = "SEM IMPEDIMENTO DETECTADO" if precheck.decision.answerable else "ABSTENÇÃO"
-            pre_reason = precheck.decision.reason.value if precheck.decision.reason else "—"
-            precheck_html = (
-                f"<p><strong>Answerability pré-geração:</strong> "
-                f"{html.escape(pre_status)} "
-                f"<span class='pill'>{html.escape(pre_reason)}</span></p>"
-                f"<p>Fontes admitidas: {len(precheck.admissible_chunk_ids)}"
-                f" · conflitos: {len(precheck.conflicting_chunk_ids)}"
-                f" · verificação específica: {str(precheck.verified_specific_answer).lower()}"
-                f" · geração ignorada: {str(observation.generation_skipped).lower()}"
-                f" · entidade incorreta na resposta: "
-                f"{str(observation.answer_entity_mismatch).lower()}</p>"
-            )
-        evidence = "".join(
-            f"<article class='card'><strong>{html.escape(item.source)}</strong> "
-            f"<span class='pill'>retrieval {item.score:.4f}</span>"
-            f"<pre class='evidence'>{html.escape(item.text)}</pre></article>"
-            for item in observation.evidence
-        ) or "<p class='muted'>Nenhum chunk recuperado.</p>"
-        claim_rows = "".join(
-            f"<tr><td>{html.escape(item.claim)}</td>"
-            f"<td>{html.escape(item.decision.status.value.upper())}</td>"
-            f"<td>{item.decision.score:.4f}</td>"
-            f"<td>{html.escape(item.source or '—')}</td>"
-            f"<td>{html.escape(item.chunk_id or '—')}</td>"
-            f"<td>{_render_evidence_span(item.span_selection)}</td></tr>"
-            for item in observation.claims
-        )
-        fact_rows = "".join(
-            f"<tr><td>{html.escape(item.fact.literal)}</td>"
-            f"<td>{html.escape(item.fact.kind.value)}</td>"
-            f"<td>{html.escape(item.status.value)}</td>"
-            f"<td>{html.escape(item.source or '—')} "
-            f"<small>{'[' + str(item.source_start) + ':' + str(item.source_end) + ']' if item.source_start is not None else ''}</small></td>"
-            f"<td>{html.escape(item.explanation)}</td></tr>"
-            for assessment in observation.fact_validations
-            for item in assessment.checks
-        )
-        policy_note = (
-            "Modo seguro: saída bloqueada quando grounding não permite resposta."
-            if observation.mode == "enforce"
-            else "Modo observação: saída mostrada para diagnóstico, mesmo se não suportada."
-        )
-        voice_select = "".join(
-            f'<option value="{opt.id}"'
-            f'{" selected" if opt.id == voice else ""}>{html.escape(opt.label)}</option>'
-            for opt in voice_options()
-        )
-        speech_controls = """
-<label for="result-voice">Voz da resposta (pode alterar sem repetir a pergunta)</label>
-<select id="result-voice">__VOICE_OPTIONS__</select>
-<button type="button" id="speak-answer">Ouvir resposta</button>
-<audio id="spoken-answer" controls preload="none" hidden></audio>
-<p id="spoken-status" class="muted" role="status">Clique em Ouvir resposta para sintetizar a voz em pt-BR.</p>
-<script>
-(() => {
-  const button = document.getElementById('speak-answer');
-  const player = document.getElementById('spoken-answer');
-  const status = document.getElementById('spoken-status');
-  const voice = document.getElementById('result-voice');
-  let currentUrl = null;
-  button.addEventListener('click', async () => {
-    button.disabled = true;
-    status.textContent = 'Gerando áudio com ' + voice.selectedOptions[0].text + '...';
-    try {
-      const response = await fetch('/workbench/speech/__OBSERVATION_ID__?voice=' + encodeURIComponent(voice.value));
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.detail || 'Falha HTTP ' + response.status);
-      }
-      if (currentUrl) URL.revokeObjectURL(currentUrl);
-      currentUrl = URL.createObjectURL(await response.blob());
-      player.src = currentUrl;
-      player.hidden = false;
-      try {
-        await player.play();
-        status.textContent = 'Reproduzindo resposta em português brasileiro.';
-      } catch (_) {
-        status.textContent = 'Áudio pronto. Clique no botão de reprodução do player.';
-      }
-    } catch (error) {
-      status.textContent = 'Não foi possível gerar áudio: ' + error.message;
-    } finally {
-      button.disabled = false;
-    }
-  });
-  window.addEventListener('pagehide', () => {
-    if (currentUrl) URL.revokeObjectURL(currentUrl);
-  });
-})();
-</script>
-""".replace("__OBSERVATION_ID__", observation.observation_id).replace(
-            "__VOICE_OPTIONS__", voice_select
-        )
-        body = f"""
-<section class="card">
-<h2>Resultado</h2>
-<p><strong>Pergunta:</strong> {html.escape(observation.question)}</p>
-{precheck_html}
-{v3_html}
-<p><strong>Grounding (NLI legado):</strong> <span class="{status_class}">{decision.status.value.upper()}</span>
-{"<span class='pill'>NLI não executado</span>" if observation.answer_origin == "local_clock" else f"<span class='pill'>NLI {decision.score:.6f}</span>"}</p>
-<p><strong>Gerador:</strong> {html.escape(observation.generator)} · abstenção da geração: {str(observation.generation_abstained).lower()}</p>
-<p class="warn"><strong>Política:</strong> {html.escape(policy_note)}</p>
-<h3>Resposta apresentada</h3>
-<p>{html.escape(observation.presented_answer)}</p>
-{speech_controls}
-<p class="muted">retrieval={observation.latency.retrieval_ms:.2f} ms · adjudicação={observation.latency.adjudication_ms:.2f} ms · geração={observation.latency.generation_ms:.2f} ms · grounding={observation.latency.grounding_ms:.2f} ms · total={observation.latency.total_ms:.2f} ms</p>
-</section>
-<section class="card">
-<h2>Verificação por afirmação</h2>
-<p class="muted">Trechos selecionados por sobreposição lexical; não são comprovação
-semântica nem alteram a decisão do NLI.</p>
-<table><thead><tr><th>Afirmação</th><th>Decisão</th><th>NLI</th><th>Fonte</th><th>Chunk ID</th><th>Trecho candidato</th></tr></thead>
-<tbody>{claim_rows or '<tr><td colspan="6">Nenhuma afirmação avaliada.</td></tr>'}</tbody></table>
-</section>
-<section class="card">
-<h2>Fact Validator V3 — diagnóstico</h2>
-<p class="muted">Compara atributos explícitos e escopos de fontes primárias.
-O resultado V3 pode vetar uma resposta no modo enforce, mas valores coincidentes
-não comprovam a afirmação inteira nem superam bloqueios do NLI.</p>
-<table><thead><tr><th>Valor mencionado</th><th>Atributo</th><th>Resultado</th>
-<th>Fonte</th><th>Justificativa</th></tr></thead>
-<tbody>{fact_rows or '<tr><td colspan="5">Nenhum atributo tipado identificado.</td></tr>'}</tbody></table>
-</section>
-<section class="card">
-<h2>Avaliação humana</h2>
-<form method="post" action="/workbench/rate">
-<input type="hidden" name="observation_id" value="{observation.observation_id}">
-<input type="hidden" name="grounding_status" value="{decision.status.value}">
-<select name="rating"><option value="correct">Correta</option><option value="partial">Parcialmente correta</option><option value="incorrect">Incorreta</option></select>
-<button type="submit">Registrar avaliação</button>
-</form>
-</section>
-<section><h2>Evidências recuperadas</h2>{evidence}</section>
-<p><a href="/workbench">Executar outro teste</a></p>
-"""
-        return HTMLResponse(_layout("Resultado da bancada", body))
+        return HTMLResponse(workbench_view.result_page(observation, voice))
 
     @app.post("/workbench/rate", response_class=HTMLResponse)
     async def rate_workbench(
@@ -858,13 +443,7 @@ não comprovam a afirmação inteira nem superam bloqueios do NLI.</p>
             "possible_false_negative": "Possível falso negativo do grounding",
             "aligned": "Avaliação humana alinhada à decisão do grounding",
         }.get(diagnostic, "Avaliação registrada")
-        body = f"""
-<section class="card"><h2 class="ok">Avaliação registrada</h2>
-<p>O evento foi acrescentado ao log sem alterar a observação original.</p>
-<p><strong>Diagnóstico:</strong> {html.escape(diagnostic_text)}</p>
-<p><a href="/workbench">Voltar à bancada</a></p></section>
-"""
-        return HTMLResponse(_layout("Avaliação registrada", body))
+        return HTMLResponse(workbench_view.rating_page(diagnostic_text))
 
     @app.post("/workbench/transcribe", response_class=JSONResponse)
     async def transcribe_workbench(file: Annotated[UploadFile, File()]):

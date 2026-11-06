@@ -1,7 +1,6 @@
 """FAQ supervisionado e áudio diagnóstico restritos ao administrador local."""
 from __future__ import annotations
 
-import html
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
@@ -12,6 +11,7 @@ from orelhao.hardware import audio_diagnostics, faq
 from orelhao.services.knowledge.paths import default_knowledge_paths
 
 from .audit_routes import _admin_only
+from .learning_view import audio_page, faq_link, faq_page
 
 router = APIRouter(prefix="/audit")
 Auth = Annotated[None, Depends(_admin_only)]
@@ -24,76 +24,40 @@ def _origin(request: Request) -> None:
         raise HTTPException(status_code=403, detail="Origem da solicitação não autorizada")
 
 
-def _h(value: object) -> str:
-    return html.escape(str(value), quote=True)
+def _html(content: str, status_code: int = 200) -> HTMLResponse:
+    return HTMLResponse(content, status_code=status_code, headers=NO_CACHE)
+
+
+async def _faq_view(
+    *, selected: tuple[str, str] | None = None, values: dict[str, str] | None = None,
+    error: str | None = None, notice: str | None = None, status_code: int = 200,
+) -> HTMLResponse:
+    groups = await run_in_threadpool(faq.candidates)
+    existing = await run_in_threadpool(faq.reviews)
+    return _html(faq_page(groups, existing, selected=selected, values=values,
+                          error=error, notice=notice), status_code)
 
 
 @router.get("/faq", response_class=HTMLResponse)
-async def faq_dashboard(_auth: Auth) -> HTMLResponse:
-    from .app import _layout
-
-    groups = await run_in_threadpool(faq.candidates)
-    existing = await run_in_threadpool(faq.reviews)
-    saved = {(r["label"], r["topic"]): r for r in existing}
-    sections: list[str] = []
-    for item in groups[:50]:
-        row = saved.get((item["label"], item["topic"]), {})
-        state = row.get("status", "unreviewed")
-        if state == "published":
-            sections.append(
-                f"<section class='card'><h3>{_h(item['label'])}</h3>"
-                f"<p>Categoria: {_h(item['topic'])} · Ocorrências sem resposta: {item['count']}</p>"
-                f"<p class='ok'>Publicado: {_h(row.get('published_path', ''))}</p></section>"
-            )
-            continue
-        question = _h(row.get("question", ""))
-        answer = _h(row.get("answer", ""))
-        source = _h(row.get("source", ""))
-        sections.append(
-            f"<section class='card'><h3>{_h(item['label'])}</h3>"
-            f"<p>Categoria: {_h(item['topic'])} · Sem resposta: {item['count']}"
-            f" · Estado: {_h(state)}</p>"
-            "<p class='muted'>O agrupamento é aproximado. Confira o tema e escreva "
-            "uma pergunta específica; não presuma que todas as falas sejam idênticas.</p>"
-            "<form method='post' action='/audit/faq/review'>"
-            f"<input type='hidden' name='label' value='{_h(item['label'])}'>"
-            f"<input type='hidden' name='topic' value='{_h(item['topic'])}'>"
-            "<label>Pergunta revisada pelo gestor</label>"
-            f"<input name='question' required maxlength='240' value='{question}'>"
-            "<label>Resposta aprovada (deve ser factual)</label>"
-            f"<textarea name='answer' required maxlength='1600' style='min-height:90px'>{answer}</textarea>"
-            "<label>URL HTTPS da fonte institucional vigente</label>"
-            f"<input name='source' type='url' required maxlength='700' value='{source}'>"
-            "<button type='submit'>Salvar revisão, sem publicar</button></form>"
-        )
-        if row.get("id") is not None:
-            sections.append(
-                f"<form method='post' action='/audit/faq/publish/{row['id']}'>"
-                "<label><input type='checkbox' name='confirmed' value='1' required "
-                "style='width:auto'> Conferi fonte, atualidade e exatidão; autorizo publicar.</label>"
-                "<button type='submit'>Publicar na base e reindexar</button></form>"
-            )
-        sections.append("</section>")
-    body = (
-        "<section class='card'><h2>FAQ supervisionado</h2>"
-        "<p>As pendências são derivadas exclusivamente de perguntas reconhecidas pelo STT "
-        "que terminaram em abstenção RAG. Falhas de microfone não viram FAQ.</p>"
-        "<p>A ferramenta não gera respostas automaticamente. A publicação exige revisão "
-        "humana, fonte HTTPS e reconstrução validada do índice. A base continua offline.</p>"
-        "</section>"
-        + ("".join(sections) if sections else
-           "<section class='card'><p>Sem pendências de conhecimento no período. "
-           "Para registrar, habilite a auditoria local (sem armazenar transcrições).</p></section>")
-    )
-    return HTMLResponse(_layout("FAQ supervisionado", body), headers=NO_CACHE)
+async def faq_dashboard(
+    _auth: Auth, topic: str | None = None, label: str | None = None,
+    salvo: str | None = None, publicado: str | None = None,
+) -> HTMLResponse:
+    selected = (label, topic) if label and topic else None
+    notice = None
+    if salvo:
+        notice = "Rascunho salvo. Nada foi publicado; confira e publique quando estiver pronto."
+    elif publicado:
+        notice = "FAQ publicado e índice reconstruído. O Lumi já consulta a nova resposta."
+    return await _faq_view(selected=selected, notice=notice)
 
 
-@router.post("/faq/review")
+@router.post("/faq/review", response_model=None)
 async def faq_save(
     request: Request, _auth: Auth,
     label: str = Form(...), topic: str = Form(...), question: str = Form(...),
     answer: str = Form(...), source: str = Form(...),
-) -> RedirectResponse:
+) -> RedirectResponse | HTMLResponse:
     _origin(request)
     try:
         await run_in_threadpool(
@@ -101,82 +65,82 @@ async def faq_save(
             answer=answer, source=source,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return RedirectResponse("/audit/faq", status_code=303, headers=NO_CACHE)
+        # Reapresenta o formulário com o texto digitado para correção sem perda.
+        return await _faq_view(
+            selected=(label, topic), error=f"{exc}. Revise os campos e salve novamente.",
+            values={"question": question, "answer": answer, "source": source},
+            status_code=422,
+        )
+    target = faq_link({"label": label, "topic": topic}, salvo="1")
+    return RedirectResponse(target, status_code=303, headers=NO_CACHE)
 
 
-@router.post("/faq/publish/{review_id}")
+@router.post("/faq/publish/{review_id}", response_model=None)
 async def faq_publish(
     request: Request, review_id: int, _auth: Auth, confirmed: str = Form(...),
-) -> RedirectResponse:
+) -> RedirectResponse | HTMLResponse:
     _origin(request)
     if confirmed != "1":
         raise HTTPException(status_code=422, detail="Confirmação obrigatória")
+    existing = await run_in_threadpool(faq.reviews)
+    row = next((r for r in existing if r.get("id") == review_id), None)
+    selected = (row["label"], row["topic"]) if row else None
     try:
         await run_in_threadpool(faq.publish_review, review_id, default_knowledge_paths())
-    except (ValueError, OSError) as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return RedirectResponse("/audit/faq", status_code=303, headers=NO_CACHE)
+    except (ValueError, OSError, RuntimeError) as exc:
+        # publish_review preserva o índice anterior e o rascunho quando falha.
+        return await _faq_view(
+            selected=selected, status_code=422,
+            error=f"Publicação cancelada: {exc}. O rascunho e o índice anterior foram "
+                  "preservados; corrija a causa e tente novamente.",
+        )
+    if row is None:
+        return RedirectResponse("/audit/faq", status_code=303, headers=NO_CACHE)
+    return RedirectResponse(faq_link(row, publicado="1"), status_code=303, headers=NO_CACHE)
+
+
+async def _audio_view(
+    *, error: str | None = None, notice: str | None = None, status_code: int = 200,
+) -> HTMLResponse:
+    armed = await run_in_threadpool(audio_diagnostics.arm_status)
+    samples = await run_in_threadpool(audio_diagnostics.list_samples)
+    return _html(audio_page(
+        active=audio_diagnostics.enabled(), armed=armed, samples=samples,
+        retention_days=audio_diagnostics._retention_days(), error=error, notice=notice,
+    ), status_code)
 
 
 @router.get("/audio", response_class=HTMLResponse)
-async def audio_dashboard(_auth: Auth) -> HTMLResponse:
-    from .app import _layout
-
-    active = audio_diagnostics.enabled()
-    armed = await run_in_threadpool(audio_diagnostics.arm_status)
-    samples = await run_in_threadpool(audio_diagnostics.list_samples)
-    lines = []
-    for item in samples:
-        lines.append(
-            f"<tr><td>{_h(item['captured_at'])}</td><td>{item['turn']}</td>"
-            f"<td>{_h(item['stt_status'])}</td>"
-            f"<td>{item['duration_seconds']} s</td>"
-            f"<td>{_h(item['peak_rms'])}</td>"
-            f"<td><audio controls preload='none' src='/audit/audio/sample/{item['id']}'></audio></td></tr>"
-        )
-    body = (
-        "<section class='card'><h2>Diagnóstico de microfone</h2>"
-        "<p>Desligado por padrão. Cada autorização cobre a próxima sessão e permite "
-        "até duas amostras WAV. Sem retenção de transcrição ou geração de resposta.</p>"
-        f"<p><strong>Coleta:</strong> {'habilitada' if active else 'desabilitada no servidor'}"
-        f" · <strong>Próxima sessão:</strong> {'armada' if armed else 'não armada'}</p>"
-        "<form method='post' action='/audit/audio/arm'>"
-        "<label><input name='confirmed' type='checkbox' value='1' required style='width:auto'> "
-        "Declaro que o visitante foi informado e autorizou a gravação para diagnóstico.</label>"
-        f"<button type='submit' {'disabled' if not active else ''}>Ativar somente próxima sessão (5 min)</button>"
-        "</form><form method='post' action='/audit/audio/disarm'>"
-        "<button type='submit'>Cancelar ativação pendente</button></form>"
-        "<p class='muted'>Somente o administrador local tem acesso. "
-        "Armazenamento privado; retenção padrão de 7 dias, máximo de 14.</p></section>"
-        "<section class='card'><h3>Amostras disponíveis</h3>"
-        "<table><thead><tr><th>Data UTC</th><th>Turno</th><th>STT</th>"
-        "<th>Duração</th><th>Pico RMS</th><th>Ouvir</th></tr></thead><tbody>"
-        + ("".join(lines) if lines else "<tr><td colspan='6'>Nenhuma amostra.</td></tr>")
-        + "</tbody></table></section>"
-    )
-    return HTMLResponse(_layout("Diagnóstico de áudio", body), headers=NO_CACHE)
+async def audio_dashboard(
+    _auth: Auth, autorizado: str | None = None, cancelado: str | None = None,
+) -> HTMLResponse:
+    notice = None
+    if autorizado:
+        notice = "Próxima sessão autorizada por 5 minutos. Faça a ligação de teste agora."
+    elif cancelado:
+        notice = "Autorização pendente cancelada. Nenhuma ligação será gravada."
+    return await _audio_view(notice=notice)
 
 
-@router.post("/audio/arm")
+@router.post("/audio/arm", response_model=None)
 async def audio_arm(
     request: Request, _auth: Auth, confirmed: str = Form(...),
-) -> RedirectResponse:
+) -> RedirectResponse | HTMLResponse:
     _origin(request)
     try:
         await run_in_threadpool(
             audio_diagnostics.arm_next_session, visitor_informed=(confirmed == "1"),
         )
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return RedirectResponse("/audit/audio", status_code=303, headers=NO_CACHE)
+        return await _audio_view(error=str(exc), status_code=422)
+    return RedirectResponse("/audit/audio?autorizado=1", status_code=303, headers=NO_CACHE)
 
 
 @router.post("/audio/disarm")
 async def audio_disarm(request: Request, _auth: Auth) -> RedirectResponse:
     _origin(request)
     await run_in_threadpool(audio_diagnostics.disarm)
-    return RedirectResponse("/audit/audio", status_code=303, headers=NO_CACHE)
+    return RedirectResponse("/audit/audio?cancelado=1", status_code=303, headers=NO_CACHE)
 
 
 @router.get("/audio/sample/{sample_id}")

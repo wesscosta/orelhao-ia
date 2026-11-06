@@ -39,14 +39,14 @@ def test_admin_marks_index_stale_after_edit(tmp_path: Path):
     )
     client.post("/reindex")
     response = client.get("/")
-    assert "ATUALIZADO" in response.text
+    assert "Índice atualizado." in response.text
     assert "indexado" in response.text
     client.post(
         "/save",
         data={"relative_path": "faq.md", "content": "# FAQ\n\nConteúdo alterado.\n"},
     )
     response = client.get("/")
-    assert "DESATUALIZADO" in response.text
+    assert "Índice desatualizado." in response.text
     assert "alterado" in response.text
 
 
@@ -87,6 +87,6 @@ def test_admin_ignores_control_and_evaluation_sources_for_freshness(tmp_path: Pa
     assert response.status_code == 200
 
     response = client.get("/")
-    assert "ATUALIZADO" in response.text
+    assert "Índice atualizado." in response.text
     assert response.text.count("ignorado") == 2
     assert "indexado" in response.text
