@@ -1,0 +1,111 @@
+/* Tokens semânticos do painel Orelhão IA.
+   Azul institucional como referência ao Senac Piauí (sem afirmar conformidade com
+   manual de marca) e laranja do orelhão reservado ao estado "ligação ativa". */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/static/fonts/atkinson-hyperlegible-400.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/static/fonts/atkinson-hyperlegible-700.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  /* Base */
+  --c-bg: #f2f4f7;
+  --c-surface: #ffffff;
+  --c-surface-sunken: #e9edf2;
+  --c-ink: #15233b;
+  --c-ink-muted: #4a5873;
+  --c-rule: #d3dae4;
+  --c-rule-strong: #8d9ab0;
+  /* Marca e ação */
+  --c-primary: #0a4f8f;
+  --c-primary-hover: #083f73;
+  --c-primary-soft: #e3edf8;
+  --c-on-primary: #ffffff;
+  --c-call: #c25507;          /* orelhão: somente ligação ativa */
+  --c-call-soft: #fdeee2;
+  --c-call-ink: #8f3d03;
+  /* Estados (texto ≥ 4,5:1 sobre o fundo suave correspondente) */
+  --c-ok: #1d6b3f;   --c-ok-soft: #e3f3e9;
+  --c-warn: #8a4b00; --c-warn-soft: #fdf1dc;
+  --c-bad: #a8231a;  --c-bad-soft: #fbe6e4;
+  --c-info: #0a4f8f; --c-info-soft: #e3edf8;
+  --c-neutral-soft: #e9edf2;
+  /* Navegação */
+  --c-nav-bg: #0f2742;
+  --c-nav-ink: #d6e1ee;
+  --c-nav-ink-strong: #ffffff;
+  --c-nav-active: #1d4a78;
+  /* Foco */
+  --focus-ring: 0 0 0 3px var(--c-surface), 0 0 0 6px #1f6fd1;
+
+  /* Tipografia: escala modular 1,2 a partir de 16 px */
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  --font-mono: ui-monospace, "DejaVu Sans Mono", "Cascadia Mono", Menlo, monospace;
+  --fs-xs: .8125rem;
+  --fs-sm: .875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.2rem;
+  --fs-xl: 1.44rem;
+  --fs-2xl: 1.728rem;
+  --fs-3xl: 2.25rem;
+  --lh-tight: 1.2;
+  --lh-body: 1.55;
+
+  /* Espaço (base 4 px) */
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem;
+  --sp-5: 1.5rem; --sp-6: 2rem; --sp-7: 3rem;
+
+  /* Forma */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+  --border: 1px solid var(--c-rule);
+  --elev-1: 0 1px 2px rgba(21, 35, 59, .06);
+  --elev-2: 0 8px 24px rgba(21, 35, 59, .18);
+
+  --sidebar-w: 16rem;
+  --content-max: 82rem;
+  --t-fast: 120ms ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --c-bg: #0d1726;
+    --c-surface: #142236;
+    --c-surface-sunken: #0f1b2c;
+    --c-ink: #e7edf5;
+    --c-ink-muted: #a8b6ca;
+    --c-rule: #2a3c55;
+    --c-rule-strong: #5f7593;
+    --c-primary: #7db4ef;
+    --c-primary-hover: #a5cbf5;
+    --c-primary-soft: #18324f;
+    --c-on-primary: #0b1a2c;
+    --c-call: #f08a3c;
+    --c-call-soft: #3a2413;
+    --c-call-ink: #ffc394;
+    --c-ok: #7fd3a1;   --c-ok-soft: #133524;
+    --c-warn: #f2c06b; --c-warn-soft: #3a2b10;
+    --c-bad: #ff9d94;  --c-bad-soft: #401a17;
+    --c-info: #9cc6f3; --c-info-soft: #18324f;
+    --c-neutral-soft: #1d2d44;
+    --c-nav-bg: #0a1220;
+    --c-nav-ink: #b9c7d9;
+    --c-nav-active: #1b3352;
+    --focus-ring: 0 0 0 3px var(--c-bg), 0 0 0 6px #8cc2ff;
+    --elev-1: none;
+    --elev-2: 0 8px 24px rgba(0, 0, 0, .5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-fast: 0ms linear; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
