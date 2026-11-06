@@ -87,14 +87,6 @@ def _require_web() -> None:
         )
 
 
-_render_evidence_span = workbench_view.render_evidence_span
-
-
-def _layout(title: str, body: str) -> str:
-    """Compatibilidade: páginas antigas passam a usar o shell novo."""
-    return render_page(title, body)
-
-
 def _error_page(status_code: int, detail: str) -> str:
     titles = {401: "Autenticação necessária", 403: "Acesso negado", 404: "Página não encontrada",
               413: "Arquivo muito grande", 503: "Serviço indisponível"}
@@ -163,7 +155,15 @@ def create_admin_app(
 ):
     _require_web()
     resolved = paths or default_knowledge_paths()
-    app = FastAPI(title="Orelhão IA Knowledge Admin", docs_url=None, redoc_url=None)
+    from fastapi import Depends
+
+    # Todo o Admin (fontes, bancada, monitoramento, visão geral e auditoria) só
+    # atende a própria máquina, alcançada por túnel SSH: cliente e Host de
+    # loopback, inclusive contra DNS rebinding. /static é público e sem dados.
+    app = FastAPI(
+        title="Orelhão IA Knowledge Admin", docs_url=None, redoc_url=None,
+        openapi_url=None, dependencies=[Depends(local_only)],
+    )
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @app.exception_handler(StarletteHTTPException)
@@ -257,30 +257,26 @@ def create_admin_app(
         threading.Thread(target=load, name="orelhao-stt-prepare", daemon=True).start()
 
     # Monitoramento e visão geral expõem transcrições ao vivo e o estado da
-    # máquina: somente acesso local (túnel SSH), inclusive contra DNS rebinding.
-    from fastapi import Depends
-
-    local = [Depends(local_only)]
-
-    @app.get("/system", response_class=HTMLResponse, dependencies=local)
+    # máquina: além da restrição local do app, respostas sem cache/enquadramento.
+    @app.get("/system", response_class=HTMLResponse)
     async def system_home() -> HTMLResponse:
         return HTMLResponse(system_page(), headers=PRIVATE_HEADERS)
 
-    @app.get("/system/state", response_class=JSONResponse, dependencies=local)
+    @app.get("/system/state", response_class=JSONResponse)
     async def system_state() -> JSONResponse:
         # systemctl e /proc são leitura local; não bloquear o event loop ASGI.
         data = await run_in_threadpool(system_collector.snapshot)
         return JSONResponse(data, headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor", response_class=HTMLResponse, dependencies=local)
+    @app.get("/monitor", response_class=HTMLResponse)
     async def monitor_home() -> HTMLResponse:
         return HTMLResponse(monitor_page(), headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor/state", response_class=JSONResponse, dependencies=local)
+    @app.get("/monitor/state", response_class=JSONResponse)
     async def monitor_state() -> JSONResponse:
         return JSONResponse(monitor_snapshot(), headers=PRIVATE_HEADERS)
 
-    @app.get("/monitor/events", dependencies=local)
+    @app.get("/monitor/events")
     async def monitor_events(request: Request) -> StreamingResponse:
         async def stream() -> AsyncIterator[str]:
             last_payload = None
@@ -311,7 +307,7 @@ def create_admin_app(
         }
         return files, statuses, manifest, _index_is_stale(current_indexable, manifest)
 
-    @app.get("/overview", response_class=HTMLResponse, dependencies=local)
+    @app.get("/overview", response_class=HTMLResponse)
     async def overview() -> HTMLResponse:
         files, _statuses, manifest, stale = await run_in_threadpool(knowledge_state)
         return HTMLResponse(

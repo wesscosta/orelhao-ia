@@ -9,8 +9,13 @@ from fastapi.testclient import TestClient
 from orelhao.admin.app import create_admin_app
 from orelhao.services.knowledge.paths import KnowledgePaths
 
+# Todo o Admin é local: monitoramento, visão geral, fontes, bancada e auditoria.
 LOCAL_ONLY = ["/overview", "/monitor", "/monitor/state", "/monitor/events",
-              "/system", "/system/state"]
+              "/system", "/system/state", "/", "/edit/x.md", "/workbench",
+              "/workbench/stt-status", "/audit/summary"]
+LOCAL_ONLY_POSTS = ["/save", "/delete", "/create", "/reindex", "/workbench/run"]
+
+pytestmark = pytest.mark.real_access
 AUTH = ("admin", "long-local-password-for-tests")
 
 
@@ -24,6 +29,11 @@ def paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> KnowledgePaths:
     return KnowledgePaths(sources=sources, index=tmp_path / "index")
 
 
+def _local(paths: KnowledgePaths) -> TestClient:
+    return TestClient(create_admin_app(paths=paths), client=("127.0.0.1", 50000),
+                      base_url="http://127.0.0.1:8765")
+
+
 def _remote(paths: KnowledgePaths) -> TestClient:
     # Simula o Admin iniciado com --host 0.0.0.0 e acessado de outra máquina.
     return TestClient(create_admin_app(paths=paths), client=("192.168.0.50", 50000))
@@ -33,6 +43,23 @@ def _remote(paths: KnowledgePaths) -> TestClient:
 def test_remote_client_is_rejected(paths: KnowledgePaths, route: str) -> None:
     response = _remote(paths).get(route, headers={"Host": "127.0.0.1:8765"})
     assert response.status_code == 403
+
+
+@pytest.mark.parametrize("route", LOCAL_ONLY_POSTS)
+def test_remote_writes_are_rejected(paths: KnowledgePaths, route: str) -> None:
+    client = TestClient(create_admin_app(paths=paths), client=("127.0.0.1", 50000),
+                        base_url="http://rebind.attacker.example")
+    assert client.post(route, data={"relative_path": "x.md", "content": "x"}).status_code == 403
+    assert _remote(paths).post(route, headers={"Host": "127.0.0.1:8765"}).status_code == 403
+
+
+def test_default_testclient_is_not_local(paths: KnowledgePaths) -> None:
+    # Sem a exceção dos testes, "testclient"/"testserver" não contam como loopback.
+    assert TestClient(create_admin_app(paths=paths)).get("/monitor/state").status_code == 403
+
+
+def test_openapi_schema_is_not_published(paths: KnowledgePaths) -> None:
+    assert _local(paths).get("/openapi.json").status_code == 404
 
 
 @pytest.mark.parametrize("route", LOCAL_ONLY)
@@ -72,7 +99,7 @@ def test_audit_also_rejects_rebinding_even_with_password(paths: KnowledgePaths) 
 
 
 def test_background_fetch_does_not_trigger_basic_auth_dialog(paths: KnowledgePaths) -> None:
-    client = TestClient(create_admin_app(paths=paths))
+    client = _local(paths)
     plain = client.get("/audit/summary")
     assert plain.status_code == 401
     assert "www-authenticate" in plain.headers

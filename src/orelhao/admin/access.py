@@ -13,9 +13,6 @@ from fastapi import HTTPException, Request
 
 LOOPBACK_CLIENTS = frozenset({"127.0.0.1", "::1"})
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
-# O TestClient do Starlette usa cliente "testclient" e Host "testserver".
-TEST_CLIENT = "testclient"
-TEST_HOST = "testserver"
 
 
 def _host_name(request: Request) -> str:
@@ -28,8 +25,6 @@ def _host_name(request: Request) -> str:
 def is_local_request(request: Request) -> bool:
     client = request.client.host if request.client else ""
     host = _host_name(request)
-    if client == TEST_CLIENT:
-        return host in LOOPBACK_HOSTS or host == TEST_HOST
     return client in LOOPBACK_CLIENTS and host in LOOPBACK_HOSTS
 
 
