@@ -298,3 +298,20 @@ def test_monitor_pipeline_lists_all_stages(client: TestClient) -> None:
     assert steps == ["listen", "stt", "rag", "grounding", "llm", "tts", "play"]
     script = client.get("/static/js/monitor.js").text
     assert "setInterval" not in script  # usa somente o SSE existente
+
+
+def test_stale_index_after_deletion_explains_removed_sources() -> None:
+    from orelhao.admin.knowledge_view import sources_page
+
+    page = sources_page([], {}, {"documents": 1, "chunks": 2}, stale=True)
+    assert "Fontes removidas ainda constam no índice." in page
+    assert "0 fonte(s)" not in page
+
+
+def test_workbench_voice_options_come_from_catalog() -> None:
+    from orelhao.admin.workbench_view import home_page
+    from orelhao.services.tts.voice_catalog import voice_options
+
+    page = home_page()
+    for option in voice_options():
+        assert f'value="{option.id}"' in page

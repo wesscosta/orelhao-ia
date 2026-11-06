@@ -34,14 +34,20 @@
     t.append(body); wrap.append(t); byId(id).append(wrap);
   }
   const LATENCY = {capture: 'Captura', stt: 'STT', rag: 'RAG / LLM / verificação', tts: 'TTS', play: 'Reprodução', overflows: 'Overflows registrados'};
+  let pending;
   async function refresh() {
     const days = Number(byId('period').value);
     byId('export').href = '/audit/events.csv?days=' + days;
     byId('audit-status').textContent = 'Consultando auditoria…';
+    // Troca rápida de período: cancelar a consulta anterior para que uma
+    // resposta antiga não sobrescreva os números do período selecionado.
+    if (pending) pending.abort();
+    const controller = pending = new AbortController();
     try {
-      const res = await fetch('/audit/summary?days=' + days, {cache:'no-store'});
+      const res = await fetch('/audit/summary?days=' + days, {cache:'no-store', signal: controller.signal});
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
+      if (controller !== pending) return;
       clear('overview');
       const cards = [
         ['Atendimentos', data.sessions], ['Perguntas reconhecidas', data.questions],
@@ -64,6 +70,7 @@
           v == null ? '—' : (k === 'overflows' ? fmt(v) : fmt(v) + ' ms')]));
       byId('audit-status').textContent = 'Resumo do período atualizado às ' + new Date().toLocaleTimeString('pt-BR') + '.';
     } catch (e) {
+      if (e.name === 'AbortError' || controller !== pending) return;
       byId('audit-status').textContent = 'Não foi possível carregar a auditoria (' + e.message + '). Recarregue a página para tentar de novo.';
     }
   }

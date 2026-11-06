@@ -82,9 +82,22 @@
     }
     updateLlmStatus();
 
+    let sttAttempts = 0;
     async function updateSttStatus() {
-      const response = await fetch('/workbench/stt-status');
-      const payload = await response.json();
+      let payload;
+      try {
+        const response = await fetch('/workbench/stt-status', {cache: 'no-store'});
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        payload = await response.json();
+      } catch (error) {
+        // Falha transitória (reinício do Admin): continuar consultando com recuo.
+        sttAttempts += 1;
+        setState(sttBadge, 'warn', 'Sem resposta');
+        statusBox.textContent = 'Não foi possível consultar o STT (' + error.message + '). Nova tentativa em instantes.';
+        setTimeout(updateSttStatus, Math.min(15000, 1000 * 2 ** Math.min(sttAttempts, 4)));
+        return;
+      }
+      sttAttempts = 0;
       if (payload.status === 'ready') {
         recordButton.disabled = false;
         recordButton.textContent = 'Gravar pergunta';
@@ -105,12 +118,15 @@
     let audioContext, processor, source, stream, samples = [], stopTimer;
     async function stopRecording() {
       if (!processor) return;
+      // Liberar as referências antes do await: um clique durante o auto-stop
+      // não pode encerrar o AudioContext nem transcrever duas vezes.
+      const context = audioContext, node = processor;
+      processor = null; audioContext = null;
       clearTimeout(stopTimer);
-      processor.disconnect(); source.disconnect();
+      node.disconnect(); source.disconnect();
       stream.getTracks().forEach(track => track.stop());
-      const inputRate = audioContext.sampleRate;
-      await audioContext.close();
-      processor = null;
+      const inputRate = context.sampleRate;
+      await context.close();
       recordButton.textContent = 'Gravar pergunta';
       recordButton.setAttribute('aria-pressed', 'false');
       statusBox.textContent = 'Transcrevendo. O primeiro uso também carrega o modelo STT…';

@@ -26,7 +26,7 @@
     ['Reprodução', 'play_ms']
   ];
   const STEPS = ['listen', 'stt', 'rag', 'grounding', 'llm', 'tts', 'play'];
-  const NOT_RAG_ROUTES = new Set(['prompt', 'guided', 'local_clock']);
+  const NOT_RAG_ROUTES = new Set(['prompt', 'guided', 'local_clock', 'clarification']);
   const ms = v => Number.isFinite(v) ? Math.round(v).toLocaleString('pt-BR') + ' ms' : '';
 
   let byId, transcript;

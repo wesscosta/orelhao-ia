@@ -53,8 +53,9 @@ def sources_page(
                           "as fontes.", "warn", title="Índice desatualizado.")
     elif stale:
         freshness = alert(
-            f"{pending} fonte(s) nova(s) ou alterada(s) ainda não estão no índice. "
-            "O Lumi continua respondendo com a versão anterior até a reindexação.",
+            (f"{pending} fonte(s) nova(s) ou alterada(s) ainda não estão no índice. "
+             if pending else "Fontes removidas ainda constam no índice. ")
+            + "O Lumi continua respondendo com a versão anterior até a reindexação.",
             "warn", title="Índice desatualizado.")
     else:
         freshness = alert("Todas as fontes indexáveis estão no índice em uso.", "ok",

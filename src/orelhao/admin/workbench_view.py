@@ -59,10 +59,7 @@ def home_page() -> str:
         <option value="enforce">Seguro: bloquear respostas sem suporte</option>
       </select></div>
     <div class="field"><label for="voice">Voz para ouvir a resposta</label>
-      <select name="voice" id="voice">
-        <option value="cadu">Piper Cadu (original)</option>
-        <option value="faber">Piper Faber (experimental)</option>
-      </select>
+      <select name="voice" id="voice">""" + _voice_select() + """</select>
       <span class="field-hint">Trocar a voz não altera a resposta nem o Grounding V3.</span></div>
   </div>
   <div class="btn-row">

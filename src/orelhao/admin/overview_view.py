@@ -13,7 +13,7 @@ def overview_page(*, index_ready: bool, index_stale: bool, sources: int) -> str:
         index_badge, index_text = badge("Não gerado", "bad"), "Gere o índice em Fontes e índice."
     elif index_stale:
         index_badge = badge("Desatualizado", "warn")
-        index_text = "Há fontes novas ou alteradas fora do índice em uso."
+        index_text = "O índice em uso não reflete as fontes atuais (novas, alteradas ou removidas)."
     else:
         index_badge, index_text = badge("Atualizado", "ok"), f"{sources} fonte(s) cadastrada(s)."
     index_state = "missing" if not index_ready else ("stale" if index_stale else "ok")

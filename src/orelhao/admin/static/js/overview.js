@@ -13,7 +13,7 @@
     const index = list.dataset.index;
     const items = [...alerts.values()];
     if (index === 'missing') items.unshift(['bad', 'O índice da base ainda não foi gerado.', '/', 'Gerar índice']);
-    if (index === 'stale') items.unshift(['warn', 'Há fontes novas ou alteradas fora do índice em uso.', '/', 'Reindexar']);
+    if (index === 'stale') items.unshift(['warn', 'O índice em uso não reflete as fontes atuais (novas, alteradas ou removidas).', '/', 'Reindexar']);
     if (!items.length) {
       const li = document.createElement('li'); li.className = 'small muted';
       li.textContent = pending ? 'Reunindo informações…' : 'Nenhum alerta no momento.';
@@ -75,10 +75,15 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       const services = data.services || [];
-      const down = services.filter(s => s.state !== 'active');
+      // Mesma leitura de /system: só falha/inativo é "fora do ar"; iniciando,
+      // parando ou sem leitura do systemd viram atenção, não erro.
+      const down = services.filter(s => s.state === 'failed' || s.state === 'inactive');
+      const pending = services.filter(s => s.state !== 'active' && !down.includes(s));
       const unknown = services.length && services.every(s => s.state === 'unknown');
       if (unknown) setBadge('ov-services', 'neutral', 'Indeterminado');
-      else setBadge('ov-services', down.length ? 'bad' : 'ok', down.length ? down.length + ' com problema' : 'Todos ativos');
+      else if (down.length) setBadge('ov-services', 'bad', down.length + ' fora do ar');
+      else if (pending.length) setBadge('ov-services', 'warn', pending.length + ' em verificação');
+      else setBadge('ov-services', 'ok', 'Todos ativos');
       const disk = data.disk && data.disk.percent;
       byId('ov-services-detail').textContent = (unknown ? 'systemd do usuário não respondeu. ' : '') +
         'Disco em ' + (Number.isFinite(disk) ? fmt(disk) + '%' : '—') + '.';
