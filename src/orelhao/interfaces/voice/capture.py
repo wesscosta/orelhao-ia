@@ -43,6 +43,9 @@ class CaptureDiagnostics:
     overflow_count: int = 0
     false_starts: int = 0
     peak_rms: float = 0.0
+    speech_started_ns: int | None = None
+    last_vad_speech_ns: int | None = None
+    capture_finished_ns: int | None = None
 
 
 @dataclass(slots=True)
@@ -102,6 +105,8 @@ class SoundDeviceAudioCapture:
         stop_reason = "max_duration"
         ever_started = False
         peak_rms = 0.0
+        speech_started_ns: int | None = None
+        last_vad_speech_ns: int | None = None
 
         try:
             stream_context = sd.RawInputStream(
@@ -141,6 +146,10 @@ class SoundDeviceAudioCapture:
                 peak_rms = max(peak_rms, block_rms)
                 is_speech = speech_vad.is_speech(block, hardware_rate)
                 event = gate.observe(is_speech)
+                if event == "speech_started":
+                    speech_started_ns = time.monotonic_ns()
+                if gate.state is SpeechGateState.SPEAKING and is_speech:
+                    last_vad_speech_ns = time.monotonic_ns()
 
                 if gate.state is SpeechGateState.WAITING:
                     blocks_waiting_for_speech += 1
@@ -183,6 +192,9 @@ class SoundDeviceAudioCapture:
             overflow_count=overflow_count,
             false_starts=false_starts,
             peak_rms=peak_rms,
+            speech_started_ns=speech_started_ns,
+            last_vad_speech_ns=last_vad_speech_ns,
+            capture_finished_ns=time.monotonic_ns(),
         )
 
         if not speech_detected:
@@ -344,6 +356,8 @@ class PipeWireAudioCapture:
         stop_reason = "max_duration"
         ever_started = False
         peak_rms = 0.0
+        speech_started_ns: int | None = None
+        last_vad_speech_ns: int | None = None
 
         intentional_stop = False
         process_failed_during_capture = False
@@ -379,6 +393,10 @@ class PipeWireAudioCapture:
                 peak_rms = max(peak_rms, block_rms)
                 is_speech = speech_vad.is_speech(block, cfg.sample_rate)
                 event = gate.observe(is_speech)
+                if event == "speech_started":
+                    speech_started_ns = time.monotonic_ns()
+                if gate.state is SpeechGateState.SPEAKING and is_speech:
+                    last_vad_speech_ns = time.monotonic_ns()
 
                 if gate.state is SpeechGateState.WAITING:
                     blocks_waiting_for_speech += 1
@@ -458,6 +476,9 @@ class PipeWireAudioCapture:
             overflow_count=0,
             false_starts=false_starts,
             peak_rms=peak_rms,
+            speech_started_ns=speech_started_ns,
+            last_vad_speech_ns=last_vad_speech_ns,
+            capture_finished_ns=time.monotonic_ns(),
         )
         if not speech_detected:
             return PCM16Audio(data=b"", sample_rate=cfg.sample_rate, channels=cfg.channels)
