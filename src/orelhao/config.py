@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -59,6 +59,7 @@ class STTConfig(BaseModel):
 
 class TTSConfig(BaseModel):
     backend: str = "piper"
+    engine: Literal["cli", "resident"] = "cli"  # padrão conservador
     executable: str = "piper"
     model: str = "models/tts/pt_BR-cadu-medium.onnx"
     config: str | None = "models/tts/pt_BR-cadu-medium.onnx.json"

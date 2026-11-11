@@ -14,7 +14,7 @@ from pathlib import Path
 
 from orelhao.interfaces.voice.audio import PCM16Audio
 from orelhao.runtime_paths import resolve_project_path
-from orelhao.services.tts.service import PiperTTSService
+from orelhao.services.tts.service import PiperTTSService, TTSService
 
 PROMPTS: dict[str, str] = {
     "greeting": "Olá! Eu sou o Lumi. Como posso ajudar?",
@@ -131,7 +131,7 @@ PROMPTS: dict[str, str] = {
 class VoicePromptCache:
     """Mantém mensagens estáticas prontas para reprodução, sem reexecutar Piper."""
 
-    def __init__(self, tts: PiperTTSService, cache_dir: Path | None = None) -> None:
+    def __init__(self, tts: TTSService, cache_dir: Path | None = None) -> None:
         self.tts = tts
         config = getattr(tts, "config", None)
         if config is None or not hasattr(config, "model_dump"):
@@ -140,6 +140,7 @@ class VoicePromptCache:
             return
         model_path = resolve_project_path(config.model)
         identity = config.model_dump(mode="json")
+        identity.pop("engine", None)  # O mecanismo não altera voz, parâmetros ou frases.
         identity["prompts"] = PROMPTS  # Invalida o cache se algum texto fixo mudar.
         if model_path.is_file():
             stat = model_path.stat()

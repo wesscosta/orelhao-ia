@@ -13,6 +13,7 @@ from orelhao.hardware.conversation_context import ContextResolution, Conversatio
 from orelhao.hardware.hook_runtime import ensure_audio_ready
 from orelhao.hardware.idle_policy import CallIdlePolicy
 from orelhao.hardware.live_monitor import publish, voice_observation_log_path
+from orelhao.hardware.performance import VoiceLatencyTrace, write_latency_trace
 from orelhao.hardware.turn_taking import TurnTakingPlayback
 from orelhao.hardware.voice_abstention import VoiceAbstentionPolicy
 from orelhao.hardware.voice_intents import (
@@ -32,6 +33,7 @@ from orelhao.services.knowledge.observation import (
 from orelhao.services.knowledge.paths import default_knowledge_paths
 from orelhao.services.llm.service import LocalOpenAICompatibleLLMService
 from orelhao.services.stt.service import FasterWhisperSTTService
+from orelhao.services.tts.resident import PiperResidentTTSService
 from orelhao.services.tts.service import PiperTTSService
 
 LOG = logging.getLogger(__name__)
@@ -45,7 +47,10 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
     config = load_config(resolve_project_path(path))
     capture = build_audio_capture(config.audio)
     stt = FasterWhisperSTTService(config.stt)
-    tts = PiperTTSService(config.tts)
+    engine = getattr(config.tts, "engine", "cli")
+    if engine not in {"cli", "resident"}:
+        raise ValueError(f"Motor TTS inválido: {engine!r}")
+    tts = (PiperResidentTTSService if engine == "resident" else PiperTTSService)(config.tts)
     prompts = VoicePromptCache(tts)
     intents = VoiceIntentRouter(runtime_summary=runtime_description(config))
     context = ConversationContext()
@@ -56,9 +61,14 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
     LOG.info("atendimento_iniciado")
     # Pré-aquecer o PipeWire durante a saudação elimina o transiente da
     # primeira abertura; não cria segunda inferência nem gravação persistente.
-    with ThreadPoolExecutor(max_workers=2) as startup:
+    with ThreadPoolExecutor(max_workers=3 if engine == "resident" else 2) as startup:
         prime = getattr(capture, "prime", None)
         warmup_future = startup.submit(prime) if callable(prime) else None
+        prepare_tts = getattr(tts, "prepare", None)
+        tts_warmup_future = (
+            startup.submit(prepare_tts)
+            if engine == "resident" and callable(prepare_tts) else None
+        )
         workbench_future = startup.submit(
             build_default_observation_workbench,
             default_knowledge_paths().index,
@@ -74,6 +84,8 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             (time.monotonic() - greeting_start) * 1000,
         )
         workbench = workbench_future.result()
+        if tts_warmup_future is not None:
+            LOG.info("tts_residente_preparado_ms=%.0f", tts_warmup_future.result() * 1000)
         if warmup_future is not None:
             try:
                 warmup_future.result()
@@ -101,10 +113,16 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             "voice.listening", turn=turn,
             status="aguardando_retorno" if idle.paused else "escutando",
         )
+        trace = VoiceLatencyTrace()
+        trace.mark("capture_start")
         capture_start = time.monotonic()
         audio = capture.capture()
+        trace.mark("capture_end")
         capture_ms = (time.monotonic() - capture_start) * 1000
         diagnostics = capture.last_diagnostics
+        if diagnostics is not None:
+            trace.speech_started_ns = getattr(diagnostics, "speech_started_ns", None)
+            trace.last_vad_speech_ns = getattr(diagnostics, "last_vad_speech_ns", None)
         if diagnostics is not None:
             LOG.info(
                 "audio_capture turno=%d motivo=%s detectou_fala=%s "
@@ -147,6 +165,7 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                         text=PROMPTS["idle_check"])
                 playback.play(prompts.audio("idle_check"))
             continue
+        trace.mark("stt_start")
         stt_start = time.monotonic()
         try:
             transcribed = stt.transcribe(audio)
@@ -156,6 +175,7 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 stt_status="error", diagnostics=diagnostics,
             )
             raise
+        trace.mark("stt_end")
         stt_ms = (time.monotonic() - stt_start) * 1000
         question = transcribed.text.strip()
         # Somente sessões explicitamente autorizadas armazenam WAV; nunca texto.
@@ -196,12 +216,21 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             spoken_text = PROMPTS[directed.prompt] if directed.prompt else (directed.text or "")
             publish("voice.response", turn=turn, text=spoken_text,
                     route="guided", status="respondida")
+            trace.mark("tts_start")
             synth_start = time.monotonic()
             outgoing = (prompts.audio(directed.prompt) if directed.prompt is not None
                         else tts.synthesize(spoken_text))
+            trace.mark("tts_end")
             tts_ms = (time.monotonic() - synth_start) * 1000
             play_start = time.monotonic()
+            trace.mark("audio_dispatch")
             playback.play(outgoing)
+            trace.mark("playback_complete")
+            write_latency_trace(turn, "guided", trace.metrics(
+                input_audio_ms=getattr(audio, "duration_seconds", 0.0) * 1000,
+                response_audio_ms=getattr(outgoing, "duration_seconds", 0.0) * 1000,
+                response_chars=len(spoken_text),
+            ))
             context.remember(
                 question, spoken_text,
                 reset_topic=directed.prompt in {
@@ -226,8 +255,18 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
             spoken_text = PROMPTS["ask_specific_course"]
             publish("voice.response", turn=turn, text=spoken_text,
                     route="clarification", status="respondida")
+            trace.mark("tts_start")
+            outgoing = prompts.audio("ask_specific_course")
+            trace.mark("tts_end")
             play_start = time.monotonic()
-            playback.play(prompts.audio("ask_specific_course"))
+            trace.mark("audio_dispatch")
+            playback.play(outgoing)
+            trace.mark("playback_complete")
+            write_latency_trace(turn, "clarification", trace.metrics(
+                input_audio_ms=getattr(audio, "duration_seconds", 0.0) * 1000,
+                response_audio_ms=getattr(outgoing, "duration_seconds", 0.0) * 1000,
+                response_chars=len(spoken_text),
+            ))
             context.remember(question, spoken_text)
             publish("voice.playback", turn=turn, status="concluida",
                     metrics={"tts_ms": 0.0,
@@ -241,6 +280,7 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
         # Perguntas rápidas não recebem esse aviso adicional.
         publish("voice.processing", turn=turn, status="consultando_base")
         with ThreadPoolExecutor(max_workers=1) as executor:
+            trace.mark("rag_start")
             started = time.monotonic()
             future = executor.submit(workbench.observe, resolution.effective_question, mode="enforce")
             try:
@@ -250,8 +290,11 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                     raise RuntimeError("Rota P3 indisponível antes do aviso de espera")
                 publish("voice.waiting", turn=turn, text=PROMPTS["waiting"],
                         status="aguardando")
+                trace.mark("waiting_audio_start")
                 playback.play(prompts.audio("waiting"))
+                trace.mark("waiting_audio_end")
                 observation = future.result()
+            trace.mark("rag_end")
             LOG.info(
                 "grounding_concluido turno=%d origem=%s duracao_ms=%.0f",
                 turn, observation.answer_origin, (time.monotonic() - started) * 1000,
@@ -274,14 +317,23 @@ def run_call(*, max_seconds: int = 180, max_turns: int = 12) -> None:
                 status="abstencao" if denied else "respondida",
                 reason=str(getattr(reason, "value", reason) or ""),
                 metrics={"rag_ms": (time.monotonic() - started) * 1000})
+        trace.mark("tts_start")
         synth_start = time.monotonic()
         outgoing = (
             prompts.audio(fallback_prompt) if fallback_prompt is not None
             else tts.synthesize(spoken_text)
         )
+        trace.mark("tts_end")
         tts_ms = (time.monotonic() - synth_start) * 1000
         play_start = time.monotonic()
+        trace.mark("audio_dispatch")
         playback.play(outgoing)
+        trace.mark("playback_complete")
+        write_latency_trace(turn, "rag", trace.metrics(
+            input_audio_ms=getattr(audio, "duration_seconds", 0.0) * 1000,
+            response_audio_ms=getattr(outgoing, "duration_seconds", 0.0) * 1000,
+            response_chars=len(spoken_text),
+        ))
         publish("voice.playback", turn=turn, status="concluida",
                 metrics={"tts_ms": tts_ms, "play_ms": (time.monotonic() - play_start) * 1000})
     LOG.info("atendimento_terminado")
